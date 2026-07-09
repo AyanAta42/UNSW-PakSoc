@@ -8,6 +8,13 @@ export function LegalPageLayout({ title, effectiveDate, children }: Props) {
   return (
     <div className="min-h-screen bg-white font-sans text-gray-700">
       <article className="max-w-[800px] mx-auto px-6 py-12 md:py-16">
+        <div className="flex items-center gap-3 mb-8">
+          <img src="/logo.png" alt="UNSW PakSoc" className="w-10 h-10 rounded-full object-cover shrink-0" />
+          <div>
+            <div className="font-bold text-sm text-gray-900 leading-tight">PakSoc UNSW</div>
+            <div className="text-[10px] tracking-widest uppercase font-bold text-green-600">Pakistani Society</div>
+          </div>
+        </div>
         <header className="mb-10 pb-6 border-b border-gray-200">
           <h1 className="text-2xl md:text-3xl font-bold text-gray-900 tracking-tight">{title}</h1>
           {effectiveDate && (
