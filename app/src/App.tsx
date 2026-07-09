@@ -1,5 +1,7 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import Home          from '@/pages/public/Home'
+import PrivacyPolicy from '@/pages/public/PrivacyPolicy'
+import TermsOfService from '@/pages/public/TermsOfService'
 import Login         from '@/pages/auth/Login'
 import Dashboard     from '@/pages/member/Dashboard'
 import ManageTasks   from '@/pages/subcom/ManageTasks'
@@ -14,6 +16,8 @@ function App() {
       <Routes>
         {/* Public */}
         <Route path="/"      element={<Home />} />
+        <Route path="/privacy" element={<PrivacyPolicy />} />
+        <Route path="/terms"   element={<TermsOfService />} />
         <Route path="/login" element={<Login />} />
 
         {/* Protected */}
