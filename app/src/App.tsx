@@ -1,30 +1,35 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
-import Home          from '@/pages/public/Home'
-import PrivacyPolicy from '@/pages/public/PrivacyPolicy'
-import TermsOfService from '@/pages/public/TermsOfService'
-import Login         from '@/pages/auth/Login'
-import Dashboard     from '@/pages/member/Dashboard'
-import ManageTasks   from '@/pages/subcom/ManageTasks'
-import CreateEvent   from '@/pages/exec/CreateEvent'
-import EventsPage    from '@/pages/events/EventsPage'
-import ManageRoles   from '@/pages/roles/ManageRoles'
-import ProtectedRoute from '@/components/ProtectedRoute'
+import ProtectedRoute    from '@/core/router/ProtectedRoute'
+import HomePage          from '@/public-site/home/HomePage'
+import LoginPage         from '@/auth/pages/LoginPage'
+import PrivacyPolicyPage from '@/public-site/legal/PrivacyPolicyPage'
+import TermsOfServicePage from '@/public-site/legal/TermsOfServicePage'
+import EventsManagerPage from '@/events/pages/EventsManagerPage'
+import ManageRolesPage   from '@/roles/pages/ManageRolesPage'
+import ManageTasksPage   from '@/tasks/pages/ManageTasksPage'
+
+function Dashboard() {
+  return <div style={{ padding: 48, fontFamily: 'system-ui,sans-serif' }}>Dashboard — coming soon.</div>
+}
+function CreateEvent() {
+  return <div style={{ padding: 48, fontFamily: 'system-ui,sans-serif' }}>Create Event — coming soon.</div>
+}
 
 function App() {
   return (
     <BrowserRouter>
       <Routes>
-        {/* Public */}
-        <Route path="/"      element={<Home />} />
-        <Route path="/privacy" element={<PrivacyPolicy />} />
-        <Route path="/terms"   element={<TermsOfService />} />
-        <Route path="/login" element={<Login />} />
+        {/* Public routes */}
+        <Route path="/"        element={<HomePage />} />
+        <Route path="/login"   element={<LoginPage />} />
+        <Route path="/privacy" element={<PrivacyPolicyPage />} />
+        <Route path="/terms"   element={<TermsOfServicePage />} />
 
-        {/* Protected */}
-        <Route path="/events"                element={<ProtectedRoute><EventsPage /></ProtectedRoute>} />
-        <Route path="/roles"                 element={<ProtectedRoute><ManageRoles /></ProtectedRoute>} />
+        {/* Protected routes — require login */}
+        <Route path="/events"                element={<ProtectedRoute><EventsManagerPage /></ProtectedRoute>} />
+        <Route path="/roles"                 element={<ProtectedRoute><ManageRolesPage /></ProtectedRoute>} />
         <Route path="/dashboard"             element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
-        <Route path="/subcom/tasks/:eventId" element={<ProtectedRoute><ManageTasks /></ProtectedRoute>} />
+        <Route path="/subcom/tasks/:eventId" element={<ProtectedRoute><ManageTasksPage /></ProtectedRoute>} />
         <Route path="/exec/create-event"     element={<ProtectedRoute><CreateEvent /></ProtectedRoute>} />
       </Routes>
     </BrowserRouter>
