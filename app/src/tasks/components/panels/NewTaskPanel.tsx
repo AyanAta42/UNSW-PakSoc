@@ -6,6 +6,8 @@ interface Props {
   title:         string;        setTitle:       Dispatch<SetStateAction<string>>
   cat:           string;        setCat:         Dispatch<SetStateAction<string>>
   allCategories: string[]
+  onAddCategory:    (name: string) => void
+  onRemoveCategory: (name: string) => void
   subtasks:      string[];      setSubtasks:    Dispatch<SetStateAction<string[]>>
   preAssigned:   Member[];      setPreAssigned: Dispatch<SetStateAction<Member[]>>
   notes:         string;        setNotes:       Dispatch<SetStateAction<string>>
@@ -13,7 +15,7 @@ interface Props {
   onAddTask:     () => void
 }
 
-export function NewTaskPanel({ title, setTitle, cat, setCat, allCategories, subtasks, setSubtasks, preAssigned, setPreAssigned, notes, setNotes, overForm, onAddTask }: Props) {
+export function NewTaskPanel({ title, setTitle, cat, setCat, allCategories, onAddCategory, onRemoveCategory, subtasks, setSubtasks, preAssigned, setPreAssigned, notes, setNotes, overForm, onAddTask }: Props) {
   return (
     <aside className="hidden lg:flex w-[300px] shrink-0 flex-col overflow-hidden bg-white border-l border-gray-200">
       <div className="p-5 border-b border-gray-200 shrink-0">
@@ -22,6 +24,7 @@ export function NewTaskPanel({ title, setTitle, cat, setCat, allCategories, subt
       </div>
       <div className="flex-1 overflow-y-auto p-5">
         <NewTaskForm title={title} setTitle={setTitle} cat={cat} setCat={setCat} allCategories={allCategories}
+          onAddCategory={onAddCategory} onRemoveCategory={onRemoveCategory}
           subtasks={subtasks} setSubtasks={setSubtasks} preAssigned={preAssigned} setPreAssigned={setPreAssigned}
           notes={notes} setNotes={setNotes} overForm={overForm} onAddTask={onAddTask} />
       </div>

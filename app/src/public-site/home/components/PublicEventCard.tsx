@@ -13,7 +13,7 @@ interface Props {
 
 /** Public-facing event card shown on the home page events grid. */
 export function PublicEventCard({ event: ev, selected, now, onClick }: Props) {
-  const { month, day, time } = dateParts(ev.time)
+  const { month, day, time } = dateParts(ev.time, ev.end_time)
   const img   = eventImageUrl(ev)
   const ended = new Date(ev.time) <= now
 

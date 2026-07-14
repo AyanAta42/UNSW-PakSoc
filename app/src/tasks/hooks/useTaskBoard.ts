@@ -5,6 +5,7 @@ import type { Member } from '@/members/types/Member'
 import { fetchMembers }    from '@/members/services/fetchMembers'
 import { fetchTasks }      from '@/tasks/services/fetchTasks'
 import { fetchEventById }  from '@/events/services/fetchEventById'
+import { updateEvent }       from '@/events/services/updateEvent'
 import { createTask }      from '@/tasks/services/createTask'
 import { updateTask }      from '@/tasks/services/updateTask'
 import { deleteTask }      from '@/tasks/services/deleteTask'
@@ -23,6 +24,8 @@ export interface TaskBoardState extends DragAssignState {
   allCategories:   string[]
   selectedMemberId: string | null
   selectMember:    (id: string | null) => void
+  addCustomCategory:    (name: string) => void
+  removeCustomCategory: (name: string) => void
   addTask:         () => void
   removeTask:      (id: string) => void
   editTask:        (id: string, title: string, cat: string, notes: string, subs: string[]) => void
@@ -58,6 +61,22 @@ export function useTaskBoard(eventId: string): TaskBoardState {
 
   function selectMember(id: string | null) { setSelectedMemberId(id) }
 
+  async function persistCategories(next: string[]) {
+    setCustomCats(next)
+    try { await updateEvent(eventId, { custom_categories: next }) } catch (e) { console.error(e) }
+  }
+
+  function addCustomCategory(name: string) {
+    const v = name.trim()
+    if (!v || allCategories.includes(v)) return
+    persistCategories([...customCats, v])
+  }
+
+  function removeCustomCategory(name: string) {
+    persistCategories(customCats.filter(c => c !== name))
+    if (cat === name) setCat('Task')
+  }
+
   async function addTask() {
     if (!title.trim()) return
     const subtitleList = subtasks.filter(s => s.trim())
@@ -88,5 +107,5 @@ export function useTaskBoard(eventId: string): TaskBoardState {
     try { await unassignMember(taskId, mId) } catch (e) { console.error(e) }
   }
 
-  return { members, tasks, loading, title, setTitle, cat, setCat, subtasks, setSubtasks, preAssigned, setPreAssigned, notes, setNotes, allCategories, selectedMemberId, selectMember, addTask, editTask, removeTask, removeAssigned, ...drag }
+  return { members, tasks, loading, title, setTitle, cat, setCat, subtasks, setSubtasks, preAssigned, setPreAssigned, notes, setNotes, allCategories, selectedMemberId, selectMember, addCustomCategory, removeCustomCategory, addTask, editTask, removeTask, removeAssigned, ...drag }
 }

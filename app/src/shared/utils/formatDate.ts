@@ -1,13 +1,9 @@
-function fmtTime(iso: string) {
-  return new Date(iso).toLocaleTimeString('en-AU', { hour: '2-digit', minute: '2-digit' })
-}
+import { formatTimeRange } from '@/shared/utils/formatTimeRange'
 
-/** Returns "Mon, 12 Jan 2026 · 3:00 PM" or "… · 3:00 PM – 5:00 PM" when end_time exists. */
+/** "Mon, 12 Jan 2026 · 5–7pm" or "Mon, 12 Jan 2026 · 5am – 7pm" */
 export function formatDate(iso: string, endIso?: string): string {
   const base = new Date(iso).toLocaleDateString('en-AU', {
     weekday: 'short', day: 'numeric', month: 'short', year: 'numeric',
   })
-  const time = fmtTime(iso)
-  const range = endIso ? `${time} – ${fmtTime(endIso)}` : time
-  return `${base} · ${range}`
+  return `${base} · ${formatTimeRange(iso, endIso)}`
 }

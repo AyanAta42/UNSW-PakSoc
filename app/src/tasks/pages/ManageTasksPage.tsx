@@ -55,6 +55,7 @@ export default function ManageTasksPage() {
         <NewTaskPanel
           title={board.title} setTitle={board.setTitle} cat={board.cat} setCat={board.setCat}
           allCategories={board.allCategories}
+          onAddCategory={board.addCustomCategory} onRemoveCategory={board.removeCustomCategory}
           subtasks={board.subtasks} setSubtasks={board.setSubtasks}
           preAssigned={board.preAssigned} setPreAssigned={board.setPreAssigned}
           notes={board.notes} setNotes={board.setNotes}
@@ -75,6 +76,7 @@ export default function ManageTasksPage() {
         <NewTaskModal open={addOpen} onClose={() => setAddOpen(false)}
           title={board.title} setTitle={board.setTitle} cat={board.cat} setCat={board.setCat}
           allCategories={board.allCategories}
+          onAddCategory={board.addCustomCategory} onRemoveCategory={board.removeCustomCategory}
           subtasks={board.subtasks} setSubtasks={board.setSubtasks}
           preAssigned={board.preAssigned} setPreAssigned={board.setPreAssigned}
           notes={board.notes} setNotes={board.setNotes}

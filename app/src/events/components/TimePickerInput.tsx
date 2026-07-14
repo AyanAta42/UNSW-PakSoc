@@ -1,61 +1,73 @@
-/** Renders separate date + hour/minute selects — no scroll-wheel jump issues. */
+/** Date + 12-hour start/end time selects (no scroll-wheel issues). */
 
-const HOURS   = Array.from({ length: 24 }, (_, i) => i)
+const HOURS12 = Array.from({ length: 12 }, (_, i) => i + 1)
 const MINUTES = Array.from({ length: 12 }, (_, i) => i * 5)
 
 const inp = { border: '1px solid #E5E7EB', color: '#111827', background: '#FAFAFA' }
 const sel = 'px-2.5 py-2.5 rounded-xl text-sm outline-none focus:ring-2 focus:ring-green-200 cursor-pointer'
 
-interface Props {
-  label:    string
-  date:     string       // "YYYY-MM-DD"
-  hour:     number       // 0-23
-  minute:   number       // 0,5,10...55
-  onDate:   (v: string)  => void
-  onHour:   (v: number)  => void
-  onMinute: (v: number)  => void
+export type Period = 'AM' | 'PM'
+
+interface TimeSelectProps {
+  label:     string
+  hour:      number
+  minute:    number
+  period:    Period
+  onHour:    (v: number) => void
+  onMinute:  (v: number) => void
+  onPeriod:  (v: Period) => void
 }
 
-export function TimePickerInput({ label, date, hour, minute, onDate, onHour, onMinute }: Props) {
+export function TimeSelect12h({ label, hour, minute, period, onHour, onMinute, onPeriod }: TimeSelectProps) {
   return (
     <div>
       <label style={{ color: '#6B7280' }} className="block text-[11px] font-bold uppercase tracking-wider mb-1.5">{label}</label>
-      <div className="flex gap-2 flex-wrap">
-        <input type="date" value={date} onChange={e => onDate(e.target.value)}
-          style={inp} className={`flex-1 min-w-[140px] ${sel}`} />
-        <div className="flex gap-1 items-center shrink-0">
-          <select value={hour} onChange={e => onHour(Number(e.target.value))}
-            style={inp} className={sel}>
-            {HOURS.map(h => (
-              <option key={h} value={h}>{String(h).padStart(2, '0')}</option>
-            ))}
-          </select>
-          <span style={{ color: '#6B7280' }} className="font-bold text-sm select-none">:</span>
-          <select value={minute} onChange={e => onMinute(Number(e.target.value))}
-            style={inp} className={sel}>
-            {MINUTES.map(m => (
-              <option key={m} value={m}>{String(m).padStart(2, '0')}</option>
-            ))}
-          </select>
-        </div>
+      <div className="flex gap-1 items-center">
+        <select value={hour} onChange={e => onHour(Number(e.target.value))} style={inp} className={sel}>
+          {HOURS12.map(h => <option key={h} value={h}>{h}</option>)}
+        </select>
+        <span style={{ color: '#6B7280' }} className="font-bold text-sm select-none">:</span>
+        <select value={minute} onChange={e => onMinute(Number(e.target.value))} style={inp} className={sel}>
+          {MINUTES.map(m => <option key={m} value={m}>{String(m).padStart(2, '0')}</option>)}
+        </select>
+        <select value={period} onChange={e => onPeriod(e.target.value as Period)} style={inp} className={sel}>
+          <option value="AM">AM</option>
+          <option value="PM">PM</option>
+        </select>
       </div>
     </div>
   )
 }
 
-/** Convert a date string + hour/minute into an ISO timestamp. */
-export function buildIso(date: string, hour: number, minute: number): string {
-  if (!date) return ''
-  return `${date}T${String(hour).padStart(2,'0')}:${String(minute).padStart(2,'0')}:00`
+function to24(hour: number, period: Period): number {
+  if (period === 'AM') return hour === 12 ? 0 : hour
+  return hour === 12 ? 12 : hour + 12
 }
 
-/** Parse an ISO string back into date / hour / minute parts. */
-export function parseIso(iso: string | undefined): { date: string; hour: number; minute: number } {
-  if (!iso) return { date: '', hour: 9, minute: 0 }
-  const d      = new Date(iso)
-  const date   = d.toLocaleDateString('en-CA') // "YYYY-MM-DD"
-  const hour   = d.getHours()
-  const raw    = d.getMinutes()
+function from24(h24: number, minute: number): { hour: number; minute: number; period: Period } {
+  return { hour: h24 % 12 || 12, minute, period: h24 >= 12 ? 'PM' : 'AM' }
+}
+
+export function parseIsoDate(iso: string | undefined): string {
+  if (!iso) return ''
+  return new Date(iso).toLocaleDateString('en-CA')
+}
+
+export function parseTime12(iso: string | undefined, fallback = { hour: 5, minute: 0, period: 'PM' as Period }) {
+  if (!iso) return fallback
+  const d = new Date(iso)
+  const raw = d.getMinutes()
   const minute = Math.round(raw / 5) * 5 % 60
-  return { date, hour, minute }
+  return from24(d.getHours(), minute)
+}
+
+export function addHours12(t: { hour: number; minute: number; period: Period }, add: number) {
+  const h24 = (to24(t.hour, t.period) + add) % 24
+  return from24(h24, t.minute)
+}
+
+export function buildIso(date: string, hour: number, minute: number, period: Period): string {
+  if (!date) return ''
+  const h24 = to24(hour, period)
+  return `${date}T${String(h24).padStart(2, '0')}:${String(minute).padStart(2, '0')}:00`
 }

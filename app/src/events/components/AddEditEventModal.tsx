@@ -4,7 +4,7 @@ import { updateEvent }       from '@/events/services/updateEvent'
 import { uploadEventImage }  from '@/events/services/uploadEventImage'
 import { ImageUploadZone }   from '@/events/components/ImageUploadZone'
 import { TimelineEditor }    from '@/events/components/TimelineEditor'
-import { TimePickerInput, buildIso, parseIso } from '@/events/components/TimePickerInput'
+import { TimeSelect12h, buildIso, parseIsoDate, parseTime12, addHours12 } from '@/events/components/TimePickerInput'
 import { CtaButtonsEditor }  from '@/events/components/CtaButtonsEditor'
 import type { DbEvent, NewEvent, TimelineItem, EventButton } from '@/events/types/Event'
 import { DEFAULT_BUTTONS }   from '@/events/types/Event'
@@ -20,13 +20,11 @@ const C   = { border: '#E5E7EB', muted: '#6B7280', dark: '#111827' }
 const lbl = 'block text-[11px] font-bold uppercase tracking-wider mb-1.5 text-[#6B7280]'
 const inp = { border: `1px solid ${C.border}`, color: C.dark, background: '#FAFAFA' }
 
-const DEFAULT_CATS = ['Task', 'Game', 'Stall']
-
 export function AddEditEventModal({ onClose, onCreated, onUpdated, event }: Props) {
   const isEdit = !!event
 
-  const start0 = parseIso(event?.time)
-  const end0   = parseIso(event?.end_time)
+  const start0 = parseTime12(event?.time, { hour: 5, minute: 0, period: 'PM' })
+  const end0   = event?.end_time ? parseTime12(event.end_time) : addHours12(start0, 2)
 
   const [name,     setName]     = useState(event?.name ?? '')
   const [location, setLocation] = useState(event?.location ?? '')
@@ -35,15 +33,14 @@ export function AddEditEventModal({ onClose, onCreated, onUpdated, event }: Prop
   const [buttons,  setButtons]  = useState<EventButton[]>(
     event?.buttons?.length ? event.buttons : [...DEFAULT_BUTTONS]
   )
-  const [customCats, setCustomCats] = useState<string[]>(event?.custom_categories ?? [])
-  const [newCat, setNewCat]         = useState('')
 
-  const [startDate,   setStartDate]   = useState(start0.date)
+  const [eventDate,   setEventDate]   = useState(parseIsoDate(event?.time))
   const [startHour,   setStartHour]   = useState(start0.hour)
   const [startMinute, setStartMinute] = useState(start0.minute)
-  const [endDate,     setEndDate]     = useState(end0.date || start0.date)
-  const [endHour,     setEndHour]     = useState(end0.hour || start0.hour + 2)
+  const [startPeriod, setStartPeriod] = useState(start0.period)
+  const [endHour,     setEndHour]     = useState(end0.hour)
   const [endMinute,   setEndMinute]   = useState(end0.minute)
+  const [endPeriod,   setEndPeriod]   = useState(end0.period)
 
   const [imageFile,    setImageFile]    = useState<File | null>(null)
   const [imagePreview, setImagePreview] = useState(event?.image_url ?? '')
@@ -57,21 +54,15 @@ export function AddEditEventModal({ onClose, onCreated, onUpdated, event }: Prop
     setImageFile(file); setImagePreview(URL.createObjectURL(file))
   }
 
-  function addCustomCat() {
-    const v = newCat.trim()
-    if (!v || DEFAULT_CATS.includes(v) || customCats.includes(v)) return
-    setCustomCats(p => [...p, v]); setNewCat('')
-  }
-
   async function submit() {
-    const startIso = buildIso(startDate, startHour, startMinute)
+    const startIso = buildIso(eventDate, startHour, startMinute, startPeriod)
     if (!name.trim() || !startIso) return
     setSaving(true); setError('')
     try {
       let image_url = event?.image_url ?? undefined
       if (imageFile) { setUploading(true); image_url = await uploadEventImage(imageFile); setUploading(false) }
 
-      const endIso = buildIso(endDate || startDate, endHour, endMinute)
+      const endIso = buildIso(eventDate, endHour, endMinute, endPeriod)
 
       const fields: NewEvent = {
         name: name.trim(), location,
@@ -79,7 +70,6 @@ export function AddEditEventModal({ onClose, onCreated, onUpdated, event }: Prop
         image_url, price: parseFloat(price) || 0,
         timeline: timeline.map(i => ({ time: i.time.trim(), title: i.title.trim() })).filter(i => i.time && i.title).sort((a, b) => a.time.localeCompare(b.time)),
         buttons:  buttons.filter(b => b.label.trim()),
-        custom_categories: customCats,
       }
 
       if (isEdit && event) { await updateEvent(event.id, fields); onUpdated?.({ ...event, ...fields }) }
@@ -88,8 +78,7 @@ export function AddEditEventModal({ onClose, onCreated, onUpdated, event }: Prop
     finally { setSaving(false); setUploading(false) }
   }
 
-  const canSave = name.trim() && startDate
-  const allCats = [...DEFAULT_CATS, ...customCats]
+  const canSave = name.trim() && eventDate
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm px-4" onClick={onClose}>
@@ -109,15 +98,18 @@ export function AddEditEventModal({ onClose, onCreated, onUpdated, event }: Prop
           <div><label className={lbl}>Location</label>
             <input value={location} onChange={e => setLocation(e.target.value)} placeholder="e.g. Roundhouse, UNSW" style={inp} className="w-full px-3.5 py-2.5 rounded-xl text-sm outline-none focus:ring-2 focus:ring-green-200" /></div>
 
-          {/* Start time */}
-          <TimePickerInput label="Start Date & Time"
-            date={startDate} hour={startHour} minute={startMinute}
-            onDate={setStartDate} onHour={setStartHour} onMinute={setStartMinute} />
-
-          {/* End time */}
-          <TimePickerInput label="End Date & Time"
-            date={endDate || startDate} hour={endHour} minute={endMinute}
-            onDate={setEndDate} onHour={setEndHour} onMinute={setEndMinute} />
+          {/* Date & times */}
+          <div><label className={lbl}>Date</label>
+            <input type="date" value={eventDate} onChange={e => setEventDate(e.target.value)}
+              style={inp} className="w-full px-3.5 py-2.5 rounded-xl text-sm outline-none focus:ring-2 focus:ring-green-200" /></div>
+          <div className="grid grid-cols-2 gap-3">
+            <TimeSelect12h label="Start Time"
+              hour={startHour} minute={startMinute} period={startPeriod}
+              onHour={setStartHour} onMinute={setStartMinute} onPeriod={setStartPeriod} />
+            <TimeSelect12h label="End Time"
+              hour={endHour} minute={endMinute} period={endPeriod}
+              onHour={setEndHour} onMinute={setEndMinute} onPeriod={setEndPeriod} />
+          </div>
 
           {/* Price */}
           <div><label className={lbl}>Ticket Price (AUD)</label>
@@ -129,31 +121,6 @@ export function AddEditEventModal({ onClose, onCreated, onUpdated, event }: Prop
           {/* CTA Buttons */}
           <div><label className={lbl}>Action Buttons</label>
             <CtaButtonsEditor buttons={buttons} onChange={setButtons} /></div>
-
-          {/* Custom task categories */}
-          <div>
-            <label className={lbl}>Task Categories</label>
-            <div className="flex flex-wrap gap-1.5 mb-2">
-              {allCats.map(c => (
-                <span key={c} className="flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold"
-                  style={{ background: DEFAULT_CATS.includes(c) ? '#F3F4F6' : '#DCFCE7', color: DEFAULT_CATS.includes(c) ? '#6B7280' : '#16A34A', border: '1px solid #E5E7EB' }}>
-                  {c}
-                  {!DEFAULT_CATS.includes(c) && (
-                    <button type="button" onClick={() => setCustomCats(p => p.filter(x => x !== c))}
-                      className="bg-transparent border-none cursor-pointer text-sm leading-none hover:text-red-400 p-0 ml-0.5">×</button>
-                  )}
-                </span>
-              ))}
-            </div>
-            <div className="flex gap-2">
-              <input value={newCat} onChange={e => setNewCat(e.target.value)} onKeyDown={e => e.key === 'Enter' && addCustomCat()}
-                placeholder="Add custom category…" style={inp} className="flex-1 px-3 py-2 rounded-lg text-sm outline-none focus:ring-2 focus:ring-green-200" />
-              <button type="button" onClick={addCustomCat} disabled={!newCat.trim()}
-                style={{ background: newCat.trim() ? '#22C55E' : '#F3F4F6', color: newCat.trim() ? '#fff' : '#9CA3AF' }}
-                className="px-3 py-2 rounded-lg text-xs font-bold border-none cursor-pointer transition-colors shrink-0">Add</button>
-            </div>
-            <p style={{ color: '#9CA3AF' }} className="text-[10px] mt-1">Grey = default (always available). Green = this event only.</p>
-          </div>
 
           {/* Timeline */}
           <div><label className={lbl}>Event Timeline</label>

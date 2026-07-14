@@ -1,6 +1,8 @@
+import { useState } from 'react'
 import type { Dispatch, SetStateAction } from 'react'
 import type { Member } from '@/members/types/Member'
 import { getCatCfg, inputCls, labelCls } from '@/config/categoryConfig'
+import { DEFAULT_TASK_CATEGORIES } from '@/tasks/types/Task'
 import { AssignedChip } from '@/tasks/components/assignment/AssignedChip'
 import { SubtaskList }  from './SubtaskList'
 
@@ -8,6 +10,8 @@ interface Props {
   title:          string;         setTitle:        Dispatch<SetStateAction<string>>
   cat:            string;         setCat:          Dispatch<SetStateAction<string>>
   allCategories:  string[]
+  onAddCategory?:    (name: string) => void
+  onRemoveCategory?: (name: string) => void
   subtasks:       string[];       setSubtasks:     Dispatch<SetStateAction<string[]>>
   preAssigned:    Member[];       setPreAssigned:  Dispatch<SetStateAction<Member[]>>
   notes:          string;         setNotes:        Dispatch<SetStateAction<string>>
@@ -18,7 +22,16 @@ interface Props {
   submitLabel?:   string
 }
 
-export function NewTaskForm({ title, setTitle, cat, setCat, allCategories, subtasks, setSubtasks, preAssigned, setPreAssigned, notes, setNotes, overForm = false, mobileAssignees = false, onOpenAssigneePicker, onAddTask, submitLabel = 'Create Task →' }: Props) {
+export function NewTaskForm({ title, setTitle, cat, setCat, allCategories, onAddCategory, onRemoveCategory, subtasks, setSubtasks, preAssigned, setPreAssigned, notes, setNotes, overForm = false, mobileAssignees = false, onOpenAssigneePicker, onAddTask, submitLabel = 'Create Task →' }: Props) {
+  const [showAddCat, setShowAddCat] = useState(false)
+  const [catInput,   setCatInput]   = useState('')
+
+  function submitCategory() {
+    const v = catInput.trim()
+    if (!v || !onAddCategory || allCategories.includes(v)) return
+    onAddCategory(v); setCatInput(''); setShowAddCat(false)
+  }
+
   return (
     <div className="flex flex-col gap-5">
       <div>
@@ -26,13 +39,36 @@ export function NewTaskForm({ title, setTitle, cat, setCat, allCategories, subta
         <input value={title} onChange={e => setTitle(e.target.value)} onKeyDown={e => e.key === 'Enter' && title.trim() && onAddTask()} placeholder="e.g. Buy equipment" className={inputCls} />
       </div>
       <div>
-        <label className={labelCls}>Category</label>
+        <div className="flex items-center gap-1.5 mb-1.5">
+          <label className={labelCls + ' mb-0'}>Category</label>
+          {onAddCategory && (
+            <button type="button" onClick={() => setShowAddCat(v => !v)} aria-label="Add custom category"
+              className={`w-5 h-5 rounded-md border flex items-center justify-center text-sm font-bold leading-none cursor-pointer transition-all ${showAddCat ? 'bg-[#22C55E] text-white border-[#22C55E]' : 'bg-gray-50 text-gray-400 border-gray-200 hover:border-[#22C55E] hover:text-[#22C55E]'}`}>+</button>
+          )}
+        </div>
+        {showAddCat && onAddCategory && (
+          <div className="flex gap-2 mb-2">
+            <input value={catInput} onChange={e => setCatInput(e.target.value)} onKeyDown={e => e.key === 'Enter' && submitCategory()}
+              placeholder="Custom category name…" autoFocus
+              className="flex-1 px-3 py-2 border border-gray-200 rounded-lg bg-gray-50 text-sm outline-none focus:border-[#22C55E] transition-colors" />
+            <button type="button" onClick={submitCategory} disabled={!catInput.trim()}
+              className={`px-3 py-2 rounded-lg text-xs font-bold border-none cursor-pointer shrink-0 transition-colors ${catInput.trim() ? 'bg-[#22C55E] text-white' : 'bg-gray-100 text-gray-300 cursor-not-allowed'}`}>Add</button>
+          </div>
+        )}
         <div className="flex flex-wrap gap-2">
           {allCategories.map(c => {
             const cfg = getCatCfg(c)
+            const isCustom = !DEFAULT_TASK_CATEGORIES.includes(c)
             return (
-              <button key={c} onClick={() => setCat(c)}
-                className={`px-3 py-1.5 rounded-lg text-xs font-bold border-[1.5px] cursor-pointer transition-all ${cat === c ? cfg.activeCls : 'bg-gray-50 border-gray-200 text-gray-400'}`}>{c}</button>
+              <button key={c} type="button" onClick={() => setCat(c)}
+                className={`px-3 py-1.5 rounded-lg text-xs font-bold border-[1.5px] cursor-pointer transition-all flex items-center gap-1 ${cat === c ? cfg.activeCls : 'bg-gray-50 border-gray-200 text-gray-400'}`}>
+                {c}
+                {isCustom && onRemoveCategory && (
+                  <span role="button" tabIndex={0} onClick={e => { e.stopPropagation(); onRemoveCategory(c) }}
+                    onKeyDown={e => e.key === 'Enter' && (e.stopPropagation(), onRemoveCategory(c))}
+                    className="text-[10px] leading-none opacity-50 hover:opacity-100 hover:text-red-500 ml-0.5">×</span>
+                )}
+              </button>
             )
           })}
         </div>

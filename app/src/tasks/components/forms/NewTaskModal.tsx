@@ -7,6 +7,8 @@ interface Props {
   title:         string;        setTitle:       Dispatch<SetStateAction<string>>
   cat:           string;        setCat:         Dispatch<SetStateAction<string>>
   allCategories: string[]
+  onAddCategory:    (name: string) => void
+  onRemoveCategory: (name: string) => void
   subtasks:      string[];      setSubtasks:    Dispatch<SetStateAction<string[]>>
   preAssigned:   Member[];      setPreAssigned: Dispatch<SetStateAction<Member[]>>
   notes:         string;        setNotes:       Dispatch<SetStateAction<string>>
@@ -14,7 +16,7 @@ interface Props {
   onOpenAssigneePicker: () => void
 }
 
-export function NewTaskModal({ open, onClose, title, setTitle, cat, setCat, allCategories, subtasks, setSubtasks, preAssigned, setPreAssigned, notes, setNotes, onAddTask, onOpenAssigneePicker }: Props) {
+export function NewTaskModal({ open, onClose, title, setTitle, cat, setCat, allCategories, onAddCategory, onRemoveCategory, subtasks, setSubtasks, preAssigned, setPreAssigned, notes, setNotes, onAddTask, onOpenAssigneePicker }: Props) {
   if (!open) return null
 
   function handleCreate() {
@@ -36,6 +38,7 @@ export function NewTaskModal({ open, onClose, title, setTitle, cat, setCat, allC
         </div>
         <div className="overflow-y-auto px-5 pb-8">
           <NewTaskForm title={title} setTitle={setTitle} cat={cat} setCat={setCat} allCategories={allCategories}
+            onAddCategory={onAddCategory} onRemoveCategory={onRemoveCategory}
             subtasks={subtasks} setSubtasks={setSubtasks} preAssigned={preAssigned} setPreAssigned={setPreAssigned}
             notes={notes} setNotes={setNotes} mobileAssignees onOpenAssigneePicker={onOpenAssigneePicker} onAddTask={handleCreate} />
         </div>
