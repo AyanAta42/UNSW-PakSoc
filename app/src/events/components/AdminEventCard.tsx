@@ -34,7 +34,7 @@ export function AdminEventCard({ event: ev, canEdit = true, onAnnounce, onUnpubl
         )}
         <h3 className="text-base font-bold m-0" style={{ color: '#111827' }}>{ev.name}</h3>
         <div className="flex flex-col gap-0.5">
-          <span className="text-xs" style={{ color: '#6B7280' }}>{formatDate(ev.time)}</span>
+          <span className="text-xs" style={{ color: '#6B7280' }}>{formatDate(ev.time, ev.end_time)}</span>
           <span className="text-xs" style={{ color: '#6B7280' }}>{ev.location}</span>
           {ev.price != null && <span className="text-xs" style={{ color: '#6B7280' }}>{ev.price > 0 ? `$${Number(ev.price).toFixed(2)}` : 'Free'}</span>}
         </div>

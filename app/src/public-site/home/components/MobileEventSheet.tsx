@@ -1,17 +1,14 @@
 import type { DbEvent } from '@/events/types/Event'
 import { CachedMapEmbed, mapEmbedSrc } from '@/maps/components/CachedMapEmbed'
 import { EventDetailContent }          from './EventDetailContent'
-import { TICKETS_URL }    from '@/config/externalLinks'
 import { PALETTE, ACCENT } from '@/config/theme'
 
-interface Props {
-  event:   DbEvent
-  now:     Date
-  onClose: () => void
-}
+interface Props { event: DbEvent; now: Date; onClose: () => void }
 
-/** Bottom-sheet shown on mobile when a user taps an event card. */
 export function MobileEventSheet({ event, now, onClose }: Props) {
+  const upcoming = new Date(event.time) > now
+  const btns     = (event.buttons ?? []).filter(b => b.label && b.url)
+
   return (
     <div className="fixed inset-0 z-[60] lg:hidden">
       <div className="absolute inset-0 bg-black/45 backdrop-blur-[2px]" onClick={onClose} />
@@ -35,13 +32,17 @@ export function MobileEventSheet({ event, now, onClose }: Props) {
               <CachedMapEmbed cacheId="home-map-sheet" src={mapEmbedSrc(event.location)} title="Event location map" className="w-full h-full" />
             </div>
             <div style={{ color: PALETTE.muted }} className="text-xs mt-2 flex items-center gap-1.5"><span style={{ color: ACCENT }}>◎</span>{event.location}</div>
-            <div style={{ color: '#9CA3AF' }} className="text-[11px] mt-1">Kensington Campus, UNSW</div>
           </div>
-          {new Date(event.time) > now && (
-            <a href={TICKETS_URL} target="_blank" rel="noopener noreferrer" style={{ background: '#C8FF00', color: '#111827' }}
-              className="w-full flex items-center justify-center rounded-xl py-3.5 font-bold text-sm no-underline active:scale-[0.98] transition-transform">
-              Get Your Tickets →
-            </a>
+          {upcoming && btns.length > 0 && (
+            <div className="flex flex-col gap-2">
+              {btns.map((b, i) => (
+                <a key={i} href={b.url} target="_blank" rel="noopener noreferrer"
+                  style={i === 0 ? { background: '#C8FF00', color: '#111827' } : { border: `1.5px solid ${ACCENT}`, color: ACCENT, background: '#fff' }}
+                  className="w-full flex items-center justify-center rounded-xl py-3.5 font-bold text-sm no-underline active:scale-[0.98] transition-transform">
+                  {b.label}
+                </a>
+              ))}
+            </div>
           )}
         </div>
       </div>

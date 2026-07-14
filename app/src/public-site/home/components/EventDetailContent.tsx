@@ -5,11 +5,11 @@ import { ACCENT, PALETTE }      from '@/config/theme'
 
 interface Props { event: DbEvent; now: Date }
 
-/** Renders event name, time, location, status badge, and optional timeline. */
 export function EventDetailContent({ event, now }: Props) {
-  const { month, day, time } = dateParts(event.time)
+  const { month, day, time } = dateParts(event.time, event.end_time)
   const isEnded  = new Date(event.time) <= now
   const schedule = event.timeline ?? []
+  const btns     = (event.buttons ?? []).filter(b => b.label && b.url)
 
   return (
     <>
@@ -21,14 +21,24 @@ export function EventDetailContent({ event, now }: Props) {
         </div>
       </div>
       <div className="flex flex-col gap-1.5">
-        <div className="flex items-center gap-2 text-xs" style={{ color: PALETTE.muted }}><span style={{ color: ACCENT }}>◷</span> {time}</div>
-        <div className="flex items-center gap-2 text-xs" style={{ color: PALETTE.muted }}><span style={{ color: ACCENT }}>◎</span> {event.location}</div>
+        <div className="flex items-center gap-2 text-xs" style={{ color: PALETTE.muted }}><span style={{ color: ACCENT }}>◷</span>{time}</div>
+        <div className="flex items-center gap-2 text-xs" style={{ color: PALETTE.muted }}><span style={{ color: ACCENT }}>◎</span>{event.location}</div>
         {event.price != null && <div className="flex items-center gap-2 text-xs" style={{ color: PALETTE.muted }}><span style={{ color: ACCENT }}>$</span>{event.price > 0 ? `$${Number(event.price).toFixed(2)}` : 'Free entry'}</div>}
       </div>
       {isEnded
         ? <span className="text-[9px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wide w-fit" style={{ background: '#F3F4F6', color: '#9CA3AF' }}>Ended</span>
-        : <span className="text-[9px] font-extrabold px-2 py-0.5 rounded-full uppercase tracking-wide w-fit" style={{ background: 'rgba(34,197,94,0.12)', color: ACCENT }}>Upcoming</span>
-      }
+        : <span className="text-[9px] font-extrabold px-2 py-0.5 rounded-full uppercase tracking-wide w-fit" style={{ background: 'rgba(34,197,94,0.12)', color: ACCENT }}>Upcoming</span>}
+      {btns.length > 0 && !isEnded && (
+        <div className="flex flex-col gap-1.5">
+          {btns.map((b, i) => (
+            <a key={i} href={b.url} target="_blank" rel="noopener noreferrer"
+              style={i === 0 ? { background: '#C8FF00', color: '#111827' } : { border: `1.5px solid ${ACCENT}`, color: ACCENT, background: '#fff' }}
+              className="w-full flex items-center justify-center rounded-xl py-2.5 font-bold text-xs no-underline hover:opacity-85 transition-opacity">
+              {b.label}
+            </a>
+          ))}
+        </div>
+      )}
       {schedule.length > 0 && (
         <div className="pt-1">
           <div style={{ color: PALETTE.dark }} className="text-[11px] font-bold uppercase tracking-widest mb-3">Timeline</div>

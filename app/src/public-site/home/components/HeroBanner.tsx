@@ -1,15 +1,14 @@
 import type { DbEvent } from '@/events/types/Event'
-import { useCountdown }    from '@/shared/hooks/useCountdown'
-import { REGISTER_TEAM_URL, TICKETS_URL } from '@/config/externalLinks'
+import { useCountdown }  from '@/shared/hooks/useCountdown'
 import { ACCENT, PALETTE } from '@/config/theme'
 
 interface Props { banner: DbEvent | null; loading: boolean }
 
-/** Full-bleed hero section with event name, live countdown, and CTA buttons. */
 export function HeroBanner({ banner, loading }: Props) {
   if (!banner) return null
 
-  const cd = useCountdown(banner.time)
+  const cd   = useCountdown(banner.time)
+  const btns = (banner.buttons ?? []).filter(b => b.label && b.url)
 
   return (
     <div className="px-4 pt-4 lg:p-0">
@@ -39,19 +38,25 @@ export function HeroBanner({ banner, loading }: Props) {
               </div>
             </div>
           )}
-          {!loading && banner && (
+          {!loading && btns.length > 0 && (
             <div className="md:hidden flex gap-2 mt-1 w-full">
-              <a href={REGISTER_TEAM_URL} target="_blank" rel="noopener noreferrer" style={{ border: `1.5px solid ${ACCENT}`, color: ACCENT, background: '#fff' }} className="flex-1 flex items-center justify-center rounded-xl px-2 py-3 text-xs font-bold no-underline active:scale-[0.98] transition-transform min-w-0 shadow-sm">Register Your Team</a>
-              <a href={TICKETS_URL}       target="_blank" rel="noopener noreferrer" style={{ background: '#C8FF00', color: '#111827' }} className="flex-1 flex items-center justify-center rounded-xl px-2 py-3 font-bold text-xs no-underline hover:opacity-85 active:scale-[0.98] transition-transform min-w-0 shadow-sm">Get Tickets →</a>
+              {btns.map((b, i) => (
+                <a key={i} href={b.url} target="_blank" rel="noopener noreferrer"
+                  style={i === 0 ? { border: `1.5px solid ${ACCENT}`, color: ACCENT, background: '#fff' } : { background: '#C8FF00', color: '#111827' }}
+                  className="flex-1 flex items-center justify-center rounded-xl px-2 py-3 text-xs font-bold no-underline active:scale-[0.98] transition-transform min-w-0 shadow-sm">{b.label}</a>
+              ))}
             </div>
           )}
         </div>
 
         <div className="hidden md:flex relative z-10 w-[42%] shrink-0 flex-col justify-end items-end p-6">
-          {!loading && banner && (
+          {!loading && banner && btns.length > 0 && (
             <div className="flex gap-2">
-              <a href={REGISTER_TEAM_URL} target="_blank" rel="noopener noreferrer" style={{ border: `1.5px solid ${ACCENT}`, color: ACCENT, background: '#fff' }} className="rounded-xl px-5 py-2.5 font-bold text-sm no-underline hover:opacity-85 whitespace-nowrap shadow-sm">Register Your Team</a>
-              <a href={TICKETS_URL}       target="_blank" rel="noopener noreferrer" style={{ background: '#C8FF00', color: '#111827' }} className="rounded-xl px-5 py-2.5 font-bold text-sm no-underline hover:opacity-85 whitespace-nowrap">Get Your Tickets &rarr;</a>
+              {btns.map((b, i) => (
+                <a key={i} href={b.url} target="_blank" rel="noopener noreferrer"
+                  style={i === 0 ? { border: `1.5px solid ${ACCENT}`, color: ACCENT, background: '#fff' } : { background: '#C8FF00', color: '#111827' }}
+                  className="rounded-xl px-5 py-2.5 font-bold text-sm no-underline hover:opacity-85 whitespace-nowrap shadow-sm">{b.label}</a>
+              ))}
             </div>
           )}
         </div>

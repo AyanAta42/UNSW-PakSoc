@@ -1,13 +1,21 @@
-import type { TaskCategory } from '@/tasks/types/Task'
 import type { Committee } from '@/members/types/Member'
 
-export const CAT_CFG: Record<TaskCategory, { color: string; activeCls: string; headerCls: string }> = {
+export const DEFAULT_CAT_CFG: Record<string, { color: string; activeCls: string; headerCls: string }> = {
   Task:  { color: '#3B9DDD', activeCls: 'bg-blue-50   border-blue-400   text-blue-600',   headerCls: 'bg-blue-50   text-blue-600'   },
   Game:  { color: '#E74C3C', activeCls: 'bg-red-50    border-red-400    text-red-600',    headerCls: 'bg-red-50    text-red-600'    },
   Stall: { color: '#E67E22', activeCls: 'bg-orange-50 border-orange-400 text-orange-600', headerCls: 'bg-orange-50 text-orange-600' },
 }
+/** Returns config for any category — custom ones get a generic teal style. */
+export function getCatCfg(cat: string) {
+  return DEFAULT_CAT_CFG[cat] ?? { color: '#0D9488', activeCls: 'bg-teal-50 border-teal-400 text-teal-600', headerCls: 'bg-teal-50 text-teal-600' }
+}
 
-export const ALL_CATS: TaskCategory[] = ['Task', 'Game', 'Stall']
+export const DEFAULT_TASK_CATEGORIES: string[] = ['Task', 'Game', 'Stall']
+
+/** @deprecated use DEFAULT_TASK_CATEGORIES */
+export const ALL_CATS = DEFAULT_TASK_CATEGORIES
+/** @deprecated use getCatCfg */
+export const CAT_CFG = DEFAULT_CAT_CFG as Record<string, { color: string; activeCls: string; headerCls: string }>
 
 export const COMM_CFG: Record<string, { color: string }> = {
   Presidents: { color: '#C9A84C' },
