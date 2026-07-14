@@ -1,8 +1,9 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import type { User } from '@supabase/supabase-js'
-import { signOut } from '@/auth/services/signOut'
-import { UserDropdown } from './UserDropdown'
+import { signOut }         from '@/auth/services/signOut'
+import { usePermissions }  from '@/roles/hooks/usePermissions'
+import { UserDropdown }    from './UserDropdown'
 import { ACCENT, PALETTE } from '@/config/theme'
 
 interface Props {
@@ -14,10 +15,10 @@ interface Props {
   onEditProfile: () => void
 }
 
-/** Sticky top navigation bar. */
 export function Navbar({ user, avatarUrl, avatarBroken, initial, onAvatarError, onEditProfile }: Props) {
   const navigate  = useNavigate()
   const [menuOpen, setMenuOpen] = useState(false)
+  const { can }   = usePermissions()
 
   return (
     <nav style={{ background: 'rgba(255,255,255,0.95)', backdropFilter: 'blur(14px)', borderBottom: `1px solid ${PALETTE.border}` }}
@@ -32,12 +33,9 @@ export function Navbar({ user, avatarUrl, avatarBroken, initial, onAvatarError, 
       </div>
 
       <div className="flex items-center gap-2 shrink-0 ml-auto">
-        {user && (
-          <>
-            <button onClick={() => navigate('/events')} style={{ background: ACCENT, color: '#fff' }} className="rounded-full px-3.5 py-1.5 font-bold text-xs border-none cursor-pointer hover:opacity-85 transition-opacity whitespace-nowrap shadow-sm">Manage Events</button>
-            <button onClick={() => navigate('/roles')} style={{ color: PALETTE.dark, border: `1px solid ${PALETTE.border}`, background: '#fff' }} className="rounded-full px-3.5 py-1.5 font-bold text-xs cursor-pointer hover:bg-gray-50 transition-colors whitespace-nowrap hidden sm:block shadow-sm">Manage Roles</button>
-          </>
-        )}
+        {can.viewEvents  && <button onClick={() => navigate('/events')} style={{ background: ACCENT, color: '#fff' }} className="rounded-full px-3.5 py-1.5 font-bold text-xs border-none cursor-pointer hover:opacity-85 transition-opacity whitespace-nowrap shadow-sm">Manage Events</button>}
+        {can.manageRoles && <button onClick={() => navigate('/roles')}  style={{ color: PALETTE.dark, border: `1px solid ${PALETTE.border}`, background: '#fff' }} className="rounded-full px-3.5 py-1.5 font-bold text-xs cursor-pointer hover:bg-gray-50 transition-colors whitespace-nowrap hidden sm:block shadow-sm">Manage Roles</button>}
+
         {user ? (
           <div className="relative">
             <button onClick={() => setMenuOpen(o => !o)} className="p-0 border-none bg-transparent cursor-pointer rounded-full">

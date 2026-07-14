@@ -13,9 +13,11 @@ import { SocialWall }           from './components/SocialWall'
 import { MobileEventSheet }     from './components/MobileEventSheet'
 import { EditProfileModal }     from './components/EditProfileModal'
 import { Footer }               from './components/Footer'
+import { useNavigate } from 'react-router-dom'
 import { ACCENT, PALETTE }      from '@/config/theme'
 
 export default function HomePage() {
+  const navigate = useNavigate()
   const { user, avatarUrl: authAvatar } = useAuth()
   const [events, setEvents]             = useState<DbEvent[]>([])
   const [loading, setLoading]           = useState(true)
@@ -68,12 +70,12 @@ export default function HomePage() {
 
       <div className="flex gap-0 lg:gap-5 px-0 lg:px-8 py-0 lg:py-5 max-w-[1400px] mx-auto items-start w-full">
         <div className="flex flex-col gap-0 lg:gap-5 flex-[7] min-w-0 w-full">
-          <HeroBanner banner={banner} loading={loading} />
+          {banner && <HeroBanner banner={banner} loading={loading} />}
 
           <div className="max-lg:rounded-none max-lg:bg-transparent max-lg:border-0 max-lg:shadow-none max-lg:border-b max-lg:border-[#E5E7EB] lg:rounded-2xl lg:bg-white lg:border lg:border-[#E5E7EB] lg:shadow-[0_2px_8px_rgba(0,0,0,0.07),0_1px_2px_rgba(0,0,0,0.04)] px-4 py-4 lg:px-6 lg:py-5">
             <div className="flex items-center justify-between mb-5">
               <span style={{ color: PALETTE.dark }} className="text-sm font-extrabold tracking-widest uppercase">Events</span>
-              {user && <button onClick={() => window.location.href='/events'} style={{ color: ACCENT }} className="text-xs font-semibold bg-transparent border-none cursor-pointer hover:opacity-80">Manage events &rarr;</button>}
+              <button onClick={() => navigate('/all-events')} style={{ color: ACCENT }} className="text-xs font-semibold bg-transparent border-none cursor-pointer hover:opacity-80">View All Events &rarr;</button>
             </div>
             {loading && <div className="grid w-full grid-cols-1 md:grid-cols-3 gap-4">{[1,2,3].map(i => <div key={i} className="h-52 rounded-xl animate-pulse bg-gray-100 min-w-0" />)}</div>}
             {!loading && <>

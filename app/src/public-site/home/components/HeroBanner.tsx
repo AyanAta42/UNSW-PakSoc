@@ -7,7 +7,9 @@ interface Props { banner: DbEvent | null; loading: boolean }
 
 /** Full-bleed hero section with event name, live countdown, and CTA buttons. */
 export function HeroBanner({ banner, loading }: Props) {
-  const cd = useCountdown(banner?.time)
+  if (!banner) return null
+
+  const cd = useCountdown(banner.time)
 
   return (
     <div className="px-4 pt-4 lg:p-0">
@@ -21,7 +23,6 @@ export function HeroBanner({ banner, loading }: Props) {
           </h1>
           <div className="hidden md:block flex-1" />
           {loading && <div style={{ border: `1px solid ${PALETTE.border}` }} className="rounded-xl h-24 animate-pulse bg-gray-100/80" />}
-          {!loading && !banner && <p style={{ color: PALETTE.muted }} className="text-sm m-0">No upcoming events — check back soon.</p>}
           {!loading && banner && (
             <div className="w-fit">
               <div style={{ color: PALETTE.dark }} className="text-[17px] font-extrabold mb-2 md:mb-3">{banner.name}</div>
@@ -47,7 +48,7 @@ export function HeroBanner({ banner, loading }: Props) {
         </div>
 
         <div className="hidden md:flex relative z-10 w-[42%] shrink-0 flex-col justify-end items-end p-6">
-          {!loading && (
+          {!loading && banner && (
             <div className="flex gap-2">
               <a href={REGISTER_TEAM_URL} target="_blank" rel="noopener noreferrer" style={{ border: `1.5px solid ${ACCENT}`, color: ACCENT, background: '#fff' }} className="rounded-xl px-5 py-2.5 font-bold text-sm no-underline hover:opacity-85 whitespace-nowrap shadow-sm">Register Your Team</a>
               <a href={TICKETS_URL}       target="_blank" rel="noopener noreferrer" style={{ background: '#C8FF00', color: '#111827' }} className="rounded-xl px-5 py-2.5 font-bold text-sm no-underline hover:opacity-85 whitespace-nowrap">Get Your Tickets &rarr;</a>
