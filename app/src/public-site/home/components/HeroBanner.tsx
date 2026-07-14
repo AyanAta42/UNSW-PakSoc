@@ -1,5 +1,7 @@
 import type { DbEvent } from '@/events/types/Event'
 import { useCountdown }  from '@/shared/hooks/useCountdown'
+import { getEventButtons } from '@/events/utils/getEventButtons'
+import { EventCtaButton }  from '@/events/components/EventCtaButton'
 import { ACCENT, PALETTE } from '@/config/theme'
 
 interface Props { banner: DbEvent | null; loading: boolean }
@@ -8,15 +10,15 @@ export function HeroBanner({ banner, loading }: Props) {
   if (!banner) return null
 
   const cd   = useCountdown(banner.time)
-  const btns = (banner.buttons ?? []).filter(b => b.label && b.url)
+  const btns = getEventButtons(banner.buttons)
 
   return (
     <div className="px-4 pt-4 lg:p-0">
-      <div className="overflow-hidden relative flex flex-col md:flex-row md:min-h-[260px] rounded-2xl border border-[#E5E7EB] shadow-[0_2px_8px_rgba(0,0,0,0.07),0_1px_2px_rgba(0,0,0,0.04)] lg:rounded-[20px]">
+      <div className="overflow-hidden relative flex flex-col min-h-[340px] md:flex-row md:min-h-[260px] rounded-2xl border border-[#E5E7EB] shadow-[0_2px_8px_rgba(0,0,0,0.07),0_1px_2px_rgba(0,0,0,0.04)] lg:rounded-[20px]">
         <img src="/banner.png" alt="" className="absolute inset-0 w-full h-full object-cover object-center" />
         <div className="absolute inset-0" style={{ background: 'linear-gradient(to right, rgba(255,255,255,0.95) 0%, rgba(255,255,255,0.7) 22%, rgba(255,255,255,0.1) 42%, transparent 55%)' }} />
 
-        <div className="relative z-10 flex flex-col p-4 sm:p-8 flex-1 gap-3 md:gap-0">
+        <div className="relative z-10 flex flex-col p-5 sm:p-8 flex-1 gap-3 md:gap-0">
           <h1 style={{ color: PALETTE.dark, fontFamily: '"Satoshi", sans-serif', fontWeight: 900 }} className="text-3xl sm:text-[42px] tracking-tight m-0 leading-none">
             Next <span style={{ color: ACCENT }}>Event</span>
           </h1>
@@ -39,23 +41,21 @@ export function HeroBanner({ banner, loading }: Props) {
             </div>
           )}
           {!loading && btns.length > 0 && (
-            <div className="md:hidden flex gap-2 mt-1 w-full">
+            <div className="md:hidden flex gap-2 mt-auto pt-3 w-full">
               {btns.map((b, i) => (
-                <a key={i} href={b.url} target="_blank" rel="noopener noreferrer"
-                  style={i === 0 ? { border: `1.5px solid ${ACCENT}`, color: ACCENT, background: '#fff' } : { background: '#C8FF00', color: '#111827' }}
-                  className="flex-1 flex items-center justify-center rounded-xl px-2 py-3 text-xs font-bold no-underline active:scale-[0.98] transition-transform min-w-0 shadow-sm">{b.label}</a>
+                <EventCtaButton key={i} label={b.label} url={b.url} variant={i === 0 ? 'outline' : 'filled'}
+                  className="flex-1 px-2 py-3.5 text-xs min-w-0 shadow-sm" />
               ))}
             </div>
           )}
         </div>
 
         <div className="hidden md:flex relative z-10 w-[42%] shrink-0 flex-col justify-end items-end p-6">
-          {!loading && banner && btns.length > 0 && (
+          {!loading && btns.length > 0 && (
             <div className="flex gap-2">
               {btns.map((b, i) => (
-                <a key={i} href={b.url} target="_blank" rel="noopener noreferrer"
-                  style={i === 0 ? { border: `1.5px solid ${ACCENT}`, color: ACCENT, background: '#fff' } : { background: '#C8FF00', color: '#111827' }}
-                  className="rounded-xl px-5 py-2.5 font-bold text-sm no-underline hover:opacity-85 whitespace-nowrap shadow-sm">{b.label}</a>
+                <EventCtaButton key={i} label={b.label} url={b.url} variant={i === 0 ? 'outline' : 'filled'}
+                  className="px-5 py-2.5 text-sm whitespace-nowrap shadow-sm" />
               ))}
             </div>
           )}

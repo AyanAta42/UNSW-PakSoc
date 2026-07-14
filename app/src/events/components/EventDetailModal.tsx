@@ -1,13 +1,15 @@
 import type { DbEvent } from '@/events/types/Event'
 import { CachedMapEmbed, mapEmbedSrc } from '@/maps/components/CachedMapEmbed'
 import { EventDetailContent }          from '@/public-site/home/components/EventDetailContent'
-import { ACCENT, PALETTE } from '@/config/theme'
+import { getEventButtons }             from '@/events/utils/getEventButtons'
+import { EventCtaButton }              from '@/events/components/EventCtaButton'
+import { PALETTE } from '@/config/theme'
 
 interface Props { event: DbEvent; now: Date; onClose: () => void }
 
 export function EventDetailModal({ event, now, onClose }: Props) {
   const upcoming = new Date(event.time) > now
-  const btns     = (event.buttons ?? []).filter(b => b.label && b.url)
+  const btns     = getEventButtons(event.buttons)
 
   return (
     <div className="fixed inset-0 z-[70] flex items-end sm:items-center justify-center p-0 sm:p-6">
@@ -31,11 +33,8 @@ export function EventDetailModal({ event, now, onClose }: Props) {
           {upcoming && btns.length > 0 && (
             <div className="flex flex-col gap-2">
               {btns.map((b, i) => (
-                <a key={i} href={b.url} target="_blank" rel="noopener noreferrer"
-                  style={i === 0 ? { background: '#C8FF00', color: '#111827' } : { border: `1.5px solid ${ACCENT}`, color: ACCENT, background: '#fff' }}
-                  className="w-full flex items-center justify-center rounded-xl py-3.5 font-bold text-sm no-underline hover:opacity-90 transition-opacity">
-                  {b.label}
-                </a>
+                <EventCtaButton key={i} label={b.label} url={b.url} variant={i === 0 ? 'filled' : 'outline'}
+                  className="w-full py-3.5 text-sm" />
               ))}
             </div>
           )}

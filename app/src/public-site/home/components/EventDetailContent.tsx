@@ -1,5 +1,7 @@
 import type { DbEvent } from '@/events/types/Event'
 import { dateParts }            from '@/events/utils/dateParts'
+import { getEventButtons }      from '@/events/utils/getEventButtons'
+import { EventCtaButton }       from '@/events/components/EventCtaButton'
 import { formatTimelineTime }   from '@/shared/utils/formatTimelineTime'
 import { ACCENT, PALETTE }      from '@/config/theme'
 
@@ -9,7 +11,7 @@ export function EventDetailContent({ event, now }: Props) {
   const { month, day, time } = dateParts(event.time, event.end_time)
   const isEnded  = new Date(event.time) <= now
   const schedule = event.timeline ?? []
-  const btns     = (event.buttons ?? []).filter(b => b.label && b.url)
+  const btns     = getEventButtons(event.buttons)
 
   return (
     <>
@@ -31,11 +33,8 @@ export function EventDetailContent({ event, now }: Props) {
       {btns.length > 0 && !isEnded && (
         <div className="flex flex-col gap-1.5">
           {btns.map((b, i) => (
-            <a key={i} href={b.url} target="_blank" rel="noopener noreferrer"
-              style={i === 0 ? { background: '#C8FF00', color: '#111827' } : { border: `1.5px solid ${ACCENT}`, color: ACCENT, background: '#fff' }}
-              className="w-full flex items-center justify-center rounded-xl py-2.5 font-bold text-xs no-underline hover:opacity-85 transition-opacity">
-              {b.label}
-            </a>
+            <EventCtaButton key={i} label={b.label} url={b.url} variant={i === 0 ? 'filled' : 'outline'}
+              className="w-full py-2.5 text-xs" />
           ))}
         </div>
       )}
