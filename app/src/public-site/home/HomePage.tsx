@@ -48,7 +48,7 @@ export default function HomePage() {
   const upcoming = [...events].filter(ev => new Date(ev.time) > now).sort((a,b) => +new Date(a.time) - +new Date(b.time))
   const past     = [...events].filter(ev => new Date(ev.time) <= now).sort((a,b) => +new Date(b.time) - +new Date(a.time))
   const allPublic = [...upcoming, ...past]
-  const phoneEvents = [...events].sort((a,b) => +new Date(b.time) - +new Date(a.time)).slice(0, 2)
+  const phoneEvents = upcoming.slice(0, 2)
   const banner   = upcoming[0] ?? null
   const featured = allPublic.find(e => e.id === selectedId) ?? banner ?? allPublic[0] ?? null
 
