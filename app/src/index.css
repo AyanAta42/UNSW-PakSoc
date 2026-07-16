@@ -213,16 +213,17 @@ body {
 }
 
 .motion-hero-gradient {
+  /* Horizontally mirrored emerald wash */
   background:
-    radial-gradient(70% 70% at 15% 85%, rgba(20, 83, 45, 0.45), transparent 60%),
-    linear-gradient(145deg, #020403 0%, #06140c 38%, #0a1f14 68%, #030805 100%);
+    radial-gradient(70% 70% at 85% 85%, rgba(20, 83, 45, 0.45), transparent 60%),
+    linear-gradient(215deg, #020403 0%, #06140c 38%, #0a1f14 68%, #030805 100%);
   animation: heroZoom 28s ease-in-out alternate infinite;
 }
 
-/* Right-side emerald spotlight — depth without competing artwork */
+/* Left-side emerald spotlight — depth without competing artwork */
 .motion-hero-spotlight {
   position: absolute;
-  right: -6%;
+  left: -6%;
   top: 8%;
   width: 50%;
   height: 85%;
@@ -243,7 +244,7 @@ body {
     linear-gradient(30deg, rgba(255,255,255,0.55) 1px, transparent 1px),
     linear-gradient(150deg, rgba(255,255,255,0.45) 1px, transparent 1px);
   background-size: 28px 28px;
-  mask-image: radial-gradient(ellipse 70% 80% at 78% 45%, #000 0%, transparent 75%);
+  mask-image: radial-gradient(ellipse 70% 80% at 22% 45%, #000 0%, transparent 75%);
 }
 
 /* Soft film grain inside the hero only */

@@ -29,11 +29,11 @@ function bezierPoint(
   w: number,
   h: number,
 ): { x: number; y: number; tx: number; ty: number } {
-  // Bottom-left → top-right, with a soft night-sky arc
-  const x0 = w * 0.04, y0 = h * 0.94
-  const x1 = w * 0.28, y1 = h * 0.55
-  const x2 = w * 0.62, y2 = h * 0.12
-  const x3 = w * 0.96, y3 = h * 0.08
+  // Bottom-right → top-left (horizontally mirrored arc)
+  const x0 = w * 0.96, y0 = h * 0.94
+  const x1 = w * 0.72, y1 = h * 0.55
+  const x2 = w * 0.38, y2 = h * 0.12
+  const x3 = w * 0.04, y3 = h * 0.08
 
   const x = bezier(t, x0, x1, x2, x3)
   const y = bezier(t, y0, y1, y2, y3)
