@@ -2,6 +2,36 @@
 @tailwind components;
 @tailwind utilities;
 
+html {
+  background: #030303;
+}
+
+body {
+  margin: 0;
+  padding-left: env(safe-area-inset-left);
+  padding-right: env(safe-area-inset-right);
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+.glass-nav {
+  position: relative;
+  isolation: isolate;
+}
+
+.glass-nav::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.07) 0%, rgba(255, 255, 255, 0.01) 45%, transparent 100%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.glass-nav > * {
+  position: relative;
+  z-index: 1;
+}
+
 /* iOS Safari zooms focused inputs below 16px — keep mobile fields at 16px+ */
 @media (max-width: 767px) {
   input,
