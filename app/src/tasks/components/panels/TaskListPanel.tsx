@@ -81,7 +81,7 @@ export function TaskListPanel({ tasks, loading, overTask, allCategories, mobile,
                   return (
                     <div key={task.id} data-task-id={task.id}
                       onClick={() => !mobile && onTaskClick?.(task.id)}
-                      className={`relative bg-white rounded-xl p-4 transition-all select-none ${hasSelected && !mobile ? 'cursor-pointer hover:border-blue-400 hover:shadow-md' : ''} ${isOver ? 'border-2 border-dashed border-[#22C55E]' : 'border border-gray-100 shadow-sm'}`}>
+                      className={`motion-card relative bg-white rounded-xl p-4 transition-all select-none ${hasSelected && !mobile ? 'cursor-pointer hover:border-[#22C55E] hover:shadow-md' : ''} ${isOver ? 'border-2 border-dashed border-[#22C55E]' : 'border border-gray-100 shadow-sm'}`}>
                       <div className="absolute top-3 right-3 flex items-center gap-1">
                         <button onClick={e => { e.stopPropagation(); setEditingTask(task) }} className="text-gray-400 hover:text-gray-600 bg-transparent border-none cursor-pointer text-[11px] font-semibold leading-none transition-colors px-1.5 py-1">Edit</button>
                         <button onClick={e => { e.stopPropagation(); setDeletingTaskId(task.id) }} className="text-gray-300 hover:text-red-400 bg-transparent border-none cursor-pointer text-base leading-none transition-colors p-1">×</button>

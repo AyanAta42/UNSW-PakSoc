@@ -1,4 +1,3 @@
-import { useState } from 'react'
 import type { DbEvent } from '@/events/types/Event'
 import { dateParts }    from '@/events/utils/dateParts'
 import { eventImageUrl } from '@/events/utils/eventImageUrl'
@@ -11,21 +10,16 @@ export function PublicEventCard({ event: ev, selected, now, onClick }: Props) {
   const { month, day, time } = dateParts(ev.time, ev.end_time)
   const img   = eventImageUrl(ev)
   const ended = new Date(ev.time) <= now
-  const [hovered, setHovered] = useState(false)
 
   return (
     <div onClick={onClick}
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
       style={{
         background:   PALETTE.card,
-        border:       `1px solid ${hovered || selected ? ACCENT : PALETTE.border}`,
+        border:       `1px solid ${selected ? ACCENT : PALETTE.border}`,
         borderRadius: 18,
-        boxShadow:    hovered || selected ? '0 0 40px rgba(34,197,94,0.12)' : PALETTE.shadowSm,
-        transition:   'border-color 0.2s, box-shadow 0.2s, transform 0.2s',
-        transform:    hovered ? 'translateY(-2px)' : 'none',
+        boxShadow:    selected ? '0 0 40px rgba(34,197,94,0.12)' : PALETTE.shadowSm,
       }}
-      className="overflow-hidden cursor-pointer flex flex-col min-w-0 w-full">
+      className="motion-card overflow-hidden cursor-pointer flex flex-col min-w-0 w-full">
 
       <div className="relative" style={{ height: 120 }}>
         {img

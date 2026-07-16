@@ -12,9 +12,9 @@ interface Props {
 
 export function ConfirmModal({ title, message, warning, confirmLabel = 'Confirm', danger = false, onConfirm, onCancel }: Props) {
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm px-4" onClick={onCancel}>
+    <div className="motion-backdrop fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm px-4" onClick={onCancel}>
       <div style={{ background: PALETTE.modal, border: `1px solid ${PALETTE.border}`, borderRadius: 24, boxShadow: PALETTE.shadowLg }}
-        className="w-full max-w-sm p-6 flex flex-col gap-4" onClick={e => e.stopPropagation()}>
+        className="motion-modal w-full max-w-sm p-6 flex flex-col gap-4" onClick={e => e.stopPropagation()}>
 
         <div className="flex flex-col gap-1.5">
           <h3 className="m-0 text-[15px] font-extrabold" style={{ color: PALETTE.dark }}>{title}</h3>

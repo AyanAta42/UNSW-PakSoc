@@ -18,17 +18,25 @@ export function EventCtaButton({ label, url, variant, className = '' }: Props) {
   const cls = `${className} flex items-center justify-center font-bold no-underline transition-all`
 
   const handleMouseEnter = (e: React.MouseEvent<HTMLElement>) => {
-    if (isPrimary) { (e.currentTarget as HTMLElement).style.background = ACCENT_HOVER }
-    else {
-      ;(e.currentTarget as HTMLElement).style.background = 'rgba(255,255,255,0.06)'
-      ;(e.currentTarget as HTMLElement).style.borderColor = '#FFFFFF'
+    const target = e.currentTarget as HTMLElement
+    target.style.transform = 'scale(1.02)'
+    if (isPrimary) {
+      target.style.background = ACCENT_HOVER
+      target.style.boxShadow = '0 0 36px rgba(34,197,94,0.42)'
+    } else {
+      target.style.background = 'rgba(255,255,255,0.06)'
+      target.style.borderColor = '#FFFFFF'
     }
   }
   const handleMouseLeave = (e: React.MouseEvent<HTMLElement>) => {
-    if (isPrimary) { (e.currentTarget as HTMLElement).style.background = ACCENT }
-    else {
-      ;(e.currentTarget as HTMLElement).style.background = 'transparent'
-      ;(e.currentTarget as HTMLElement).style.borderColor = 'rgba(229,231,235,0.5)'
+    const target = e.currentTarget as HTMLElement
+    target.style.transform = 'scale(1)'
+    if (isPrimary) {
+      target.style.background = ACCENT
+      target.style.boxShadow = '0 0 30px rgba(34,197,94,0.35)'
+    } else {
+      target.style.background = 'transparent'
+      target.style.borderColor = 'rgba(229,231,235,0.5)'
     }
   }
 

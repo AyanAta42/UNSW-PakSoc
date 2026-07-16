@@ -15,7 +15,7 @@ export function LocationSidebar({ mapEvent, featured, now }: Props) {
         <div className="px-5 pt-5 pb-3">
           <span style={{ color: PALETTE.muted }} className="text-[10px] font-bold tracking-widest uppercase">Event Location</span>
         </div>
-        <div className="mx-5" style={{ height: 220, borderRadius: 16, border: `1px solid ${PALETTE.border}`, overflow: 'hidden' }}>
+        <div className="motion-map mx-5" style={{ height: 220, borderRadius: 16, border: `1px solid ${PALETTE.border}`, overflow: 'hidden' }}>
           {desktopMapSrc
             ? <CachedMapEmbed cacheId="home-map-desktop" src={desktopMapSrc} title="Event location map" className="w-full h-full" />
             : <div className="w-full h-full flex items-center justify-center" style={{ background: PALETTE.cardAlt }}>

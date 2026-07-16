@@ -83,8 +83,8 @@ export function AddEditEventModal({ onClose, onCreated, onUpdated, event }: Prop
   const canSave = name.trim() && eventDate
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm px-4" onClick={onClose}>
-      <div onClick={e => e.stopPropagation()} className="w-full max-w-md overflow-hidden max-h-[92vh] flex flex-col"
+    <div className="motion-backdrop fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm px-4" onClick={onClose}>
+      <div onClick={e => e.stopPropagation()} className="motion-modal w-full max-w-md overflow-hidden max-h-[92vh] flex flex-col"
         style={{ background: PALETTE.modal, borderRadius: 24, border: `1px solid ${PALETTE.border}`, boxShadow: PALETTE.shadowLg }}>
 
         <div className="px-6 py-4 flex items-center justify-between shrink-0" style={{ borderBottom: `1px solid ${PALETTE.border}` }}>

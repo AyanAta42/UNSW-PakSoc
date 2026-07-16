@@ -23,7 +23,7 @@ export function SocialWall() {
         {IG.map((p, i) => (
           <div key={p.id}
             style={{ background: GRADS[i], border: `1px solid ${PALETTE.border}`, borderRadius: 14, minWidth: 140, aspectRatio: '4/5' }}
-            className="relative overflow-hidden cursor-pointer hover:opacity-90 transition-opacity shrink-0">
+            className="motion-social-card relative overflow-hidden cursor-pointer shrink-0">
             {p.type === 'reel' && (
               <span className="absolute top-2 right-2 font-bold px-1.5 py-0.5 rounded text-white"
                 style={{ fontSize: 9, background: 'rgba(0,0,0,0.65)' }}>REEL</span>

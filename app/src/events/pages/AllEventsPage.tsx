@@ -52,7 +52,7 @@ export default function AllEventsPage() {
         {loading && (
           <div className="grid grid-cols-[repeat(auto-fill,minmax(260px,1fr))] gap-4">
             {[1,2,3,4].map(i => (
-              <div key={i} className="h-44 animate-pulse" style={{ borderRadius: 18, background: PALETTE.card, border: `1px solid ${PALETTE.border}` }} />
+              <div key={i} className="motion-skeleton h-44" style={{ borderRadius: 18, border: `1px solid ${PALETTE.border}` }} />
             ))}
           </div>
         )}

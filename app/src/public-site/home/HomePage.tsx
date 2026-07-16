@@ -15,6 +15,8 @@ import { EditProfileModal }     from './components/EditProfileModal'
 import { Footer }               from './components/Footer'
 import { useNavigate } from 'react-router-dom'
 import { ACCENT, PALETTE } from '@/config/theme'
+import { useReveal } from '@/shared/hooks/useReveal'
+import { usePointerPosition } from '@/shared/hooks/usePointerPosition'
 
 export default function HomePage() {
   const navigate = useNavigate()
@@ -26,6 +28,10 @@ export default function HomePage() {
   const [selectedId, setSelectedId]     = useState<string | null>(null)
   const [mobileEvent, setMobileEvent]   = useState<DbEvent | null>(null)
   const [editOpen, setEditOpen]         = useState(false)
+  const eventsReveal = useReveal<HTMLDivElement>()
+  const socialReveal = useReveal<HTMLDivElement>()
+  const sidebarReveal = useReveal<HTMLDivElement>()
+  const pointer = usePointerPosition()
 
   const meta    = (user as User | null)?.user_metadata ?? {}
   const initial = (meta.full_name ?? meta.name ?? user?.email ?? '?')[0]?.toUpperCase()
@@ -68,32 +74,42 @@ export default function HomePage() {
   }
 
   return (
-    <div style={{ background: PALETTE.page, color: PALETTE.dark, fontFamily: '"Inter", system-ui, sans-serif', minHeight: '100vh' }}>
+    <div style={{
+      background: pointer.active
+        ? `radial-gradient(500px circle at ${pointer.x}px ${pointer.y}px, rgba(34,197,94,0.045), transparent 55%), ${PALETTE.page}`
+        : PALETTE.page,
+      color: PALETTE.dark,
+      fontFamily: '"Inter", system-ui, sans-serif',
+      minHeight: '100vh',
+      transition: 'background 220ms ease-out',
+    }}>
       <Navbar user={user} avatarUrl={avatarUrl} avatarBroken={avatarBroken} initial={initial ?? '?'} onAvatarError={() => setAvatarBroken(true)} onEditProfile={handleEditProfile} />
 
       <div className="flex gap-0 lg:gap-5 px-0 lg:px-8 py-0 lg:py-5 max-w-[1400px] mx-auto items-start w-full">
         <div className="flex flex-col gap-0 lg:gap-5 flex-[7] min-w-0 w-full">
           {banner && <HeroBanner banner={banner} loading={loading} />}
 
-          <div style={{ background: PALETTE.card, border: `1px solid ${PALETTE.border}`, borderRadius: 18, boxShadow: PALETTE.shadowMd }}
-            className="max-lg:rounded-none max-lg:border-x-0 max-lg:border-t-0 max-lg:shadow-none px-4 py-4 lg:px-6 lg:py-5">
+          <div ref={eventsReveal.ref} data-visible={eventsReveal.visible}
+            style={{ background: PALETTE.card, border: `1px solid ${PALETTE.border}`, borderRadius: 18, boxShadow: PALETTE.shadowMd }}
+            className="motion-reveal max-lg:rounded-none max-lg:border-x-0 max-lg:border-t-0 max-lg:shadow-none px-4 py-4 lg:px-6 lg:py-5">
             <div className="flex items-center justify-between mb-5">
               <span style={{ color: PALETTE.muted }} className="text-[10px] font-bold tracking-widest uppercase">Events</span>
               <button onClick={() => navigate('/all-events')} style={{ color: ACCENT }} className="text-xs font-semibold bg-transparent border-none cursor-pointer hover:opacity-80">View All Events →</button>
             </div>
-            {loading && <div className="grid w-full grid-cols-1 md:grid-cols-3 gap-4">{[1,2,3].map(i => <div key={i} className="h-52 rounded-xl animate-pulse bg-gray-100 min-w-0" />)}</div>}
+            {loading && <div className="grid w-full grid-cols-1 md:grid-cols-3 gap-4">{[1,2,3].map(i => <div key={i} className="motion-skeleton h-52 rounded-xl min-w-0" />)}</div>}
             {!loading && <>
-              <div className="grid w-full grid-cols-1 md:grid-cols-3 gap-4 md:hidden">
+              <div className="motion-stagger grid w-full grid-cols-1 md:grid-cols-3 gap-4 md:hidden">
                 {phoneEvents.length === 0 ? <p style={{ color: PALETTE.muted }} className="text-sm m-0 col-span-full">No events yet — check back soon.</p> : phoneEvents.map(ev => <PublicEventCard key={ev.id} event={ev} selected={selectedId === ev.id || (!selectedId && ev.id === featured?.id)} now={now} onClick={() => openEvent(ev)} />)}
               </div>
-              <div className="grid w-full grid-cols-1 md:grid-cols-3 gap-4 hidden md:grid">
+              <div className="motion-stagger grid w-full grid-cols-1 md:grid-cols-3 gap-4 hidden md:grid">
                 {allPublic.length === 0 ? <p style={{ color: PALETTE.muted }} className="text-sm m-0 col-span-full">No events yet — announce some from Events Manager.</p> : allPublic.slice(0, 3).map(ev => <PublicEventCard key={ev.id} event={ev} selected={selectedId === ev.id || (!selectedId && ev.id === featured?.id)} now={now} onClick={() => openEvent(ev)} />)}
               </div>
             </>}
           </div>
 
-          <div style={{ background: PALETTE.card, border: `1px solid ${PALETTE.border}`, borderRadius: 18, boxShadow: PALETTE.shadowMd }}
-            className="max-lg:rounded-none max-lg:border-x-0 max-lg:border-b-0 max-lg:shadow-none px-4 py-4 lg:px-6 lg:py-5">
+          <div ref={socialReveal.ref} data-visible={socialReveal.visible}
+            style={{ background: PALETTE.card, border: `1px solid ${PALETTE.border}`, borderRadius: 18, boxShadow: PALETTE.shadowMd }}
+            className="motion-reveal max-lg:rounded-none max-lg:border-x-0 max-lg:border-b-0 max-lg:shadow-none px-4 py-4 lg:px-6 lg:py-5">
             <div className="flex items-center justify-between mb-5">
               <span style={{ color: PALETTE.muted }} className="text-[10px] font-bold tracking-widest uppercase">Social Wall</span>
               <a href="#" style={{ color: ACCENT }} className="text-xs font-semibold no-underline hover:opacity-80">View on Instagram →</a>
@@ -102,7 +118,9 @@ export default function HomePage() {
           </div>
         </div>
 
-        <LocationSidebar mapEvent={featured ?? banner} featured={featured} now={now} />
+        <div ref={sidebarReveal.ref} data-visible={sidebarReveal.visible} className="motion-reveal hidden lg:block flex-[3] min-w-0">
+          <LocationSidebar mapEvent={featured ?? banner} featured={featured} now={now} />
+        </div>
       </div>
 
       {mobileEvent && <MobileEventSheet event={mobileEvent} now={now} onClose={() => setMobileEvent(null)} />}

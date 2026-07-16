@@ -13,9 +13,9 @@ export function EventDetailModal({ event, now, onClose }: Props) {
 
   return (
     <div className="fixed inset-0 z-[70] flex items-end sm:items-center justify-center p-0 sm:p-6">
-      <div className="absolute inset-0 bg-black/60 backdrop-blur-[3px]" onClick={onClose} />
+      <div className="motion-backdrop absolute inset-0 bg-black/60 backdrop-blur-[3px]" onClick={onClose} />
       <div style={{ background: PALETTE.modal, boxShadow: PALETTE.shadowLg, borderRadius: 24, border: `1px solid ${PALETTE.border}` }}
-        className="relative w-full sm:max-w-lg rounded-t-[24px] sm:rounded-[24px] max-h-[88vh] flex flex-col"
+        className="motion-modal relative w-full sm:max-w-lg rounded-t-[24px] sm:rounded-[24px] max-h-[88vh] flex flex-col"
         onClick={e => e.stopPropagation()}>
 
         <div className="flex items-center justify-between px-6 py-4 shrink-0"

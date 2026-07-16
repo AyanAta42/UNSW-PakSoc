@@ -13,13 +13,13 @@ interface Props {
 export function UserDropdown({ avatarUrl, initial, onEditProfile, onSignOut, onClose }: Props) {
   return (
     <>
-      <div className="fixed inset-0 z-40" onClick={onClose} />
+      <div className="motion-backdrop fixed inset-0 z-40" onClick={onClose} />
       <div style={{
         background: PALETTE.modal,
         border: `1px solid ${PALETTE.border}`,
         boxShadow: PALETTE.shadowMd,
         borderRadius: 16,
-      }} className="absolute right-0 mt-2 w-40 z-50 overflow-hidden">
+      }} className="motion-modal absolute right-0 mt-2 w-40 z-50 overflow-hidden">
         <button onClick={onEditProfile}
           style={{ color: PALETTE.secondary }}
           className="w-full text-left px-4 py-2.5 text-sm font-semibold bg-transparent border-none cursor-pointer transition-colors hover:bg-white/5">

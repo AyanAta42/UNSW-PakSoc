@@ -1,3 +1,4 @@
+import { useEffect, useRef, useState } from 'react'
 import type { DbEvent } from '@/events/types/Event'
 import { useCountdown }    from '@/shared/hooks/useCountdown'
 import { getEventButtons } from '@/events/utils/getEventButtons'
@@ -7,28 +8,57 @@ import { ACCENT, ACCENT_GLOW, PALETTE } from '@/config/theme'
 interface Props { banner: DbEvent | null; loading: boolean }
 
 export function HeroBanner({ banner, loading }: Props) {
+  const cd   = useCountdown(banner?.time)
+  const heroRef = useRef<HTMLDivElement>(null)
+  const [parallax, setParallax] = useState({ x: 0, y: 0 })
+
+  useEffect(() => {
+    const node = heroRef.current
+    if (!node || !window.matchMedia('(hover: hover) and (pointer: fine)').matches || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
+
+    const onPointerMove = (event: PointerEvent) => {
+      const bounds = node.getBoundingClientRect()
+      setParallax({
+        x: ((event.clientX - bounds.left) / bounds.width - 0.5) * 10,
+        y: ((event.clientY - bounds.top) / bounds.height - 0.5) * 8,
+      })
+    }
+    const reset = () => setParallax({ x: 0, y: 0 })
+
+    node.addEventListener('pointermove', onPointerMove)
+    node.addEventListener('pointerleave', reset)
+    return () => {
+      node.removeEventListener('pointermove', onPointerMove)
+      node.removeEventListener('pointerleave', reset)
+    }
+  }, [])
+
   if (!banner) return null
-  const cd   = useCountdown(banner.time)
   const btns = getEventButtons(banner.buttons)
 
   return (
     <div className="px-4 pt-4 lg:p-0">
-      <div className="overflow-hidden relative flex flex-col min-h-[228px] md:flex-row md:min-h-[280px]"
+      <div ref={heroRef} className="overflow-hidden relative flex flex-col min-h-[228px] md:flex-row md:min-h-[280px]"
         style={{ borderRadius: 18, border: `1px solid ${PALETTE.border}`, boxShadow: PALETTE.shadowLg }}>
 
-        <img src="/banner.png" alt="" className="absolute inset-0 w-full h-full object-cover object-center" />
+        <div className="absolute -inset-2 transition-transform duration-500 ease-out"
+          style={{ transform: `translate3d(${parallax.x}px, ${parallax.y}px, 0)` }}>
+          <img src="/banner.png" alt="" className="w-[calc(100%+1rem)] h-[calc(100%+1rem)] object-cover object-center motion-hero-image" />
+        </div>
 
         {/* Base dark overlay */}
         <div className="absolute inset-0" style={{ background: 'rgba(0,0,0,0.55)' }} />
         {/* Green gradient accent — bottom-left corner */}
         <div className="absolute inset-0" style={{ background: 'linear-gradient(135deg, rgba(34,197,94,0.18) 0%, rgba(0,0,0,0) 55%)' }} />
+        <div aria-hidden className="absolute -inset-1/4 opacity-30 motion-light-rays"
+          style={{ background: 'linear-gradient(115deg, transparent 38%, rgba(74,222,128,0.15) 48%, transparent 58%)' }} />
         {/* Left-side text legibility fade */}
         <div className="absolute inset-0" style={{ background: 'linear-gradient(to right, rgba(0,0,0,0.88) 0%, rgba(0,0,0,0.55) 35%, transparent 65%)' }} />
 
         {/* Content */}
         <div className="relative z-10 flex flex-col p-5 md:p-9 flex-1 min-h-[228px] md:min-h-0">
           <h1 style={{ fontFamily: '"Satoshi", sans-serif', fontWeight: 900, color: '#F8FAFC' }}
-            className="text-2xl md:text-[44px] tracking-tight m-0 leading-none shrink-0">
+            className="text-2xl md:text-[44px] tracking-tight m-0 leading-none shrink-0 motion-hero-title">
             Next <span style={{ color: ACCENT }}>Event</span>
           </h1>
 
@@ -40,7 +70,7 @@ export function HeroBanner({ banner, loading }: Props) {
           )}
 
           {!loading && banner && (
-            <div className="w-full md:w-fit shrink-0">
+            <div className="w-full md:w-fit shrink-0 motion-hero-details">
               <div style={{ color: '#F8FAFC' }} className="text-[15px] md:text-lg font-extrabold mb-3 truncate">{banner.name}</div>
               <div className="flex gap-2 w-fit">
                 {(['days','hrs','mins','secs'] as const).map((k, i) => {
@@ -59,7 +89,7 @@ export function HeroBanner({ banner, loading }: Props) {
 
           {/* Mobile CTAs */}
           {!loading && btns.length > 0 && (
-            <div className="md:hidden flex gap-2 mt-3 w-full shrink-0">
+            <div className="md:hidden flex gap-2 mt-3 w-full shrink-0 motion-hero-actions">
               {btns.map((b, i) => (
                 <EventCtaButton key={i} label={b.label} url={b.url} variant={i === 0 ? 'primary' : 'secondary'}
                   className="flex-1 px-2 py-2.5 text-xs min-w-0" />
@@ -71,7 +101,7 @@ export function HeroBanner({ banner, loading }: Props) {
         {/* Desktop CTAs — bottom-right */}
         <div className="hidden md:flex relative z-10 w-[42%] shrink-0 flex-col justify-end items-end p-8">
           {!loading && btns.length > 0 && (
-            <div className="flex gap-3">
+            <div className="flex gap-3 motion-hero-actions">
               {btns.map((b, i) => (
                 <EventCtaButton key={i} label={b.label} url={b.url} variant={i === 0 ? 'primary' : 'secondary'}
                   className="px-5 py-2.5 text-sm whitespace-nowrap" />
