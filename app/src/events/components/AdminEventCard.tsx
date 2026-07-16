@@ -50,7 +50,7 @@ export function AdminEventCard({ event: ev, canEdit = true, onAnnounce, onUnpubl
           boxShadow:    hovered ? PALETTE.shadowMd : PALETTE.shadowSm,
           transition:   'border-color 0.2s, box-shadow 0.2s',
         }}
-        className="overflow-hidden flex flex-col">
+        className="motion-card overflow-hidden flex flex-col">
 
         <div className="relative" style={{ height: 120 }}>
           {img
