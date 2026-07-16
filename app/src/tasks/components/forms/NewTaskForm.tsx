@@ -3,8 +3,9 @@ import type { Dispatch, SetStateAction } from 'react'
 import type { Member } from '@/members/types/Member'
 import { getCatCfg, inputCls, labelCls } from '@/config/categoryConfig'
 import { DEFAULT_TASK_CATEGORIES } from '@/tasks/types/Task'
-import { AssignedChip } from '@/tasks/components/assignment/AssignedChip'
-import { SubtaskList }  from './SubtaskList'
+import { AssignedChip }  from '@/tasks/components/assignment/AssignedChip'
+import { SubtaskList }   from './SubtaskList'
+import { ConfirmModal }  from '@/shared/components/ConfirmModal'
 
 interface Props {
   title:          string;         setTitle:        Dispatch<SetStateAction<string>>
@@ -23,13 +24,17 @@ interface Props {
 }
 
 export function NewTaskForm({ title, setTitle, cat, setCat, allCategories, onAddCategory, onRemoveCategory, subtasks, setSubtasks, preAssigned, setPreAssigned, notes, setNotes, overForm = false, mobileAssignees = false, onOpenAssigneePicker, onAddTask, submitLabel = 'Create Task →' }: Props) {
-  const [showAddCat, setShowAddCat] = useState(false)
-  const [catInput,   setCatInput]   = useState('')
+  const [showAddCat,      setShowAddCat]      = useState(false)
+  const [catInput,        setCatInput]        = useState('')
+  const [pendingDeleteCat, setPendingDeleteCat] = useState<string | null>(null)
 
   function submitCategory() {
     const v = catInput.trim()
     if (!v || !onAddCategory || allCategories.includes(v)) return
-    onAddCategory(v); setCatInput(''); setShowAddCat(false)
+    onAddCategory(v)
+    setCat(v)           // auto-select the new category
+    setCatInput('')
+    setShowAddCat(false)
   }
 
   return (
@@ -39,20 +44,23 @@ export function NewTaskForm({ title, setTitle, cat, setCat, allCategories, onAdd
         <input value={title} onChange={e => setTitle(e.target.value)} onKeyDown={e => e.key === 'Enter' && title.trim() && onAddTask()} placeholder="e.g. Buy equipment" className={inputCls} />
       </div>
       <div>
-        <div className="flex items-center gap-1.5 mb-1.5">
-          <label className={labelCls + ' mb-0'}>Category</label>
+        <div className="flex items-center mb-1.5">
+          <label className={labelCls + ' mb-0 flex-1'}>Category</label>
           {onAddCategory && (
-            <button type="button" onClick={() => setShowAddCat(v => !v)} aria-label="Add custom category"
-              className={`w-5 h-5 rounded-md border flex items-center justify-center text-sm font-bold leading-none cursor-pointer transition-all ${showAddCat ? 'bg-[#22C55E] text-white border-[#22C55E]' : 'bg-gray-50 text-gray-400 border-gray-200 hover:border-[#22C55E] hover:text-[#22C55E]'}`}>+</button>
+            <button type="button" onClick={() => { setShowAddCat(v => !v); setCatInput('') }}
+              aria-label={showAddCat ? 'Close category manager' : 'Add custom category'}
+              className={`w-6 h-6 rounded-full border-none flex items-center justify-center text-sm font-bold leading-none cursor-pointer transition-all shrink-0 ${showAddCat ? 'bg-gray-200 text-gray-500 hover:bg-gray-300' : 'bg-[#22C55E] text-white hover:bg-[#16A34A] shadow-sm'}`}>
+              {showAddCat ? '×' : '+'}
+            </button>
           )}
         </div>
         {showAddCat && onAddCategory && (
-          <div className="flex gap-2 mb-2">
+          <div className="flex gap-2 mb-2.5">
             <input value={catInput} onChange={e => setCatInput(e.target.value)} onKeyDown={e => e.key === 'Enter' && submitCategory()}
-              placeholder="Custom category name…" autoFocus
-              className="flex-1 px-3 py-2 border border-gray-200 rounded-lg bg-gray-50 text-sm outline-none focus:border-[#22C55E] transition-colors" />
+              placeholder="New category name…" autoFocus
+              className="flex-1 px-3 py-1.5 border border-gray-200 rounded-lg bg-gray-50 text-sm outline-none focus:border-[#22C55E] transition-colors" />
             <button type="button" onClick={submitCategory} disabled={!catInput.trim()}
-              className={`px-3 py-2 rounded-lg text-xs font-bold border-none cursor-pointer shrink-0 transition-colors ${catInput.trim() ? 'bg-[#22C55E] text-white' : 'bg-gray-100 text-gray-300 cursor-not-allowed'}`}>Add</button>
+              className={`px-3 py-1.5 rounded-lg text-xs font-bold border-none cursor-pointer shrink-0 transition-colors ${catInput.trim() ? 'bg-[#22C55E] text-white hover:bg-[#16A34A]' : 'bg-gray-100 text-gray-300 cursor-not-allowed'}`}>Add</button>
           </div>
         )}
         <div className="flex flex-wrap gap-2">
@@ -63,10 +71,11 @@ export function NewTaskForm({ title, setTitle, cat, setCat, allCategories, onAdd
               <button key={c} type="button" onClick={() => setCat(c)}
                 className={`px-3 py-1.5 rounded-lg text-xs font-bold border-[1.5px] cursor-pointer transition-all flex items-center gap-1 ${cat === c ? cfg.activeCls : 'bg-gray-50 border-gray-200 text-gray-400'}`}>
                 {c}
-                {isCustom && onRemoveCategory && (
-                  <span role="button" tabIndex={0} onClick={e => { e.stopPropagation(); onRemoveCategory(c) }}
-                    onKeyDown={e => e.key === 'Enter' && (e.stopPropagation(), onRemoveCategory(c))}
-                    className="text-[10px] leading-none opacity-50 hover:opacity-100 hover:text-red-500 ml-0.5">×</span>
+                {isCustom && showAddCat && onRemoveCategory && (
+                  <span role="button" tabIndex={0}
+                    onClick={e => { e.stopPropagation(); setPendingDeleteCat(c) }}
+                    onKeyDown={e => e.key === 'Enter' && (e.stopPropagation(), setPendingDeleteCat(c))}
+                    className="w-3.5 h-3.5 flex items-center justify-center rounded-full bg-red-100 text-red-400 hover:bg-red-200 hover:text-red-600 text-[9px] leading-none ml-0.5 transition-colors">×</span>
                 )}
               </button>
             )
@@ -103,6 +112,18 @@ export function NewTaskForm({ title, setTitle, cat, setCat, allCategories, onAdd
         className={`w-full py-3 rounded-xl text-sm font-bold transition-all cursor-pointer border-none ${title.trim() ? 'bg-[#111827] text-white hover:bg-[#374151]' : 'bg-gray-100 text-gray-300 cursor-not-allowed'}`}>
         {submitLabel}
       </button>
+
+      {pendingDeleteCat && onRemoveCategory && (
+        <ConfirmModal
+          title={`Delete "${pendingDeleteCat}" category?`}
+          message="The category will be removed from this event."
+          warning="All tasks in this category will be permanently deleted and cannot be recovered."
+          confirmLabel="Delete Category & Tasks"
+          danger
+          onConfirm={() => { onRemoveCategory(pendingDeleteCat); setPendingDeleteCat(null) }}
+          onCancel={() => setPendingDeleteCat(null)}
+        />
+      )}
     </div>
   )
 }

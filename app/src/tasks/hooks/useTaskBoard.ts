@@ -2,10 +2,11 @@ import { useState, useEffect } from 'react'
 import type { Dispatch, SetStateAction } from 'react'
 import type { Task } from '@/tasks/types/Task'
 import type { Member } from '@/members/types/Member'
+import { supabase }       from '@/core/supabase/client'
 import { fetchMembers }    from '@/members/services/fetchMembers'
 import { fetchTasks }      from '@/tasks/services/fetchTasks'
 import { fetchEventById }  from '@/events/services/fetchEventById'
-import { updateEvent }       from '@/events/services/updateEvent'
+import { updateEvent }     from '@/events/services/updateEvent'
 import { createTask }      from '@/tasks/services/createTask'
 import { updateTask }      from '@/tasks/services/updateTask'
 import { deleteTask }      from '@/tasks/services/deleteTask'
@@ -48,8 +49,9 @@ export function useTaskBoard(eventId: string): TaskBoardState {
     setLoading(true)
     Promise.all([fetchMembers(), fetchTasks(eventId), fetchEventById(eventId)])
       .then(([m, t, ev]) => {
-        setMembers(m); setTasks(t)
-        setCustomCats(ev?.custom_categories ?? [])
+        setMembers(m.filter(x => x.role !== 'public')); setTasks(t)
+        // Only set from DB on initial load — don't overwrite if user already added categories
+        setCustomCats(prev => prev.length > 0 ? prev : (ev?.custom_categories ?? []))
       })
       .catch(console.error)
       .finally(() => setLoading(false))
@@ -61,20 +63,38 @@ export function useTaskBoard(eventId: string): TaskBoardState {
 
   function selectMember(id: string | null) { setSelectedMemberId(id) }
 
-  async function persistCategories(next: string[]) {
-    setCustomCats(next)
-    try { await updateEvent(eventId, { custom_categories: next }) } catch (e) { console.error(e) }
-  }
-
   function addCustomCategory(name: string) {
     const v = name.trim()
-    if (!v || allCategories.includes(v)) return
-    persistCategories([...customCats, v])
+    if (!v) return
+    // Use current snapshot to avoid stale-closure duplicates
+    setCustomCats(prev => {
+      const all = [...DEFAULT_TASK_CATEGORIES, ...prev]
+      if (all.includes(v)) return prev
+      const next = [...prev, v]
+      // Fire-and-forget persistence after state is confirmed updated
+      updateEvent(eventId, { custom_categories: next }).catch(e =>
+        console.error('[useTaskBoard] Failed to save custom_categories:', e)
+      )
+      return next
+    })
   }
 
   function removeCustomCategory(name: string) {
-    persistCategories(customCats.filter(c => c !== name))
+    // Remove from UI immediately
+    setTasks(prev => prev.filter(t => t.category !== name))
     if (cat === name) setCat('Task')
+
+    setCustomCats(prev => {
+      const next = prev.filter(c => c !== name)
+      // Persist category list update
+      updateEvent(eventId, { custom_categories: next }).catch(e =>
+        console.error('[useTaskBoard] Failed to save custom_categories:', e)
+      )
+      // Delete all tasks with this category from Supabase
+      supabase.from('tasks').delete().eq('event_id', eventId).eq('category', name)
+        .then(({ error }) => { if (error) console.error('[useTaskBoard] Failed to delete tasks for category:', error) })
+      return next
+    })
   }
 
   async function addTask() {

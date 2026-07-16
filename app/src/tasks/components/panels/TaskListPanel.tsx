@@ -3,6 +3,7 @@ import type { Task } from '@/tasks/types/Task'
 import { getCatCfg } from '@/config/categoryConfig'
 import { AssignedChip }  from '@/tasks/components/assignment/AssignedChip'
 import { EditTaskModal } from '@/tasks/components/forms/EditTaskModal'
+import { ConfirmModal }  from '@/shared/components/ConfirmModal'
 
 interface Props {
   tasks:             Task[];  loading:          boolean; overTask:      string | null
@@ -16,8 +17,9 @@ interface Props {
 }
 
 export function TaskListPanel({ tasks, loading, overTask, allCategories, mobile, currentUserAuthId, selectedMemberId, onRemoveTask, onRemoveAssigned, onEditTask, onAssignClick, onTaskClick }: Props) {
-  const [editingTask,  setEditingTask]  = useState<Task | null>(null)
-  const [myTasksOnly,  setMyTasksOnly]  = useState(false)
+  const [editingTask,   setEditingTask]   = useState<Task | null>(null)
+  const [myTasksOnly,   setMyTasksOnly]   = useState(false)
+  const [deletingTaskId, setDeletingTaskId] = useState<string | null>(null)
 
   const visibleTasks = myTasksOnly && currentUserAuthId
     ? tasks.filter(t => t.assigned.some(m => m.user_id === currentUserAuthId))
@@ -82,7 +84,7 @@ export function TaskListPanel({ tasks, loading, overTask, allCategories, mobile,
                       className={`relative bg-white rounded-xl p-4 transition-all select-none ${hasSelected && !mobile ? 'cursor-pointer hover:border-blue-400 hover:shadow-md' : ''} ${isOver ? 'border-2 border-dashed border-[#22C55E]' : 'border border-gray-100 shadow-sm'}`}>
                       <div className="absolute top-3 right-3 flex items-center gap-1">
                         <button onClick={e => { e.stopPropagation(); setEditingTask(task) }} className="text-gray-400 hover:text-gray-600 bg-transparent border-none cursor-pointer text-[11px] font-semibold leading-none transition-colors px-1.5 py-1">Edit</button>
-                        <button onClick={e => { e.stopPropagation(); onRemoveTask(task.id) }} className="text-gray-300 hover:text-red-400 bg-transparent border-none cursor-pointer text-base leading-none transition-colors p-1">×</button>
+                        <button onClick={e => { e.stopPropagation(); setDeletingTaskId(task.id) }} className="text-gray-300 hover:text-red-400 bg-transparent border-none cursor-pointer text-base leading-none transition-colors p-1">×</button>
                       </div>
                       <div className="text-sm font-bold text-[#111827] pr-14 mb-2">{task.title}</div>
                       {task.subtasks.length > 0 && (
@@ -115,6 +117,15 @@ export function TaskListPanel({ tasks, loading, overTask, allCategories, mobile,
       {editingTask && (
         <EditTaskModal task={editingTask} allCategories={allCategories} onClose={() => setEditingTask(null)}
           onSave={(id, title, cat, notes, subs) => { onEditTask(id, title, cat, notes, subs); setEditingTask(null) }} />
+      )}
+      {deletingTaskId && (
+        <ConfirmModal
+          title="Delete task?"
+          message="This will permanently remove the task and all its assignments. This cannot be undone."
+          confirmLabel="Delete"
+          danger
+          onConfirm={() => { onRemoveTask(deletingTaskId); setDeletingTaskId(null) }}
+          onCancel={() => setDeletingTaskId(null)} />
       )}
     </main>
   )

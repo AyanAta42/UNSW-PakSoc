@@ -15,7 +15,6 @@ const GRADS = [
   'linear-gradient(135deg,#0A1E30,#050C18)', 'linear-gradient(135deg,#1E0D1A,#0D060E)',
 ]
 
-/** Horizontal scroll wall of Instagram-style post cards. */
 export function SocialWall() {
   return (
     <>
@@ -23,12 +22,16 @@ export function SocialWall() {
       <div className="flex gap-3 overflow-x-auto pb-1" style={{ scrollbarWidth: 'none' }}>
         {IG.map((p, i) => (
           <div key={p.id}
-            style={{ background: GRADS[i], border: `1px solid ${PALETTE.border}`, minWidth: 140, aspectRatio: '4/5' }}
-            className="rounded-xl relative overflow-hidden cursor-pointer hover:opacity-90 transition-opacity shrink-0">
-            {p.type === 'reel' && <span className="absolute top-2 right-2 bg-black/60 text-white font-bold px-1.5 py-0.5 rounded" style={{ fontSize: 9 }}>REEL</span>}
-            <div className="absolute bottom-0 left-0 right-0 px-2.5 pb-2 pt-5" style={{ background: 'linear-gradient(to top,rgba(0,0,0,0.75),transparent)' }}>
-              <p className="text-white m-0 leading-snug" style={{ fontSize: 10 }}>{p.caption}</p>
-              <span style={{ color: 'rgba(255,255,255,0.6)', fontSize: 9 }}>{p.likes} likes</span>
+            style={{ background: GRADS[i], border: `1px solid ${PALETTE.border}`, borderRadius: 14, minWidth: 140, aspectRatio: '4/5' }}
+            className="relative overflow-hidden cursor-pointer hover:opacity-90 transition-opacity shrink-0">
+            {p.type === 'reel' && (
+              <span className="absolute top-2 right-2 font-bold px-1.5 py-0.5 rounded text-white"
+                style={{ fontSize: 9, background: 'rgba(0,0,0,0.65)' }}>REEL</span>
+            )}
+            <div className="absolute bottom-0 left-0 right-0 px-2.5 pb-2.5 pt-6"
+              style={{ background: 'linear-gradient(to top,rgba(0,0,0,0.85),transparent)' }}>
+              <p className="m-0 leading-snug" style={{ fontSize: 10, color: PALETTE.dark }}>{p.caption}</p>
+              <span style={{ color: PALETTE.muted, fontSize: 9 }}>{p.likes} likes</span>
             </div>
           </div>
         ))}

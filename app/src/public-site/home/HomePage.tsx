@@ -14,7 +14,7 @@ import { MobileEventSheet }     from './components/MobileEventSheet'
 import { EditProfileModal }     from './components/EditProfileModal'
 import { Footer }               from './components/Footer'
 import { useNavigate } from 'react-router-dom'
-import { ACCENT, PALETTE }      from '@/config/theme'
+import { ACCENT, PALETTE } from '@/config/theme'
 
 export default function HomePage() {
   const navigate = useNavigate()
@@ -48,7 +48,10 @@ export default function HomePage() {
   const upcoming = [...events].filter(ev => new Date(ev.time) > now).sort((a,b) => +new Date(a.time) - +new Date(b.time))
   const past     = [...events].filter(ev => new Date(ev.time) <= now).sort((a,b) => +new Date(b.time) - +new Date(a.time))
   const allPublic = [...upcoming, ...past]
-  const phoneEvents = upcoming.slice(0, 2)
+  // All upcoming first; if fewer than 2 upcoming, fill the remainder with recently ended events
+  const phoneEvents = upcoming.length >= 2
+    ? upcoming
+    : [...upcoming, ...past.slice(0, 2 - upcoming.length)]
   const banner   = upcoming[0] ?? null
   const featured = allPublic.find(e => e.id === selectedId) ?? banner ?? allPublic[0] ?? null
 
@@ -72,10 +75,11 @@ export default function HomePage() {
         <div className="flex flex-col gap-0 lg:gap-5 flex-[7] min-w-0 w-full">
           {banner && <HeroBanner banner={banner} loading={loading} />}
 
-          <div className="max-lg:rounded-none max-lg:bg-transparent max-lg:border-0 max-lg:shadow-none max-lg:border-b max-lg:border-[#E5E7EB] lg:rounded-2xl lg:bg-white lg:border lg:border-[#E5E7EB] lg:shadow-[0_2px_8px_rgba(0,0,0,0.07),0_1px_2px_rgba(0,0,0,0.04)] px-4 py-4 lg:px-6 lg:py-5">
+          <div style={{ background: PALETTE.card, border: `1px solid ${PALETTE.border}`, borderRadius: 18, boxShadow: PALETTE.shadowMd }}
+            className="max-lg:rounded-none max-lg:border-x-0 max-lg:border-t-0 max-lg:shadow-none px-4 py-4 lg:px-6 lg:py-5">
             <div className="flex items-center justify-between mb-5">
-              <span style={{ color: PALETTE.dark }} className="text-sm font-extrabold tracking-widest uppercase">Events</span>
-              <button onClick={() => navigate('/all-events')} style={{ color: ACCENT }} className="text-xs font-semibold bg-transparent border-none cursor-pointer hover:opacity-80">View All Events &rarr;</button>
+              <span style={{ color: PALETTE.muted }} className="text-[10px] font-bold tracking-widest uppercase">Events</span>
+              <button onClick={() => navigate('/all-events')} style={{ color: ACCENT }} className="text-xs font-semibold bg-transparent border-none cursor-pointer hover:opacity-80">View All Events →</button>
             </div>
             {loading && <div className="grid w-full grid-cols-1 md:grid-cols-3 gap-4">{[1,2,3].map(i => <div key={i} className="h-52 rounded-xl animate-pulse bg-gray-100 min-w-0" />)}</div>}
             {!loading && <>
@@ -88,8 +92,12 @@ export default function HomePage() {
             </>}
           </div>
 
-          <div className="max-lg:rounded-none max-lg:bg-transparent max-lg:border-0 max-lg:shadow-none lg:rounded-2xl lg:bg-white lg:border lg:border-[#E5E7EB] lg:shadow-[0_2px_8px_rgba(0,0,0,0.07),0_1px_2px_rgba(0,0,0,0.04)] px-4 py-4 lg:px-6 lg:py-5 max-lg:border-b-0">
-            <div className="flex items-center justify-between mb-5"><span style={{ color: PALETTE.dark }} className="text-sm font-extrabold tracking-widest uppercase">Social Wall</span><a href="#" style={{ color: ACCENT }} className="text-xs font-semibold no-underline hover:opacity-80">View on Instagram &rarr;</a></div>
+          <div style={{ background: PALETTE.card, border: `1px solid ${PALETTE.border}`, borderRadius: 18, boxShadow: PALETTE.shadowMd }}
+            className="max-lg:rounded-none max-lg:border-x-0 max-lg:border-b-0 max-lg:shadow-none px-4 py-4 lg:px-6 lg:py-5">
+            <div className="flex items-center justify-between mb-5">
+              <span style={{ color: PALETTE.muted }} className="text-[10px] font-bold tracking-widest uppercase">Social Wall</span>
+              <a href="#" style={{ color: ACCENT }} className="text-xs font-semibold no-underline hover:opacity-80">View on Instagram →</a>
+            </div>
             <SocialWall />
           </div>
         </div>

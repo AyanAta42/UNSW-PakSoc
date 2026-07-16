@@ -1,12 +1,40 @@
-/** Primary green accent used across the whole app. */
-export const ACCENT = '#22C55E'
+// ─── Brand ───────────────────────────────────────────────────────────────────
+export const ACCENT       = '#22C55E'
+export const ACCENT_HOVER = '#16A34A'
+export const ACCENT_GLOW  = '#4ADE80'
+export const ACCENT_TEXT  = '#FFFFFF'
 
-/** Core colour palette — import instead of hardcoding hex strings. */
+// ─── Backgrounds ─────────────────────────────────────────────────────────────
 export const PALETTE = {
-  page:   '#F3F4F6',
-  card:   '#FFFFFF',
-  border: '#E5E7EB',
-  muted:  '#6B7280',
-  dark:   '#111827',
-  shadow: '0 2px 8px rgba(0,0,0,0.07), 0 1px 2px rgba(0,0,0,0.04)',
+  page:    '#030303',
+  navbar:  '#050505',
+  navbarGlass: 'rgba(5,5,5,0.88)',
+  card:    '#0A0A0A',
+  cardAlt: '#070707',
+  modal:   '#0C0C0C',
+  input:   '#080808',
+
+  // Borders
+  border:       '#1C1C1C',
+  borderHover:  '#2E2E2E',
+  borderActive: '#22C55E',
+
+  // Text
+  dark:     '#F8FAFC',
+  secondary:'#CBD5E1',
+  muted:    '#94A3B8',
+  disabled: '#64748B',
+
+  // Shadows
+  shadowSm: '0 4px 12px rgba(0,0,0,0.4)',
+  shadowMd: '0 10px 30px rgba(0,0,0,0.5)',
+  shadowLg: '0 20px 60px rgba(0,0,0,0.6)',
+  shadowGreen: '0 0 40px rgba(34,197,94,0.18)',
+  shadow:   '0 4px 12px rgba(0,0,0,0.4)',
+
+  // Radius (as CSS strings for style props)
+  radiusBtn:   '14px',
+  radiusCard:  '18px',
+  radiusInput: '12px',
+  radiusModal: '24px',
 } as const

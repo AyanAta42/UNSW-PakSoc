@@ -48,7 +48,7 @@ export default function ManageTasksPage() {
         <RosterPanel
           members={board.members} loading={board.loading}
           draggingMemberId={board.draggingMemberId} selectedMemberId={board.selectedMemberId}
-          onBack={() => navigate('/')}
+          onBack={() => navigate('/events')}
           onMemberDragStart={board.beginMemberDrag} onMemberDragMove={board.moveMemberDrag} onMemberDragEnd={board.endMemberDrag}
           onMemberSelect={id => board.selectMember(board.selectedMemberId === id ? null : id)} />
         <TaskListPanel {...sharedPanelProps} onTaskClick={handleTaskClick} selectedMemberId={board.selectedMemberId} />
@@ -64,8 +64,15 @@ export default function ManageTasksPage() {
 
       {/* Mobile */}
       <div className="flex lg:hidden flex-col h-[100dvh] overflow-hidden font-sans bg-[#F4F6F2]">
-        <header className="shrink-0 px-4 py-3 bg-white border-b border-gray-200 flex items-center gap-3">
-          <button onClick={() => navigate('/')} className="text-xs font-semibold px-3 py-1.5 rounded-lg bg-gray-100 text-gray-500 border border-gray-200 cursor-pointer shrink-0">← Back</button>
+        <header className="shrink-0 px-4 py-3 bg-white border-b border-gray-200 flex items-center gap-2.5">
+          <button onClick={() => window.location.href = '/'} aria-label="Go to home"
+            className="w-9 h-9 rounded-full overflow-hidden border-2 border-gray-100 cursor-pointer shrink-0 p-0 bg-transparent shadow-sm active:scale-95 transition-all">
+            <img src="/logo.png" alt="PakSoc" className="w-full h-full object-cover" />
+          </button>
+          <button onClick={() => navigate('/events')} aria-label="Back to events"
+            className="w-8 h-8 rounded-full bg-gray-100 border border-gray-200 flex items-center justify-center text-gray-500 cursor-pointer active:bg-gray-200 transition-colors shrink-0 text-sm font-bold">
+            ←
+          </button>
           <div className="flex-1 min-w-0">
             <h1 className="m-0 text-base font-extrabold text-[#111827] truncate">Manage Tasks</h1>
             <p className="m-0 text-[10px] text-gray-400">{board.tasks.length} tasks</p>

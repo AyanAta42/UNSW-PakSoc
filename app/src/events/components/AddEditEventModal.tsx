@@ -16,9 +16,10 @@ interface Props {
   event?:     DbEvent
 }
 
-const C   = { border: '#E5E7EB', muted: '#6B7280', dark: '#111827' }
-const lbl = 'block text-[11px] font-bold uppercase tracking-wider mb-1.5 text-[#6B7280]'
-const inp = { border: `1px solid ${C.border}`, color: C.dark, background: '#FAFAFA' }
+import { ACCENT, ACCENT_TEXT, PALETTE } from '@/config/theme'
+
+const lbl = 'block text-[11px] font-bold uppercase tracking-wider mb-1.5 text-[#94A3B8]'
+const inp = { border: `1px solid ${PALETTE.border}`, color: PALETTE.dark, background: PALETTE.input }
 
 export function AddEditEventModal({ onClose, onCreated, onUpdated, event }: Props) {
   const isEdit = !!event
@@ -48,6 +49,7 @@ export function AddEditEventModal({ onClose, onCreated, onUpdated, event }: Prop
   const [saving,       setSaving]       = useState(false)
   const [uploading,    setUploading]    = useState(false)
   const [error,        setError]        = useState('')
+  const [mapPreview,   setMapPreview]   = useState(false)
 
   function handleFile(file: File) {
     if (!file.type.startsWith('image/')) return
@@ -81,12 +83,13 @@ export function AddEditEventModal({ onClose, onCreated, onUpdated, event }: Prop
   const canSave = name.trim() && eventDate
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm px-4" onClick={onClose}>
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden max-h-[92vh] flex flex-col" onClick={e => e.stopPropagation()}>
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm px-4" onClick={onClose}>
+      <div onClick={e => e.stopPropagation()} className="w-full max-w-md overflow-hidden max-h-[92vh] flex flex-col"
+        style={{ background: PALETTE.modal, borderRadius: 24, border: `1px solid ${PALETTE.border}`, boxShadow: PALETTE.shadowLg }}>
 
-        <div className="px-6 py-4 flex items-center justify-between shrink-0" style={{ borderBottom: `1px solid ${C.border}` }}>
-          <h2 style={{ color: C.dark }} className="font-extrabold text-base m-0">{isEdit ? 'Edit Event' : 'New Event'}</h2>
-          <button onClick={onClose} style={{ color: C.muted }} className="text-xl bg-transparent border-none cursor-pointer leading-none hover:opacity-70">×</button>
+        <div className="px-6 py-4 flex items-center justify-between shrink-0" style={{ borderBottom: `1px solid ${PALETTE.border}` }}>
+          <h2 style={{ color: PALETTE.dark }} className="font-extrabold text-base m-0">{isEdit ? 'Edit Event' : 'New Event'}</h2>
+          <button onClick={onClose} style={{ color: PALETTE.muted, background: PALETTE.cardAlt, border: `1px solid ${PALETTE.border}`, borderRadius: '50%' }} className="w-8 h-8 flex items-center justify-center text-lg cursor-pointer hover:border-white/30 transition-colors">×</button>
         </div>
 
         <div className="p-6 flex flex-col gap-5 overflow-y-auto">
@@ -95,8 +98,17 @@ export function AddEditEventModal({ onClose, onCreated, onUpdated, event }: Prop
             <input value={name} onChange={e => setName(e.target.value)} placeholder="e.g. Eid Gala 2026" style={inp} className="w-full px-3.5 py-2.5 rounded-xl text-sm outline-none focus:ring-2 focus:ring-green-200" /></div>
 
           {/* Location */}
-          <div><label className={lbl}>Location</label>
-            <input value={location} onChange={e => setLocation(e.target.value)} placeholder="e.g. Roundhouse, UNSW" style={inp} className="w-full px-3.5 py-2.5 rounded-xl text-sm outline-none focus:ring-2 focus:ring-green-200" /></div>
+          <div>
+            <label className={lbl}>Location</label>
+            <div className="flex gap-2 items-center">
+              <input value={location} onChange={e => setLocation(e.target.value)} placeholder="e.g. Roundhouse, UNSW" style={inp} className="flex-1 px-3.5 py-2.5 rounded-xl text-sm outline-none focus:ring-2 focus:ring-green-200" />
+              <button type="button" onClick={() => location.trim() && setMapPreview(true)} disabled={!location.trim()}
+                style={{ borderColor: PALETTE.border, color: location.trim() ? PALETTE.secondary : PALETTE.disabled, background: PALETTE.cardAlt, borderRadius: 12 }}
+                className="shrink-0 px-3 py-2.5 text-xs font-semibold border cursor-pointer hover:bg-white/5 transition-colors disabled:cursor-not-allowed whitespace-nowrap">
+                Preview
+              </button>
+            </div>
+          </div>
 
           {/* Date & times */}
           <div><label className={lbl}>Date</label>
@@ -113,7 +125,7 @@ export function AddEditEventModal({ onClose, onCreated, onUpdated, event }: Prop
 
           {/* Price */}
           <div><label className={lbl}>Ticket Price (AUD)</label>
-            <div className="relative"><span style={{ color: C.muted }} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-sm font-semibold">$</span>
+            <div className="relative"><span style={{ color: PALETTE.muted }} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-sm font-semibold">$</span>
               <input type="number" min="0" step="0.01" value={price} onChange={e => setPrice(e.target.value)} placeholder="0.00"
                 style={{ ...inp, paddingLeft: '1.75rem' }} className="w-full px-3.5 py-2.5 rounded-xl text-sm outline-none focus:ring-2 focus:ring-green-200" /></div>
             <p style={{ color: '#9CA3AF' }} className="text-[10px] mt-1">Set to 0 for a free event</p></div>
@@ -131,17 +143,44 @@ export function AddEditEventModal({ onClose, onCreated, onUpdated, event }: Prop
             <ImageUploadZone preview={imagePreview} dragOver={dragOver} onFile={handleFile} onClear={() => { setImageFile(null); setImagePreview('') }} onDragOver={setDragOver} /></div>
         </div>
 
-        {error && <div className="mx-6 mb-2 px-3.5 py-2.5 rounded-xl text-sm" style={{ background: '#FEF2F2', color: '#DC2626', border: '1px solid #FECACA' }}>{error}</div>}
+        {error && (
+          <div className="mx-6 mb-2 px-3.5 py-2.5 text-sm"
+            style={{ background: 'rgba(239,68,68,0.1)', color: '#F87171', border: '1px solid rgba(239,68,68,0.3)', borderRadius: 12 }}>{error}</div>
+        )}
 
         <div className="px-6 pb-5 flex gap-3 shrink-0">
-          <button onClick={onClose} style={{ border: `1px solid ${C.border}`, color: C.muted }} className="flex-1 py-2.5 rounded-xl text-sm font-semibold cursor-pointer bg-transparent hover:bg-gray-50 transition-colors">Cancel</button>
+          <button onClick={onClose}
+            style={{ border: `1px solid ${PALETTE.border}`, color: PALETTE.secondary, borderRadius: 14, background: 'transparent' }}
+            className="flex-1 py-2.5 text-sm font-semibold cursor-pointer hover:bg-white/5 transition-colors">Cancel</button>
           <button onClick={submit} disabled={!canSave || saving}
-            style={{ background: canSave ? '#111827' : '#F3F4F6', color: canSave ? '#fff' : '#9CA3AF' }}
-            className="flex-1 py-2.5 rounded-xl text-sm font-bold border-none cursor-pointer transition-all disabled:cursor-not-allowed">
+            style={{ background: canSave ? ACCENT : PALETTE.cardAlt, color: canSave ? ACCENT_TEXT : PALETTE.disabled, borderRadius: 14, boxShadow: canSave ? '0 0 20px rgba(34,197,94,0.25)' : 'none' }}
+            className="flex-1 py-2.5 text-sm font-bold border-none cursor-pointer transition-all disabled:cursor-not-allowed">
             {uploading ? 'Uploading…' : saving ? 'Saving…' : isEdit ? 'Save Changes' : '+ Save as Draft'}
           </button>
         </div>
       </div>
+      {mapPreview && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/60 backdrop-blur-sm px-4" onClick={() => setMapPreview(false)}>
+          <div onClick={e => e.stopPropagation()} className="w-full max-w-sm overflow-hidden"
+            style={{ background: PALETTE.modal, borderRadius: 20, border: `1px solid ${PALETTE.border}`, boxShadow: PALETTE.shadowLg }}>
+            <div className="flex items-center justify-between px-4 py-3" style={{ borderBottom: `1px solid ${PALETTE.border}` }}>
+              <span className="text-sm font-bold truncate pr-2" style={{ color: PALETTE.dark }}>{location}</span>
+              <button onClick={() => setMapPreview(false)}
+                style={{ background: PALETTE.cardAlt, border: `1px solid ${PALETTE.border}`, color: PALETTE.muted, borderRadius: '50%' }}
+                className="shrink-0 w-7 h-7 flex items-center justify-center cursor-pointer hover:border-white/30 transition-colors text-base leading-none">×</button>
+            </div>
+            <div style={{ height: 260 }}>
+              <iframe
+                title="Location preview"
+                src={`https://maps.google.com/maps?q=${encodeURIComponent(location)}&output=embed&z=15`}
+                className="w-full h-full border-0"
+                loading="lazy"
+                referrerPolicy="no-referrer-when-downgrade"
+              />
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

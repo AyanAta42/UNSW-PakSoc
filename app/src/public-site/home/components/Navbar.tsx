@@ -1,10 +1,10 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import type { User } from '@supabase/supabase-js'
-import { signOut }         from '@/auth/services/signOut'
-import { usePermissions }  from '@/roles/hooks/usePermissions'
-import { UserDropdown }    from './UserDropdown'
-import { ACCENT, PALETTE } from '@/config/theme'
+import { signOut }        from '@/auth/services/signOut'
+import { usePermissions } from '@/roles/hooks/usePermissions'
+import { UserDropdown }   from './UserDropdown'
+import { ACCENT, ACCENT_TEXT, PALETTE } from '@/config/theme'
 
 interface Props {
   user?:         User | null
@@ -16,15 +16,19 @@ interface Props {
 }
 
 export function Navbar({ user, avatarUrl, avatarBroken, initial, onAvatarError, onEditProfile }: Props) {
-  const navigate  = useNavigate()
+  const navigate   = useNavigate()
   const [menuOpen, setMenuOpen] = useState(false)
-  const { can }   = usePermissions()
+  const { can }    = usePermissions()
 
   return (
-    <nav style={{ background: 'rgba(255,255,255,0.95)', backdropFilter: 'blur(14px)', borderBottom: `1px solid ${PALETTE.border}` }}
-      className="sticky top-0 z-50 h-14 px-4 md:px-8 flex items-center justify-between gap-3">
+    <nav style={{
+      background: PALETTE.navbarGlass,
+      backdropFilter: 'blur(16px)',
+      WebkitBackdropFilter: 'blur(16px)',
+      borderBottom: `1px solid ${PALETTE.border}`,
+    }} className="sticky top-0 z-50 h-14 px-4 md:px-8 flex items-center justify-between gap-3">
 
-      <div className="flex items-center gap-2 shrink min-w-0">
+      <div className="flex items-center gap-2.5 shrink min-w-0">
         <img src="/logo.png" alt="PakSoc UNSW" className="w-9 h-9 rounded-full object-cover shrink-0" />
         <div className="min-w-0">
           <div style={{ color: PALETTE.dark }} className="font-bold text-sm leading-tight truncate">PakSoc UNSW</div>
@@ -33,21 +37,45 @@ export function Navbar({ user, avatarUrl, avatarBroken, initial, onAvatarError, 
       </div>
 
       <div className="flex items-center gap-2 shrink-0 ml-auto">
-        {can.viewEvents  && <button onClick={() => navigate('/events')} style={{ background: ACCENT, color: '#fff' }} className="rounded-full px-3.5 py-1.5 font-bold text-xs border-none cursor-pointer hover:opacity-85 transition-opacity whitespace-nowrap shadow-sm">Manage Events</button>}
-        {can.manageRoles && <button onClick={() => navigate('/roles')}  style={{ color: PALETTE.dark, border: `1px solid ${PALETTE.border}`, background: '#fff' }} className="rounded-full px-3.5 py-1.5 font-bold text-xs cursor-pointer hover:bg-gray-50 transition-colors whitespace-nowrap hidden sm:block shadow-sm">Manage Roles</button>}
+        {can.viewEvents && (
+          <button onClick={() => navigate('/events')}
+            style={{ background: ACCENT, color: ACCENT_TEXT, borderRadius: PALETTE.radiusBtn, boxShadow: '0 0 20px rgba(34,197,94,0.25)' }}
+            className="px-4 py-1.5 font-bold text-xs border-none cursor-pointer hover:opacity-85 transition-opacity whitespace-nowrap">
+            Manage Events
+          </button>
+        )}
+        {can.manageRoles && (
+          <button onClick={() => navigate('/roles')}
+            style={{ color: PALETTE.secondary, border: `1px solid ${PALETTE.border}`, background: PALETTE.cardAlt, borderRadius: PALETTE.radiusBtn }}
+            className="px-4 py-1.5 font-bold text-xs cursor-pointer hover:opacity-80 transition-opacity whitespace-nowrap hidden sm:block">
+            Manage Roles
+          </button>
+        )}
 
         {user ? (
           <div className="relative">
             <button onClick={() => setMenuOpen(o => !o)} className="p-0 border-none bg-transparent cursor-pointer rounded-full">
               {avatarUrl && !avatarBroken
-                ? <img src={avatarUrl} alt="" referrerPolicy="no-referrer" onError={onAvatarError} className="w-8 h-8 rounded-full object-cover ring-2 ring-[#22C55E] ring-offset-1 hover:opacity-90 transition-opacity" />
-                : <div style={{ background: '#111827', color: '#fff' }} className="w-8 h-8 rounded-full flex items-center justify-center font-bold text-xs hover:opacity-90 transition-opacity">{initial}</div>
+                ? <img src={avatarUrl} alt="" referrerPolicy="no-referrer" onError={onAvatarError}
+                    className="w-8 h-8 rounded-full object-cover hover:opacity-90 transition-opacity"
+                    style={{ outline: `2px solid ${ACCENT}`, outlineOffset: 2 }} />
+                : <div style={{ background: PALETTE.cardAlt, color: PALETTE.secondary, border: `1.5px solid ${PALETTE.border}` }}
+                    className="w-8 h-8 rounded-full flex items-center justify-center font-bold text-xs hover:opacity-90 transition-opacity">
+                    {initial}
+                  </div>
               }
             </button>
-            {menuOpen && <UserDropdown user={user} avatarUrl={avatarUrl} initial={initial} onEditProfile={() => { setMenuOpen(false); onEditProfile() }} onSignOut={() => { setMenuOpen(false); signOut().then(() => navigate('/login')) }} onClose={() => setMenuOpen(false)} />}
+            {menuOpen && <UserDropdown user={user} avatarUrl={avatarUrl} initial={initial}
+              onEditProfile={() => { setMenuOpen(false); onEditProfile() }}
+              onSignOut={() => { setMenuOpen(false); signOut().then(() => navigate('/login')) }}
+              onClose={() => setMenuOpen(false)} />}
           </div>
         ) : (
-          <button onClick={() => navigate('/login')} style={{ background: '#111827', color: '#fff' }} className="rounded-full px-3.5 py-1.5 font-bold text-xs border-none cursor-pointer hover:opacity-90 whitespace-nowrap">Login</button>
+          <button onClick={() => navigate('/login')}
+            style={{ background: ACCENT, color: ACCENT_TEXT, borderRadius: PALETTE.radiusBtn }}
+            className="px-4 py-1.5 font-bold text-xs border-none cursor-pointer hover:opacity-90 whitespace-nowrap">
+            Login
+          </button>
         )}
       </div>
     </nav>

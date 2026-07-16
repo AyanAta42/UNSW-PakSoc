@@ -28,9 +28,16 @@ export function RosterPanel({ members, loading, draggingMemberId, selectedMember
       : 'hidden lg:flex w-[300px] shrink-0 flex-col overflow-hidden bg-white border-r border-gray-200'}>
       {!mobile && (
         <div className="p-5 border-b border-gray-200 shrink-0">
-          <div className="flex items-center justify-between mb-1.5">
-            <span className="text-[15px] font-extrabold text-[#111827]">Team Roster</span>
-            <button onClick={onBack} className="text-xs font-semibold px-3 py-1.5 rounded-lg bg-gray-100 text-gray-500 border border-gray-200 cursor-pointer hover:bg-gray-200 transition-colors">← Back</button>
+          <div className="flex items-center gap-2.5 mb-3">
+            <button onClick={() => window.location.href = '/'} aria-label="Go to home"
+              className="w-9 h-9 rounded-full overflow-hidden border-2 border-gray-100 cursor-pointer shrink-0 hover:border-[#22C55E] transition-all p-0 bg-transparent shadow-sm">
+              <img src="/logo.png" alt="PakSoc" className="w-full h-full object-cover" />
+            </button>
+            <button onClick={onBack} aria-label="Back to events"
+              className="w-8 h-8 rounded-full bg-gray-100 border border-gray-200 flex items-center justify-center text-gray-500 cursor-pointer hover:bg-gray-200 transition-colors shrink-0 text-sm font-bold">
+              ←
+            </button>
+            <span className="text-[15px] font-extrabold text-[#111827] flex-1">Team Roster</span>
           </div>
           <p className="text-xs text-gray-400 m-0">Drag onto a task, or click a member then click a task.</p>
         </div>
