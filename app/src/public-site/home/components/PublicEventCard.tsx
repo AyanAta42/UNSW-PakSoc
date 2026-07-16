@@ -1,7 +1,6 @@
 import type { DbEvent } from '@/events/types/Event'
 import { dateParts }    from '@/events/utils/dateParts'
 import { eventImageUrl } from '@/events/utils/eventImageUrl'
-import { TICKETS_URL }   from '@/config/externalLinks'
 import { ACCENT, PALETTE } from '@/config/theme'
 
 interface Props { event: DbEvent; selected: boolean; now: Date; onClick: () => void }
@@ -57,12 +56,6 @@ export function PublicEventCard({ event: ev, selected, now, onClick }: Props) {
         <div className="text-[11px] truncate flex items-center gap-1.5" style={{ color: PALETTE.muted }}>
           <span style={{ color: ended ? PALETTE.disabled : ACCENT }}>◎</span>{ev.location}
         </div>
-        {!ended && (
-          <a href={TICKETS_URL} target="_blank" rel="noopener noreferrer" onClick={e => e.stopPropagation()}
-            style={{ color: ACCENT }} className="text-xs font-semibold no-underline hover:opacity-70 transition-opacity mt-1 self-start">
-            Get Tickets →
-          </a>
-        )}
         <p className="lg:hidden text-[10px] m-0 mt-1.5 font-semibold" style={{ color: PALETTE.disabled }}>Tap for schedule →</p>
       </div>
     </div>

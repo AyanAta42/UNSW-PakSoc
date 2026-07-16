@@ -5,6 +5,7 @@ import { getEventButtons, getCtaVariant } from '@/events/utils/getEventButtons'
 import { EventCtaButton }  from '@/events/components/EventCtaButton'
 import { OdometerNumber }  from '@/shared/components/OdometerNumber'
 import { useParallaxLayers, type ParallaxLayer } from '@/shared/motion'
+import { HeroCelestialTrail } from './HeroCelestialTrail'
 import { ACCENT, ACCENT_GLOW, PALETTE } from '@/config/theme'
 
 interface Props { banner: DbEvent | null; loading: boolean }
@@ -52,12 +53,9 @@ export function HeroBanner({ banner, loading }: Props) {
           <div className="motion-hero-spotlight" />
         </div>
 
-        {/* Layer 3: Texture — grain, faint geometry, light streak */}
-        <div aria-hidden className="motion-hero-geo" />
+        {/* Layer 3: Celestial trail (bottom-left → top-right) + faint grain */}
+        <HeroCelestialTrail />
         <div aria-hidden className="motion-hero-grain" />
-        <div aria-hidden className="absolute -inset-1/4 opacity-20 motion-light-rays"
-          style={{ background: 'linear-gradient(115deg, transparent 38%, rgba(74,222,128,0.1) 48%, transparent 58%)' }} />
-        <div aria-hidden className="motion-hero-streak" />
 
         {/* Layer 4: Content */}
         <div ref={contentRef} className="relative z-10 flex flex-col p-5 md:p-8 flex-1 min-h-[200px] md:min-h-0 motion-parallax-layer">

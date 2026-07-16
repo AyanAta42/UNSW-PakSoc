@@ -6,18 +6,36 @@ html {
   background: #030303;
   color-scheme: dark;
   scroll-behavior: smooth;
+  overflow-x: hidden;
+  max-width: 100%;
 }
 
 body {
   margin: 0;
   overflow-x: hidden;
+  max-width: 100%;
+  overscroll-behavior-x: none;
   padding-left: env(safe-area-inset-left);
   padding-right: env(safe-area-inset-right);
   padding-bottom: env(safe-area-inset-bottom);
 }
 
-/* Hide scrollbars on phone — scrolling still works */
+/* Hide scrollbars on phone — scrolling still works.
+   Lock horizontal pan so the page can't slide left/right. */
 @media (max-width: 1023px) {
+  html,
+  body {
+    overflow-x: hidden;
+    overscroll-behavior-x: none;
+    touch-action: pan-y;
+  }
+
+  #root {
+    overflow-x: hidden;
+    max-width: 100vw;
+    touch-action: pan-y;
+  }
+
   html,
   body,
   * {
@@ -29,6 +47,11 @@ body {
     display: none;
     width: 0;
     height: 0;
+  }
+
+  /* Intentional horizontal carousels can still swipe */
+  .allow-pan-x {
+    touch-action: pan-x pan-y;
   }
 }
 
@@ -199,13 +222,13 @@ body {
 /* Right-side emerald spotlight — depth without competing artwork */
 .motion-hero-spotlight {
   position: absolute;
-  right: -8%;
-  top: 10%;
-  width: 58%;
-  height: 90%;
-  background: radial-gradient(closest-side, rgba(34, 197, 94, 0.18), rgba(20, 83, 45, 0.08) 45%, transparent 72%);
-  filter: blur(48px);
-  opacity: 0.85;
+  right: -6%;
+  top: 8%;
+  width: 50%;
+  height: 85%;
+  background: radial-gradient(closest-side, rgba(34, 197, 94, 0.12), rgba(20, 83, 45, 0.05) 45%, transparent 72%);
+  filter: blur(52px);
+  opacity: 0.7;
   pointer-events: none;
   animation: glowBreath 10s ease-in-out infinite;
 }
