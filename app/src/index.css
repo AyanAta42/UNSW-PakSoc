@@ -16,16 +16,6 @@ body {
 
 .glass-nav {
   position: relative;
-  isolation: isolate;
-}
-
-.glass-nav::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(180deg, transparent 0%, rgba(255, 255, 255, 0.025) 55%, transparent 100%);
-  pointer-events: none;
-  z-index: 0;
 }
 
 .glass-nav > * {
