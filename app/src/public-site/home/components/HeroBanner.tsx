@@ -36,8 +36,13 @@ export function HeroBanner({ banner, loading }: Props) {
 
   return (
     <div className="motion-glow motion-glow-hero px-4 pt-4 lg:p-0">
-      <div ref={heroRef} className="motion-hero-enter overflow-hidden relative flex flex-col min-h-[228px] md:flex-row md:min-h-[280px]"
-        style={{ borderRadius: 18, border: `1px solid ${PALETTE.border}`, boxShadow: PALETTE.shadowLg }}>
+      {/* Entrance transform stays on the outer shell so iOS can still clip rounded corners */}
+      <div className="motion-hero-enter">
+      <div
+        ref={heroRef}
+        className="hero-clip overflow-hidden relative flex flex-col min-h-[228px] md:flex-row md:min-h-[280px] rounded-[18px]"
+        style={{ borderRadius: 18, border: `1px solid ${PALETTE.border}`, boxShadow: PALETTE.shadowLg }}
+      >
 
         {/* Layer 1: Background image — slow zoom only (no filter breathing) */}
         <div ref={bgRef} className="absolute -inset-2 motion-parallax-layer">
@@ -120,6 +125,7 @@ export function HeroBanner({ banner, loading }: Props) {
             </div>
           )}
         </div>
+      </div>
       </div>
     </div>
   )

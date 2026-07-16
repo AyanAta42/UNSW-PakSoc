@@ -153,6 +153,11 @@ body {
   animation: heroEnter var(--motion-enter) var(--motion-ease) both;
 }
 
+/* Safari/iOS: force border-radius clipping without putting transform on this shell */
+.hero-clip {
+  -webkit-mask-image: -webkit-radial-gradient(white, black);
+}
+
 .motion-parallax-layer {
   transition: transform var(--motion-slow) var(--motion-ease);
   will-change: auto;
