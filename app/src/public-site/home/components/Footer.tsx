@@ -3,7 +3,7 @@ import { ACCENT, PALETTE } from '@/config/theme'
 
 export function Footer() {
   return (
-    <footer style={{ borderTop: `1px solid ${PALETTE.border}` }} className="py-6 px-4 lg:px-8 flex flex-col items-center gap-3 text-center">
+    <footer className="py-6 px-4 lg:px-8 flex flex-col items-center gap-3 text-center">
       <div className="flex items-center gap-6">
         <a href={INSTAGRAM_URL} target="_blank" rel="noopener noreferrer"
           style={{ color: PALETTE.muted }} className="hover:text-green-400 transition-colors">

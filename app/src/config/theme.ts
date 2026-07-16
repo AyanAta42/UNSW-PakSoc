@@ -44,13 +44,12 @@ export const PALETTE = {
 /** PWA status bar / browser chrome — must match the glass navbar. */
 export const PWA_THEME_COLOR = PALETTE.navbar
 
-/** Frosted-glass navbar (status bar area uses the same treatment). */
+/** Transparent navbar — no blur, so the ambient dust animation shows through
+ *  and it blends seamlessly into the page background (no hard divider). A faint
+ *  top-weighted gradient keeps the logo/buttons legible over bright content. */
 export const GLASS_NAV: CSSProperties = {
-  background: PALETTE.navbarGlass,
-  backdropFilter: 'blur(24px) saturate(180%)',
-  WebkitBackdropFilter: 'blur(24px) saturate(180%)',
-  borderBottom: '1px solid rgba(255, 255, 255, 0.06)',
-  boxShadow: 'inset 0 1px 0 rgba(255, 255, 255, 0.06), 0 8px 32px rgba(0, 0, 0, 0.35)',
+  background: 'linear-gradient(180deg, rgba(3, 3, 3, 0.38) 0%, rgba(3, 3, 3, 0.12) 55%, rgba(3, 3, 3, 0) 100%)',
+  borderBottom: '1px solid transparent',
 }
 
 /** Secondary glass surface for nav buttons / chips. */

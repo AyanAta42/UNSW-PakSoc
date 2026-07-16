@@ -43,6 +43,7 @@ export function EventCtaButton({ label, url, variant, className = '' }: Props) {
   if (url?.trim()) {
     return (
       <a href={url.trim()} target="_blank" rel="noopener noreferrer"
+        data-cta={isPrimary ? '' : undefined}
         style={baseStyle} className={`${cls} active:scale-[0.98]`}
         onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave}>
         {label}
@@ -50,7 +51,7 @@ export function EventCtaButton({ label, url, variant, className = '' }: Props) {
     )
   }
   return (
-    <span style={baseStyle} className={`${cls} cursor-default`}
+    <span data-cta={isPrimary ? '' : undefined} style={baseStyle} className={`${cls} cursor-default`}
       onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave}>
       {label}
     </span>

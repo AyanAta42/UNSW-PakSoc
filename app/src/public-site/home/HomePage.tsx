@@ -17,6 +17,7 @@ import { useNavigate } from 'react-router-dom'
 import { ACCENT, PALETTE } from '@/config/theme'
 import { useReveal } from '@/shared/hooks/useReveal'
 import { usePointerPosition } from '@/shared/hooks/usePointerPosition'
+import { AmbientBackground } from '@/shared/components/AmbientBackground'
 
 export default function HomePage() {
   const navigate = useNavigate()
@@ -82,16 +83,18 @@ export default function HomePage() {
       fontFamily: '"Inter", system-ui, sans-serif',
       minHeight: '100vh',
       transition: 'background 220ms ease-out',
+      position: 'relative',
     }}>
+      <AmbientBackground />
+
       <Navbar user={user} avatarUrl={avatarUrl} avatarBroken={avatarBroken} initial={initial ?? '?'} onAvatarError={() => setAvatarBroken(true)} onEditProfile={handleEditProfile} />
 
-      <div className="flex gap-0 lg:gap-5 px-0 lg:px-8 py-0 lg:py-5 max-w-[1400px] mx-auto items-start w-full">
+      <div className="relative z-10 flex gap-0 lg:gap-5 px-0 lg:px-8 py-0 lg:py-5 max-w-[1400px] mx-auto items-start w-full">
         <div className="flex flex-col gap-0 lg:gap-5 flex-[7] min-w-0 w-full">
           {banner && <HeroBanner banner={banner} loading={loading} />}
 
           <div ref={eventsReveal.ref} data-visible={eventsReveal.visible}
-            style={{ background: PALETTE.card, border: `1px solid ${PALETTE.border}`, borderRadius: 18, boxShadow: PALETTE.shadowMd }}
-            className="motion-reveal max-lg:rounded-none max-lg:border-x-0 max-lg:border-t-0 max-lg:shadow-none px-4 py-4 lg:px-6 lg:py-5">
+            className="motion-reveal bg-transparent rounded-none px-4 py-4 lg:px-6 lg:py-5 lg:bg-[#0A0A0A] lg:rounded-[18px] lg:border lg:border-[#1C1C1C] lg:shadow-[0_10px_30px_rgba(0,0,0,0.5)]">
             <div className="flex items-center justify-between mb-5">
               <span style={{ color: PALETTE.muted }} className="text-[10px] font-bold tracking-widest uppercase">Events</span>
               <button onClick={() => navigate('/all-events')} style={{ color: ACCENT }} className="text-xs font-semibold bg-transparent border-none cursor-pointer hover:opacity-80">View All Events →</button>
@@ -108,8 +111,7 @@ export default function HomePage() {
           </div>
 
           <div ref={socialReveal.ref} data-visible={socialReveal.visible}
-            style={{ background: PALETTE.card, border: `1px solid ${PALETTE.border}`, borderRadius: 18, boxShadow: PALETTE.shadowMd }}
-            className="motion-reveal max-lg:rounded-none max-lg:border-x-0 max-lg:border-b-0 max-lg:shadow-none px-4 py-4 lg:px-6 lg:py-5">
+            className="motion-reveal bg-transparent rounded-none px-4 py-4 lg:px-6 lg:py-5 lg:bg-[#0A0A0A] lg:rounded-[18px] lg:border lg:border-[#1C1C1C] lg:shadow-[0_10px_30px_rgba(0,0,0,0.5)]">
             <div className="flex items-center justify-between mb-5">
               <span style={{ color: PALETTE.muted }} className="text-[10px] font-bold tracking-widest uppercase">Social Wall</span>
               <a href="#" style={{ color: ACCENT }} className="text-xs font-semibold no-underline hover:opacity-80">View on Instagram →</a>
@@ -125,7 +127,7 @@ export default function HomePage() {
 
       {mobileEvent && <MobileEventSheet event={mobileEvent} now={now} onClose={() => setMobileEvent(null)} />}
       {editOpen && user && <EditProfileModal user={user} initial={initial ?? '?'} onClose={() => setEditOpen(false)} />}
-      <Footer />
+      <div className="relative z-10"><Footer /></div>
     </div>
   )
 }

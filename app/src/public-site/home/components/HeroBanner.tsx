@@ -7,6 +7,11 @@ import { ACCENT, ACCENT_GLOW, PALETTE } from '@/config/theme'
 
 interface Props { banner: DbEvent | null; loading: boolean }
 
+// Parallax depth multipliers applied to the normalised pointer offset (-0.5..0.5)
+const BG_DEPTH = 8       // ±4px
+const GLOW_DEPTH = 16    // ±8px
+const CONTENT_DEPTH = 3  // ±1.5px
+
 export function HeroBanner({ banner, loading }: Props) {
   const cd   = useCountdown(banner?.time)
   const heroRef = useRef<HTMLDivElement>(null)
@@ -19,8 +24,8 @@ export function HeroBanner({ banner, loading }: Props) {
     const onPointerMove = (event: PointerEvent) => {
       const bounds = node.getBoundingClientRect()
       setParallax({
-        x: ((event.clientX - bounds.left) / bounds.width - 0.5) * 10,
-        y: ((event.clientY - bounds.top) / bounds.height - 0.5) * 8,
+        x: (event.clientX - bounds.left) / bounds.width - 0.5,
+        y: (event.clientY - bounds.top) / bounds.height - 0.5,
       })
     }
     const reset = () => setParallax({ x: 0, y: 0 })
@@ -36,27 +41,44 @@ export function HeroBanner({ banner, loading }: Props) {
   if (!banner) return null
   const btns = getEventButtons(banner.buttons)
 
+  const layerTransform = (depth: number) =>
+    `translate3d(${(parallax.x * depth).toFixed(2)}px, ${(parallax.y * depth).toFixed(2)}px, 0)`
+  const smoothTransition = 'transform 500ms cubic-bezier(0.22, 1, 0.36, 1)'
+
   return (
     <div className="px-4 pt-4 lg:p-0">
-      <div ref={heroRef} className="overflow-hidden relative flex flex-col min-h-[228px] md:flex-row md:min-h-[280px]"
+      <div ref={heroRef} className="motion-hero-enter overflow-hidden relative flex flex-col min-h-[228px] md:flex-row md:min-h-[280px]"
         style={{ borderRadius: 18, border: `1px solid ${PALETTE.border}`, boxShadow: PALETTE.shadowLg }}>
 
-        <div className="absolute -inset-2 transition-transform duration-500 ease-out"
-          style={{ transform: `translate3d(${parallax.x}px, ${parallax.y}px, 0)` }}>
+        {/* Layer 1: Background image */}
+        <div className="absolute -inset-2 will-change-transform"
+          style={{ transform: layerTransform(BG_DEPTH), transition: smoothTransition }}>
           <img src="/banner.png" alt="" className="w-[calc(100%+1rem)] h-[calc(100%+1rem)] object-cover object-center motion-hero-image" />
         </div>
 
         {/* Base dark overlay */}
         <div className="absolute inset-0" style={{ background: 'rgba(0,0,0,0.55)' }} />
+
+        {/* Layer 2: Aurora glow */}
+        <div aria-hidden className="absolute inset-0 will-change-transform"
+          style={{ transform: layerTransform(GLOW_DEPTH), transition: smoothTransition }}>
+          <div className="absolute -left-[8%] -top-[35%] w-[65%] h-[170%] motion-hero-aurora"
+            style={{ background: 'radial-gradient(closest-side, rgba(34,197,94,0.55), transparent 72%)', filter: 'blur(70px)', opacity: 0.55 }} />
+        </div>
+
+        {/* Layer 3: Decorative gradients */}
         {/* Green gradient accent — bottom-left corner */}
         <div className="absolute inset-0" style={{ background: 'linear-gradient(135deg, rgba(34,197,94,0.18) 0%, rgba(0,0,0,0) 55%)' }} />
         <div aria-hidden className="absolute -inset-1/4 opacity-30 motion-light-rays"
           style={{ background: 'linear-gradient(115deg, transparent 38%, rgba(74,222,128,0.15) 48%, transparent 58%)' }} />
+        {/* Faint diagonal light streak — passes over slowly */}
+        <div aria-hidden className="motion-hero-streak" />
         {/* Left-side text legibility fade */}
         <div className="absolute inset-0" style={{ background: 'linear-gradient(to right, rgba(0,0,0,0.88) 0%, rgba(0,0,0,0.55) 35%, transparent 65%)' }} />
 
-        {/* Content */}
-        <div className="relative z-10 flex flex-col p-5 md:p-9 flex-1 min-h-[228px] md:min-h-0">
+        {/* Layer 4: Content */}
+        <div className="relative z-10 flex flex-col p-5 md:p-9 flex-1 min-h-[228px] md:min-h-0 will-change-transform"
+          style={{ transform: layerTransform(CONTENT_DEPTH), transition: smoothTransition }}>
           <h1 style={{ fontFamily: '"Satoshi", sans-serif', fontWeight: 900, color: '#F8FAFC' }}
             className="text-2xl md:text-[44px] tracking-tight m-0 leading-none shrink-0 motion-hero-title">
             Next <span style={{ color: ACCENT }}>Event</span>
@@ -99,7 +121,8 @@ export function HeroBanner({ banner, loading }: Props) {
         </div>
 
         {/* Desktop CTAs — bottom-right */}
-        <div className="hidden md:flex relative z-10 w-[42%] shrink-0 flex-col justify-end items-end p-8">
+        <div className="hidden md:flex relative z-10 w-[42%] shrink-0 flex-col justify-end items-end p-8 will-change-transform"
+          style={{ transform: layerTransform(CONTENT_DEPTH), transition: smoothTransition }}>
           {!loading && btns.length > 0 && (
             <div className="flex gap-3 motion-hero-actions">
               {btns.map((b, i) => (

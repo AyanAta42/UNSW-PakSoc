@@ -90,8 +90,8 @@ export function MobileEventSheet({ event, now, onClose }: Props) {
             className="w-8 h-8 flex items-center justify-center text-lg leading-none cursor-pointer hover:border-white/30 transition-colors">×</button>
         </div>
 
-        <div ref={scrollRef} className="overflow-y-auto px-5 pb-8 flex flex-col gap-5">
-          {/* Details — buttons hidden here, only shown below map */}
+        <div ref={scrollRef} className="flex-1 min-h-0 overflow-y-auto px-5 pb-4 flex flex-col gap-5">
+          {/* Details — buttons hidden here, pinned in footer below */}
           <EventDetailContent event={event} now={now} hideButtons />
 
           {(event.timeline ?? []).length === 0 && (
@@ -108,17 +108,24 @@ export function MobileEventSheet({ event, now, onClose }: Props) {
               <span style={{ color: ACCENT }}>◎</span>{event.location}
             </div>
           </div>
-
-          {/* CTA buttons — only here */}
-          {upcoming && btns.length > 0 && (
-            <div className="flex flex-col gap-2.5">
-              {btns.map((b, i) => (
-                <EventCtaButton key={i} label={b.label} url={b.url} variant={i === 0 ? 'primary' : 'secondary'}
-                  className="w-full py-3.5 text-sm" />
-              ))}
-            </div>
-          )}
         </div>
+
+        {/* Pinned CTA buttons — always visible */}
+        {upcoming && btns.length > 0 && (
+          <div
+            style={{
+              background: PALETTE.modal,
+              borderTop: `1px solid ${PALETTE.border}`,
+              boxShadow: '0 -8px 24px rgba(0,0,0,0.35)',
+            }}
+            className="shrink-0 px-5 pt-3 pb-[max(1rem,env(safe-area-inset-bottom))] flex flex-col gap-2.5"
+          >
+            {btns.map((b, i) => (
+              <EventCtaButton key={i} label={b.label} url={b.url} variant={i === 0 ? 'primary' : 'secondary'}
+                className="w-full py-3.5 text-sm" />
+            ))}
+          </div>
+        )}
       </div>
     </div>
   )
