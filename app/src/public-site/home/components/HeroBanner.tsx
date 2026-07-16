@@ -9,10 +9,9 @@ import { ACCENT, ACCENT_GLOW, PALETTE } from '@/config/theme'
 
 interface Props { banner: DbEvent | null; loading: boolean }
 
-// Parallax depth multipliers applied to the normalised pointer offset (-0.5..0.5)
-const BG_DEPTH = 8       // ±4px
-const GLOW_DEPTH = 16    // ±8px
-const CONTENT_DEPTH = 3  // ±1.5px
+const BG_DEPTH = 8
+const GLOW_DEPTH = 16
+const CONTENT_DEPTH = 3
 
 export function HeroBanner({ banner, loading }: Props) {
   const cd   = useCountdown(banner?.time)
@@ -36,68 +35,55 @@ export function HeroBanner({ banner, loading }: Props) {
 
   return (
     <div className="motion-glow motion-glow-hero px-4 pt-4 lg:p-0">
-      {/* Entrance transform stays on the outer shell so iOS can still clip rounded corners */}
       <div className="motion-hero-enter">
       <div
         ref={heroRef}
-        className="hero-clip overflow-hidden relative flex flex-col min-h-[228px] md:flex-row md:min-h-[280px] rounded-[18px]"
+        className="hero-clip overflow-hidden relative flex flex-col min-h-[200px] md:flex-row md:min-h-[250px] rounded-[18px]"
         style={{ borderRadius: 18, border: `1px solid ${PALETTE.border}`, boxShadow: PALETTE.shadowLg }}
       >
 
-        {/* Layer 1: Background image — slow zoom only (no filter breathing) */}
-        <div ref={bgRef} className="absolute -inset-2 motion-parallax-layer">
-          <img
-            src="/banner.png"
-            alt=""
-            fetchPriority="high"
-            decoding="async"
-            className="w-[calc(100%+1rem)] h-[calc(100%+1rem)] object-cover object-center motion-hero-image"
-          />
-          {/* Opacity-only breath overlay — avoids animating filter on the image */}
-          <div aria-hidden className="motion-hero-breath absolute inset-0 pointer-events-none" />
-        </div>
+        {/* Layer 1: Dark emerald gradient */}
+        <div ref={bgRef} aria-hidden className="absolute inset-0 motion-parallax-layer motion-hero-gradient" />
 
-        {/* Base dark overlay */}
-        <div className="absolute inset-0" style={{ background: 'rgba(0,0,0,0.55)' }} />
-
-        {/* Layer 2: Aurora glow */}
+        {/* Layer 2: Soft aurora + right-side spotlight */}
         <div ref={glowRef} aria-hidden className="absolute inset-0 motion-parallax-layer">
-          <div className="absolute -left-[8%] -top-[35%] w-[65%] h-[170%] motion-hero-aurora"
-            style={{ background: 'radial-gradient(closest-side, rgba(34,197,94,0.55), transparent 72%)', filter: 'blur(70px)', opacity: 0.55 }} />
+          <div className="absolute -left-[8%] -top-[35%] w-[55%] h-[160%] motion-hero-aurora"
+            style={{ background: 'radial-gradient(closest-side, rgba(34,197,94,0.35), transparent 72%)', filter: 'blur(70px)', opacity: 0.45 }} />
+          <div className="motion-hero-spotlight" />
         </div>
 
-        {/* Layer 3: Decorative gradients */}
-        <div className="absolute inset-0" style={{ background: 'linear-gradient(135deg, rgba(34,197,94,0.18) 0%, rgba(0,0,0,0) 55%)' }} />
-        <div aria-hidden className="absolute -inset-1/4 opacity-30 motion-light-rays"
-          style={{ background: 'linear-gradient(115deg, transparent 38%, rgba(74,222,128,0.15) 48%, transparent 58%)' }} />
+        {/* Layer 3: Texture — grain, faint geometry, light streak */}
+        <div aria-hidden className="motion-hero-geo" />
+        <div aria-hidden className="motion-hero-grain" />
+        <div aria-hidden className="absolute -inset-1/4 opacity-20 motion-light-rays"
+          style={{ background: 'linear-gradient(115deg, transparent 38%, rgba(74,222,128,0.1) 48%, transparent 58%)' }} />
         <div aria-hidden className="motion-hero-streak" />
-        <div className="absolute inset-0" style={{ background: 'linear-gradient(to right, rgba(0,0,0,0.88) 0%, rgba(0,0,0,0.55) 35%, transparent 65%)' }} />
 
         {/* Layer 4: Content */}
-        <div ref={contentRef} className="relative z-10 flex flex-col p-5 md:p-9 flex-1 min-h-[228px] md:min-h-0 motion-parallax-layer">
+        <div ref={contentRef} className="relative z-10 flex flex-col p-5 md:p-8 flex-1 min-h-[200px] md:min-h-0 motion-parallax-layer">
           <h1 style={{ fontFamily: '"Satoshi", sans-serif', fontWeight: 900, color: '#F8FAFC' }}
-            className="text-2xl md:text-[44px] tracking-tight m-0 leading-none shrink-0 motion-hero-title">
+            className="text-2xl md:text-[40px] tracking-tight m-0 leading-none shrink-0 motion-hero-title">
             Next <span style={{ color: ACCENT }}>Event</span>
           </h1>
 
-          <div className="flex-1 min-h-8 md:min-h-0" />
+          <div className="flex-1 min-h-6 md:min-h-0" />
 
           {loading && (
-            <div className="rounded-xl h-[72px] md:h-24 motion-skeleton shrink-0"
+            <div className="rounded-xl h-[80px] md:h-28 motion-skeleton shrink-0"
               style={{ border: `1px solid ${PALETTE.border}` }} />
           )}
 
           {!loading && banner && (
             <div className="w-full md:w-fit shrink-0 motion-hero-details">
-              <div style={{ color: '#F8FAFC' }} className="text-[15px] md:text-lg font-extrabold mb-3 truncate">{banner.name}</div>
-              <div className="flex gap-2 w-fit">
+              <div style={{ color: '#F8FAFC' }} className="text-[15px] md:text-lg font-extrabold mb-3.5 truncate">{banner.name}</div>
+              <div className="flex gap-2.5 w-fit">
                 {(['days','hrs','mins','secs'] as const).map((k, i) => {
                   const val = [cd.days, cd.hrs, cd.mins, cd.secs][i]
                   return (
-                    <div key={k} className="text-center min-w-[48px] md:min-w-[58px] shrink-0 px-2 py-1.5 md:px-3 md:py-2"
-                      style={{ background: 'rgba(10,10,10,0.9)', border: `1px solid ${PALETTE.border}`, borderRadius: 12 }}>
-                      <OdometerNumber value={val} style={{ color: ACCENT_GLOW, fontSize: 20, lineHeight: 1 }} className="font-extrabold tabular-nums" />
-                      <div style={{ color: PALETTE.secondary, fontSize: 8 }} className="uppercase tracking-widest mt-1 font-bold md:text-[9px]">{k}</div>
+                    <div key={k} className="text-center min-w-[54px] md:min-w-[66px] shrink-0 px-2.5 py-2 md:px-3.5 md:py-2.5"
+                      style={{ background: 'rgba(10,10,10,0.92)', border: `1px solid ${PALETTE.border}`, borderRadius: 14 }}>
+                      <OdometerNumber value={val} style={{ color: ACCENT_GLOW, lineHeight: 1, fontWeight: 900 }} className="font-black tabular-nums text-2xl md:text-[30px]" />
+                      <div style={{ color: PALETTE.secondary, fontSize: 8 }} className="uppercase tracking-widest mt-1.5 font-bold md:text-[9px]">{k}</div>
                     </div>
                   )
                 })}
@@ -107,21 +93,27 @@ export function HeroBanner({ banner, loading }: Props) {
 
           {!loading && btns.length > 0 && (
             <div className="md:hidden flex gap-2 mt-3 w-full shrink-0 motion-hero-actions">
-              {btns.map((b, i) => (
-                <EventCtaButton key={i} label={b.label} url={b.url} variant={getCtaVariant(i, btns.length)}
-                  className="flex-1 px-2 py-2.5 text-xs min-w-0" />
-              ))}
+              {btns.map((b, i) => {
+                const variant = getCtaVariant(i, btns.length)
+                return (
+                  <EventCtaButton key={i} label={b.label} url={b.url} variant={variant}
+                    className={`${variant === 'primary' ? 'flex-[1.18]' : 'flex-1'} px-2 py-2.5 text-xs min-w-0`} />
+                )
+              })}
             </div>
           )}
         </div>
 
-        <div ref={ctaRef} className="hidden md:flex relative z-10 w-[42%] shrink-0 flex-col justify-end items-end p-8 motion-parallax-layer">
+        <div ref={ctaRef} className="hidden md:flex relative z-10 w-[42%] shrink-0 flex-col justify-end items-end p-7 motion-parallax-layer">
           {!loading && btns.length > 0 && (
-            <div className="flex gap-3 motion-hero-actions">
-              {btns.map((b, i) => (
-                <EventCtaButton key={i} label={b.label} url={b.url} variant={getCtaVariant(i, btns.length)}
-                  className="px-5 py-2.5 text-sm whitespace-nowrap" />
-              ))}
+            <div className="flex gap-3 items-stretch motion-hero-actions">
+              {btns.map((b, i) => {
+                const variant = getCtaVariant(i, btns.length)
+                return (
+                  <EventCtaButton key={i} label={b.label} url={b.url} variant={variant}
+                    className={`${variant === 'primary' ? 'px-7' : 'px-5'} py-2.5 text-sm whitespace-nowrap`} />
+                )
+              })}
             </div>
           )}
         </div>

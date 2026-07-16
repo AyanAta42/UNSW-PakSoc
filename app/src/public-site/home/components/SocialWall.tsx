@@ -19,7 +19,7 @@ export function SocialWall() {
   return (
     <>
       <div style={{ color: PALETTE.muted }} className="text-xs -mt-3 mb-4">Latest from @unswpaksoc</div>
-      <div className="flex gap-3 overflow-x-auto pb-1" style={{ scrollbarWidth: 'none' }}>
+      <div className="flex gap-3 overflow-x-auto pb-1 scrollbar-none" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
         {IG.map((p, i) => (
           <div key={p.id}
             style={{ background: GRADS[i], border: `1px solid ${PALETTE.border}`, borderRadius: 14, minWidth: 140, aspectRatio: '4/5' }}

@@ -28,10 +28,6 @@ export function PublicEventCard({ event: ev, selected, now, onClick }: Props) {
         }
         <div className="absolute inset-0" style={{ background: 'linear-gradient(to top, rgba(0,0,0,0.65) 0%, transparent 50%)' }} />
 
-        {!ended && (
-          <div className="absolute top-2 right-2 rounded-full px-2 py-0.5 text-[9px] font-extrabold tracking-widest uppercase"
-            style={{ background: 'rgba(34,197,94,0.15)', color: '#4ADE80' }}>Upcoming</div>
-        )}
         <div className="absolute top-2 left-2 px-2.5 py-1 text-center"
           style={{ background: 'rgba(10,10,10,0.9)', border: `1px solid ${PALETTE.border}`, borderRadius: 10 }}>
           <div className="font-extrabold tracking-widest" style={{ fontSize: 9, color: ended ? PALETTE.muted : ACCENT }}>{month}</div>
@@ -43,9 +39,12 @@ export function PublicEventCard({ event: ev, selected, now, onClick }: Props) {
         <div className="flex items-start justify-between gap-2 mb-0.5">
           <div style={{ color: PALETTE.dark, fontWeight: 700 }} className="text-sm leading-snug flex items-center gap-1.5 flex-wrap">
             {ev.name}
-            {ended && (
+            {ended ? (
               <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-full uppercase tracking-wide"
                 style={{ background: 'rgba(239,68,68,0.15)', color: '#F87171' }}>Ended</span>
+            ) : (
+              <span className="text-[9px] font-extrabold px-1.5 py-0.5 rounded-full uppercase tracking-wide"
+                style={{ background: 'rgba(34,197,94,0.15)', color: '#4ADE80' }}>Upcoming</span>
             )}
           </div>
           <span style={{ color: PALETTE.muted }} className="text-[11px] shrink-0 mt-0.5">
