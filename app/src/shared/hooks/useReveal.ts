@@ -1,13 +1,23 @@
 import { useEffect, useRef, useState } from 'react'
+import type { CSSProperties } from 'react'
+import { prefersReducedMotion } from '@/shared/motion'
 
-/** Marks a section visible once it enters the viewport. */
-export function useReveal<T extends HTMLElement>(threshold = 0.12) {
+interface RevealOptions {
+  threshold?: number
+  /** Extra delay (ms) before the entrance transition begins — used to stagger sections. */
+  delay?: number
+}
+
+/** Marks a section visible once it enters the viewport (animates only once). */
+export function useReveal<T extends HTMLElement>(options: number | RevealOptions = {}) {
+  const { threshold = 0.12, delay = 0 } =
+    typeof options === 'number' ? { threshold: options } : options
   const ref = useRef<T>(null)
   const [visible, setVisible] = useState(false)
 
   useEffect(() => {
     const node = ref.current
-    if (!node || window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    if (!node || prefersReducedMotion()) {
       setVisible(true)
       return
     }
@@ -22,5 +32,6 @@ export function useReveal<T extends HTMLElement>(threshold = 0.12) {
     return () => observer.disconnect()
   }, [threshold])
 
-  return { ref, visible }
+  const style: CSSProperties = delay ? { transitionDelay: `${delay}ms` } : {}
+  return { ref, visible, style }
 }

@@ -1,18 +1,16 @@
 import { useEffect, useRef } from 'react'
+import { prefersReducedMotion } from '@/shared/motion'
 
 /**
- * A giant, heavily-blurred emerald glow that smoothly trails the cursor (rAF
- * lerp) to gently brighten the area around it. Intensifies a touch while
- * hovering elements marked with `data-cta`. Disabled for coarse pointers and
- * under prefers-reduced-motion; pauses when the tab is hidden.
+ * Soft emerald cursor wash — DOM updates via rAF lerp only (no React state).
+ * Idles the loop when settled; pauses when the tab is hidden.
  */
 export function MouseSpotlight() {
   const ref = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     const finePointer = window.matchMedia('(hover: hover) and (pointer: fine)')
-    const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)')
-    if (!finePointer.matches || reducedMotion.matches) return
+    if (!finePointer.matches || prefersReducedMotion()) return
     const el = ref.current
     if (!el) return
 
@@ -25,45 +23,63 @@ export function MouseSpotlight() {
     let visible = false
     let raf = 0
 
-    function onMove(e: PointerEvent) {
-      targetX = e.clientX
-      targetY = e.clientY
-      if (!visible) visible = true
-    }
-    function onOver(e: MouseEvent) {
-      const t = e.target as HTMLElement | null
-      if (t?.closest?.('[data-cta]')) targetIntensity = 1
-    }
-    function onOut(e: MouseEvent) {
-      const t = e.target as HTMLElement | null
-      if (t?.closest?.('[data-cta]')) targetIntensity = 0
-    }
-
-    function frame() {
-      raf = requestAnimationFrame(frame)
-      x += (targetX - x) * 0.08
-      y += (targetY - y) * 0.08
-      intensity += (targetIntensity - intensity) * 0.06
-      const scale = 1 + intensity * 0.15
-      const opacity = visible ? 0.05 + intensity * 0.05 : 0
+    function paint() {
+      const scale = 1 + intensity * 0.12
+      const opacity = visible ? 0.045 + intensity * 0.04 : 0
       el!.style.transform = `translate3d(${x}px, ${y}px, 0) translate(-50%, -50%) scale(${scale})`
       el!.style.opacity = opacity.toFixed(3)
     }
 
+    function frame() {
+      x += (targetX - x) * 0.08
+      y += (targetY - y) * 0.08
+      intensity += (targetIntensity - intensity) * 0.06
+      paint()
+
+      const settled =
+        Math.abs(targetX - x) < 0.15
+        && Math.abs(targetY - y) < 0.15
+        && Math.abs(targetIntensity - intensity) < 0.002
+
+      if (settled) {
+        raf = 0
+        return
+      }
+      raf = requestAnimationFrame(frame)
+    }
+
     function start() {
-      if (raf) return
+      if (raf || document.hidden) return
       raf = requestAnimationFrame(frame)
     }
     function stop() {
       cancelAnimationFrame(raf)
       raf = 0
     }
+
+    function onMove(e: PointerEvent) {
+      targetX = e.clientX
+      targetY = e.clientY
+      if (!visible) visible = true
+      start()
+    }
+    function onOver(e: MouseEvent) {
+      if ((e.target as HTMLElement | null)?.closest?.('[data-cta]')) {
+        targetIntensity = 1
+        start()
+      }
+    }
+    function onOut(e: MouseEvent) {
+      if ((e.target as HTMLElement | null)?.closest?.('[data-cta]')) {
+        targetIntensity = 0
+        start()
+      }
+    }
     function onVisibility() {
       if (document.hidden) stop()
       else start()
     }
 
-    start()
     window.addEventListener('pointermove', onMove, { passive: true })
     document.addEventListener('mouseover', onOver)
     document.addEventListener('mouseout', onOut)

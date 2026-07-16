@@ -1,7 +1,7 @@
 import type { DbEvent } from '@/events/types/Event'
 import { CachedMapEmbed, mapEmbedSrc } from '@/maps/components/CachedMapEmbed'
 import { EventDetailContent }          from '@/public-site/home/components/EventDetailContent'
-import { getEventButtons }             from '@/events/utils/getEventButtons'
+import { getEventButtons, getCtaVariant }             from '@/events/utils/getEventButtons'
 import { EventCtaButton }              from '@/events/components/EventCtaButton'
 import { ACCENT, PALETTE } from '@/config/theme'
 
@@ -40,7 +40,7 @@ export function EventDetailModal({ event, now, onClose }: Props) {
           {upcoming && btns.length > 0 && (
             <div className="flex flex-col gap-2">
               {btns.map((b, i) => (
-                <EventCtaButton key={i} label={b.label} url={b.url} variant={i === 0 ? 'primary' : 'secondary'}
+                <EventCtaButton key={i} label={b.label} url={b.url} variant={getCtaVariant(i, btns.length)}
                   className="w-full py-3.5 text-sm" />
               ))}
             </div>

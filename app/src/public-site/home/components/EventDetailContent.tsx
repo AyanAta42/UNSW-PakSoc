@@ -1,6 +1,6 @@
 import type { DbEvent } from '@/events/types/Event'
 import { dateParts }          from '@/events/utils/dateParts'
-import { getEventButtons }    from '@/events/utils/getEventButtons'
+import { getEventButtons, getCtaVariant }    from '@/events/utils/getEventButtons'
 import { EventCtaButton }     from '@/events/components/EventCtaButton'
 import { formatTimelineTime } from '@/shared/utils/formatTimelineTime'
 import { ACCENT, PALETTE }    from '@/config/theme'
@@ -45,16 +45,6 @@ export function EventDetailContent({ event, now, hideButtons = false }: Props) {
             style={{ background: 'rgba(34,197,94,0.15)', color: '#4ADE80' }}>Upcoming</span>
       }
 
-      {/* CTA buttons (hidden in MobileEventSheet — shown below map there) */}
-      {!hideButtons && btns.length > 0 && !isEnded && (
-        <div className="flex flex-col gap-2">
-          {btns.map((b, i) => (
-            <EventCtaButton key={i} label={b.label} url={b.url} variant={i === 0 ? 'primary' : 'secondary'}
-              className="w-full py-2.5 text-xs" />
-          ))}
-        </div>
-      )}
-
       {/* Timeline */}
       {schedule.length > 0 && (
         <div className="pt-1">
@@ -73,6 +63,16 @@ export function EventDetailContent({ event, now, hideButtons = false }: Props) {
               </div>
             ))}
           </div>
+        </div>
+      )}
+
+      {/* CTA buttons — below timeline on desktop sidebar */}
+      {!hideButtons && btns.length > 0 && !isEnded && (
+        <div className="flex flex-col gap-2">
+          {btns.map((b, i) => (
+            <EventCtaButton key={i} label={b.label} url={b.url} variant={getCtaVariant(i, btns.length)}
+              className="w-full py-2.5 text-xs" />
+          ))}
         </div>
       )}
     </>

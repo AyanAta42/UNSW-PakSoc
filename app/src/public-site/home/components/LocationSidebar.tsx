@@ -10,6 +10,7 @@ export function LocationSidebar({ mapEvent, featured, now }: Props) {
 
   return (
     <div className="hidden lg:flex flex-col gap-4 flex-[3] sticky top-[72px]">
+      <div className="motion-glow">
       <div style={{ background: PALETTE.card, border: `1px solid ${PALETTE.border}`, borderRadius: 18, boxShadow: PALETTE.shadowMd }}
         className="overflow-hidden flex flex-col">
         <div className="px-5 pt-5 pb-3">
@@ -34,6 +35,7 @@ export function LocationSidebar({ mapEvent, featured, now }: Props) {
               <p style={{ color: PALETTE.muted }} className="text-sm m-0">No events scheduled.</p>
             </div>
         }
+      </div>
       </div>
 
       {featured && (

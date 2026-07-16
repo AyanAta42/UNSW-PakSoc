@@ -40,7 +40,7 @@ export function Navbar({ user, avatarUrl, avatarBroken, initial, onAvatarError, 
           {can.viewEvents && (
             <button onClick={() => navigate('/events')} data-cta
               style={{ background: ACCENT, color: ACCENT_TEXT, borderRadius: PALETTE.radiusBtn, boxShadow: '0 0 20px rgba(34,197,94,0.25)' }}
-              className="px-4 py-1.5 font-bold text-xs border-none cursor-pointer hover:opacity-85 transition-opacity whitespace-nowrap">
+              className="motion-primary px-4 py-1.5 font-bold text-xs border-none cursor-pointer hover:opacity-85 transition-opacity whitespace-nowrap">
               Manage Events
             </button>
           )}
@@ -72,7 +72,7 @@ export function Navbar({ user, avatarUrl, avatarBroken, initial, onAvatarError, 
           ) : (
             <button onClick={() => navigate('/login')} data-cta
               style={{ background: ACCENT, color: ACCENT_TEXT, borderRadius: PALETTE.radiusBtn }}
-              className="px-4 py-1.5 font-bold text-xs border-none cursor-pointer hover:opacity-90 whitespace-nowrap">
+              className="motion-primary px-4 py-1.5 font-bold text-xs border-none cursor-pointer hover:opacity-90 whitespace-nowrap">
               Login
             </button>
           )}

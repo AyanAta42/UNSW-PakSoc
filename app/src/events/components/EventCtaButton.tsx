@@ -1,4 +1,4 @@
-import { ACCENT, ACCENT_TEXT, ACCENT_HOVER } from '@/config/theme'
+import { ACCENT, ACCENT_TEXT } from '@/config/theme'
 
 interface Props {
   label:      string
@@ -12,47 +12,27 @@ export function EventCtaButton({ label, url, variant, className = '' }: Props) {
   const isPrimary = variant === 'primary'
 
   const baseStyle: React.CSSProperties = isPrimary
-    ? { background: ACCENT, color: ACCENT_TEXT, boxShadow: '0 0 30px rgba(34,197,94,0.35)', borderRadius: 14 }
+    ? { background: ACCENT, color: ACCENT_TEXT, borderRadius: 14 }
     : { background: 'transparent', border: '1.5px solid rgba(229,231,235,0.5)', color: '#F8FAFC', borderRadius: 14 }
 
-  const cls = `${className} flex items-center justify-center font-bold no-underline transition-all`
-
-  const handleMouseEnter = (e: React.MouseEvent<HTMLElement>) => {
-    const target = e.currentTarget as HTMLElement
-    target.style.transform = 'scale(1.02)'
-    if (isPrimary) {
-      target.style.background = ACCENT_HOVER
-      target.style.boxShadow = '0 0 36px rgba(34,197,94,0.42)'
-    } else {
-      target.style.background = 'rgba(255,255,255,0.06)'
-      target.style.borderColor = '#FFFFFF'
-    }
-  }
-  const handleMouseLeave = (e: React.MouseEvent<HTMLElement>) => {
-    const target = e.currentTarget as HTMLElement
-    target.style.transform = 'scale(1)'
-    if (isPrimary) {
-      target.style.background = ACCENT
-      target.style.boxShadow = '0 0 30px rgba(34,197,94,0.35)'
-    } else {
-      target.style.background = 'transparent'
-      target.style.borderColor = 'rgba(229,231,235,0.5)'
-    }
-  }
+  // Hover/active handled in CSS (transform/opacity) so reduced-motion can mute them
+  const cls = [
+    className,
+    isPrimary ? 'motion-primary motion-cta-primary' : 'motion-cta-secondary',
+    'motion-cta flex items-center justify-center font-bold no-underline',
+  ].filter(Boolean).join(' ')
 
   if (url?.trim()) {
     return (
       <a href={url.trim()} target="_blank" rel="noopener noreferrer"
         data-cta={isPrimary ? '' : undefined}
-        style={baseStyle} className={`${cls} active:scale-[0.98]`}
-        onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave}>
+        style={baseStyle} className={cls}>
         {label}
       </a>
     )
   }
   return (
-    <span data-cta={isPrimary ? '' : undefined} style={baseStyle} className={`${cls} cursor-default`}
-      onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave}>
+    <span data-cta={isPrimary ? '' : undefined} style={baseStyle} className={`${cls} cursor-default`}>
       {label}
     </span>
   )

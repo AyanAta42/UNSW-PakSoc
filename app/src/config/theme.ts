@@ -27,12 +27,12 @@ export const PALETTE = {
   muted:    '#94A3B8',
   disabled: '#64748B',
 
-  // Shadows
-  shadowSm: '0 4px 12px rgba(0,0,0,0.4)',
-  shadowMd: '0 10px 30px rgba(0,0,0,0.5)',
-  shadowLg: '0 20px 60px rgba(0,0,0,0.6)',
-  shadowGreen: '0 0 40px rgba(34,197,94,0.18)',
-  shadow:   '0 4px 12px rgba(0,0,0,0.4)',
+  // Shadows — giant, soft, faintly emerald-tinted for depth (Apple/Linear feel)
+  shadowSm: '0 8px 24px -8px rgba(0,0,0,0.5), 0 2px 10px rgba(6,20,12,0.35)',
+  shadowMd: '0 22px 50px -16px rgba(0,0,0,0.55), 0 6px 20px rgba(8,30,18,0.32)',
+  shadowLg: '0 40px 90px -24px rgba(0,0,0,0.6), 0 12px 40px rgba(10,40,24,0.3)',
+  shadowGreen: '0 0 60px rgba(34,197,94,0.14)',
+  shadow:   '0 8px 24px -8px rgba(0,0,0,0.5), 0 2px 10px rgba(6,20,12,0.35)',
 
   // Radius (as CSS strings for style props)
   radiusBtn:   '14px',

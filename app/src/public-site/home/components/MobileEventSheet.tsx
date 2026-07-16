@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import type { DbEvent } from '@/events/types/Event'
 import { CachedMapEmbed, mapEmbedSrc } from '@/maps/components/CachedMapEmbed'
 import { EventDetailContent }          from './EventDetailContent'
-import { getEventButtons }             from '@/events/utils/getEventButtons'
+import { getEventButtons, getCtaVariant }             from '@/events/utils/getEventButtons'
 import { EventCtaButton }              from '@/events/components/EventCtaButton'
 import { ACCENT, PALETTE }             from '@/config/theme'
 
@@ -121,7 +121,7 @@ export function MobileEventSheet({ event, now, onClose }: Props) {
             className="shrink-0 px-5 pt-3 pb-[max(1rem,env(safe-area-inset-bottom))] flex flex-col gap-2.5"
           >
             {btns.map((b, i) => (
-              <EventCtaButton key={i} label={b.label} url={b.url} variant={i === 0 ? 'primary' : 'secondary'}
+              <EventCtaButton key={i} label={b.label} url={b.url} variant={getCtaVariant(i, btns.length)}
                 className="w-full py-3.5 text-sm" />
             ))}
           </div>

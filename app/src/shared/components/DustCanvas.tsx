@@ -1,4 +1,5 @@
 import { useEffect, useRef } from 'react'
+import { prefersReducedMotion } from '@/shared/motion'
 
 interface Particle {
   x: number
@@ -13,34 +14,34 @@ interface Particle {
   fadeSpeed: number
 }
 
-const COUNT = 40
+/** Fewer particles on coarse/low-DPR screens keeps the loop cheap. */
+const COUNT = typeof window !== 'undefined' && (window.devicePixelRatio || 1) > 1.5 ? 28 : 36
 
 /**
- * A single <canvas> of ~40 slowly rising, gently swaying dust motes with
- * fading opacity — like illuminated dust in sunlight. Pauses when the tab is
- * hidden and is disabled under prefers-reduced-motion.
+ * Single-canvas dust motes (transform-equivalent: x/y/opacity only).
+ * No canvas shadows — those were a per-frame paint tax. Pauses when hidden.
  */
 export function DustCanvas() {
   const canvasRef = useRef<HTMLCanvasElement>(null)
 
   useEffect(() => {
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
+    if (prefersReducedMotion()) return
     const canvas = canvasRef.current
-    const ctx = canvas?.getContext('2d')
+    const ctx = canvas?.getContext('2d', { alpha: true })
     if (!canvas || !ctx) return
 
     let width = window.innerWidth
     let height = window.innerHeight
-    let dpr = Math.min(window.devicePixelRatio || 1, 2)
+    let dpr = Math.min(window.devicePixelRatio || 1, 1.5)
     let raf = 0
     let last = performance.now()
 
     function resize() {
       width = window.innerWidth
       height = window.innerHeight
-      dpr = Math.min(window.devicePixelRatio || 1, 2)
-      canvas!.width = width * dpr
-      canvas!.height = height * dpr
+      dpr = Math.min(window.devicePixelRatio || 1, 1.5)
+      canvas!.width = Math.floor(width * dpr)
+      canvas!.height = Math.floor(height * dpr)
       canvas!.style.width = `${width}px`
       canvas!.style.height = `${height}px`
       ctx!.setTransform(dpr, 0, 0, dpr, 0, 0)
@@ -50,14 +51,14 @@ export function DustCanvas() {
       return {
         x: Math.random() * width,
         y: fromBottom ? height + Math.random() * 40 : Math.random() * height,
-        r: 0.6 + Math.random() * 1.8,
-        vy: 0.05 + Math.random() * 0.14,
-        drift: (Math.random() - 0.5) * 0.16,
+        r: 0.55 + Math.random() * 1.5,
+        vy: 0.05 + Math.random() * 0.12,
+        drift: (Math.random() - 0.5) * 0.14,
         driftPhase: Math.random() * Math.PI * 2,
         driftSpeed: 0.0005 + Math.random() * 0.001,
-        baseOpacity: 0.06 + Math.random() * 0.26,
+        baseOpacity: 0.05 + Math.random() * 0.22,
         fadePhase: Math.random() * Math.PI * 2,
-        fadeSpeed: 0.0003 + Math.random() * 0.0008,
+        fadeSpeed: 0.0003 + Math.random() * 0.0007,
       }
     }
 
@@ -70,8 +71,6 @@ export function DustCanvas() {
       last = now
 
       ctx!.clearRect(0, 0, width, height)
-      ctx!.shadowColor = 'rgba(34, 197, 94, 0.5)'
-      ctx!.shadowBlur = 4
 
       for (const p of particles) {
         p.y -= p.vy * dt * 0.06
@@ -90,7 +89,7 @@ export function DustCanvas() {
     }
 
     function start() {
-      if (raf) return
+      if (raf || document.hidden) return
       last = performance.now()
       raf = requestAnimationFrame(frame)
     }
@@ -104,7 +103,7 @@ export function DustCanvas() {
     }
 
     start()
-    window.addEventListener('resize', resize)
+    window.addEventListener('resize', resize, { passive: true })
     document.addEventListener('visibilitychange', onVisibility)
     return () => {
       stop()

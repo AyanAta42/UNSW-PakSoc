@@ -1,35 +1,35 @@
+import { lazy, Suspense } from 'react'
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import { CurrentMemberProvider } from '@/roles/context/CurrentMemberContext'
-import RoleRoute         from '@/core/router/RoleRoute'
-import HomePage          from '@/public-site/home/HomePage'
-import LoginPage         from '@/auth/pages/LoginPage'
-import AuthCallbackPage  from '@/auth/pages/AuthCallbackPage'
-import PrivacyPolicyPage from '@/public-site/legal/PrivacyPolicyPage'
-import TermsOfServicePage from '@/public-site/legal/TermsOfServicePage'
-import EventsManagerPage from '@/events/pages/EventsManagerPage'
-import AllEventsPage     from '@/events/pages/AllEventsPage'
-import ManageRolesPage   from '@/roles/pages/ManageRolesPage'
-import ManageTasksPage   from '@/tasks/pages/ManageTasksPage'
+import RoleRoute from '@/core/router/RoleRoute'
+import HomePage from '@/public-site/home/HomePage'
+
+const LoginPage = lazy(() => import('@/auth/pages/LoginPage'))
+const AuthCallbackPage = lazy(() => import('@/auth/pages/AuthCallbackPage'))
+const PrivacyPolicyPage = lazy(() => import('@/public-site/legal/PrivacyPolicyPage'))
+const TermsOfServicePage = lazy(() => import('@/public-site/legal/TermsOfServicePage'))
+const AllEventsPage = lazy(() => import('@/events/pages/AllEventsPage'))
+const EventsManagerPage = lazy(() => import('@/events/pages/EventsManagerPage'))
+const ManageRolesPage = lazy(() => import('@/roles/pages/ManageRolesPage'))
+const ManageTasksPage = lazy(() => import('@/tasks/pages/ManageTasksPage'))
 
 function App() {
   return (
     <BrowserRouter>
       <CurrentMemberProvider>
-        <Routes>
-          {/* Public — anyone can visit */}
-          <Route path="/"        element={<HomePage />} />
-          <Route path="/login"         element={<LoginPage />} />
-          <Route path="/auth/callback" element={<AuthCallbackPage />} />
-          <Route path="/privacy" element={<PrivacyPolicyPage />} />
-          <Route path="/terms"   element={<TermsOfServicePage />} />
-
-          <Route path="/all-events" element={<AllEventsPage />} />
-          <Route path="/events"                element={<RoleRoute minRole="subcom"><EventsManagerPage /></RoleRoute>} />
-          <Route path="/subcom/tasks/:eventId" element={<RoleRoute minRole="subcom"><ManageTasksPage /></RoleRoute>} />
-
-          {/* President only */}
-          <Route path="/roles" element={<RoleRoute minRole="president"><ManageRolesPage /></RoleRoute>} />
-        </Routes>
+        <Suspense fallback={null}>
+          <Routes>
+            <Route path="/" element={<HomePage />} />
+            <Route path="/login" element={<LoginPage />} />
+            <Route path="/auth/callback" element={<AuthCallbackPage />} />
+            <Route path="/privacy" element={<PrivacyPolicyPage />} />
+            <Route path="/terms" element={<TermsOfServicePage />} />
+            <Route path="/all-events" element={<AllEventsPage />} />
+            <Route path="/events" element={<RoleRoute minRole="subcom"><EventsManagerPage /></RoleRoute>} />
+            <Route path="/subcom/tasks/:eventId" element={<RoleRoute minRole="subcom"><ManageTasksPage /></RoleRoute>} />
+            <Route path="/roles" element={<RoleRoute minRole="president"><ManageRolesPage /></RoleRoute>} />
+          </Routes>
+        </Suspense>
       </CurrentMemberProvider>
     </BrowserRouter>
   )

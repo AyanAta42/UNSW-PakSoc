@@ -21,10 +21,10 @@ export function PublicEventCard({ event: ev, selected, now, onClick }: Props) {
       }}
       className="motion-card overflow-hidden cursor-pointer flex flex-col min-w-0 w-full">
 
-      <div className="relative" style={{ height: 120 }}>
+      <div className="relative overflow-hidden" style={{ height: 120 }}>
         {img
-          ? <img src={img} alt={ev.name} className="w-full h-full object-cover" />
-          : <div className="w-full h-full" style={{ background: `linear-gradient(135deg, ${PALETTE.cardAlt}, ${PALETTE.card})` }} />
+          ? <img src={img} alt={ev.name} className="motion-card-poster w-full h-full object-cover" />
+          : <div className="motion-card-poster w-full h-full" style={{ background: `linear-gradient(135deg, ${PALETTE.cardAlt}, ${PALETTE.card})` }} />
         }
         <div className="absolute inset-0" style={{ background: 'linear-gradient(to top, rgba(0,0,0,0.65) 0%, transparent 50%)' }} />
 
