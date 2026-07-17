@@ -47,6 +47,18 @@ Gotchas learned the hard way:
   reduced-motion path (ambient background hidden entirely).
 - `--dump-dom` (same flags) is the quickest way to confirm ambient DOM
   nodes mounted (`ambient-dust`, `ambient-aurora-ribbon`, ...).
+- **`--window-size` below ~500px wide is a lie** — headless=new clamps the
+  window to ~512px but still writes the PNG at the requested width, so a
+  "390px" screenshot is a 512px layout with the right edge silently cropped.
+  Elements near the right edge look missing/cut when they're fine. For real
+  phone captures, drive CDP: `--remote-debugging-port`, then
+  `Emulation.setDeviceMetricsOverride {width:390, height:844,
+  deviceScaleFactor:2, mobile:true}` + `Page.reload` +
+  `Page.captureScreenshot`. Working scripts from a past session:
+  `cdp-scroll-test.ps1` / `cdp-phone-shot.ps1` pattern — raw
+  ClientWebSocket JSON-RPC in PowerShell 5.1, no npm packages needed.
+- CDP is also the way to verify behavior (scroll, computed styles,
+  element rects) — `Runtime.evaluate` with `returnByValue: true`.
 
 ## What to eyeball
 

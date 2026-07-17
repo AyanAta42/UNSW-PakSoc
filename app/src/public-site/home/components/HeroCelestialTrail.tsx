@@ -84,7 +84,7 @@ export function HeroCelestialTrail() {
     function build(count: number) {
       const next: Speck[] = []
       let sinceCrescent = 0
-      const crescentEvery = 15 + Math.floor(Math.random() * 11) // 15–25
+      const crescentEvery = 28 + Math.floor(Math.random() * 15) // sparse — the CSS moon is the focal point
 
       for (let i = 0; i < count; i++) {
         // Bias density toward the start; thin out as we disperse
@@ -104,7 +104,8 @@ export function HeroCelestialTrail() {
             : 1 + Math.random() * 3,
           baseOpacity: kind === 'crescent'
             ? 0.18 + Math.random() * 0.28
-            : (0.15 + Math.random() * 0.55) * (1 - t * 0.55),
+            // Brightens toward the top-right, leading the eye to the moon
+            : (0.15 + Math.random() * 0.55) * (0.5 + t * 0.5),
           twinklePhase: Math.random() * Math.PI * 2,
           twinkleSpeed: 0.0004 + Math.random() * 0.0012,
           driftAmp: 0.4 + Math.random() * 1.8,
@@ -142,7 +143,7 @@ export function HeroCelestialTrail() {
         const { x, y } = bezierPoint(t, w, h)
         const r = 28 + t * 50
         const g = ctx!.createRadialGradient(x, y, 0, x, y, r)
-        g.addColorStop(0, `rgba(34, 197, 94, ${0.07 * (1 - t * 0.5)})`)
+        g.addColorStop(0, `rgba(34, 197, 94, ${0.07 * (0.6 + t * 0.4)})`)
         g.addColorStop(1, 'rgba(34, 197, 94, 0)')
         ctx!.fillStyle = g
         ctx!.beginPath()

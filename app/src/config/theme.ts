@@ -11,14 +11,14 @@ export const PALETTE = {
   page:    '#030408',
   navbar:  '#050505',
   navbarGlass: 'rgba(8, 8, 8, 0.42)',
-  card:    '#0A0A0A',
-  cardAlt: '#070707',
-  modal:   '#0C0C0C',
-  input:   '#080808',
+  card:    '#0B0E0C',
+  cardAlt: '#080B09',
+  modal:   '#0D110E',
+  input:   '#090C0A',
 
   // Borders
-  border:       '#1C1C1C',
-  borderHover:  '#2E2E2E',
+  border:       '#1D231F',
+  borderHover:  '#2E3630',
   borderActive: '#22C55E',
 
   // Text
@@ -27,12 +27,13 @@ export const PALETTE = {
   muted:    '#94A3B8',
   disabled: '#64748B',
 
-  // Shadows — giant, soft, faintly emerald-tinted for depth (Apple/Linear feel)
-  shadowSm: '0 8px 24px -8px rgba(0,0,0,0.5), 0 2px 10px rgba(6,20,12,0.35)',
-  shadowMd: '0 22px 50px -16px rgba(0,0,0,0.55), 0 6px 20px rgba(8,30,18,0.32)',
-  shadowLg: '0 40px 90px -24px rgba(0,0,0,0.6), 0 12px 40px rgba(10,40,24,0.3)',
+  // Shadows — inset top highlight (lifted glass edge) + deep soft drop so
+  // surfaces float off the near-black page instead of blending into it
+  shadowSm: 'inset 0 1px 0 rgba(255,255,255,0.045), 0 10px 28px -10px rgba(0,0,0,0.65), 0 3px 10px rgba(0,0,0,0.4)',
+  shadowMd: 'inset 0 1px 0 rgba(255,255,255,0.05), 0 24px 55px -18px rgba(0,0,0,0.7), 0 8px 22px rgba(0,0,0,0.42), 0 0 44px rgba(16,95,58,0.1)',
+  shadowLg: 'inset 0 1px 0 rgba(255,255,255,0.05), 0 44px 95px -26px rgba(0,0,0,0.75), 0 14px 42px rgba(0,0,0,0.48), 0 0 64px rgba(16,95,58,0.12)',
   shadowGreen: '0 0 60px rgba(34,197,94,0.14)',
-  shadow:   '0 8px 24px -8px rgba(0,0,0,0.5), 0 2px 10px rgba(6,20,12,0.35)',
+  shadow:   'inset 0 1px 0 rgba(255,255,255,0.045), 0 10px 28px -10px rgba(0,0,0,0.65), 0 3px 10px rgba(0,0,0,0.4)',
 
   // Radius (as CSS strings for style props)
   radiusBtn:   '14px',

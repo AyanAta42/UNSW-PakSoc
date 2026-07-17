@@ -68,11 +68,15 @@ export function HeroBanner({ banner, loading }: Props) {
         {/* Layer 1: Dark emerald gradient */}
         <div ref={bgRef} aria-hidden className="absolute inset-0 motion-parallax-layer motion-hero-gradient" />
 
-        {/* Layer 2: Soft aurora + right-side spotlight */}
+        {/* Layer 2: Soft aurora (right) + spotlight + crescent moon */}
         <div ref={glowRef} aria-hidden className="absolute inset-0 motion-parallax-layer">
-          <div className="absolute -left-[8%] -top-[35%] w-[55%] h-[160%] motion-hero-aurora"
-            style={{ background: 'radial-gradient(closest-side, rgba(34,197,94,0.3), rgba(34,197,94,0.1) 55%, transparent 80%)', opacity: 0.45 }} />
+          <div className="absolute -right-[8%] -top-[35%] w-[55%] h-[160%] motion-hero-aurora"
+            style={{ background: 'radial-gradient(closest-side, rgba(34,197,94,0.3), rgba(34,211,238,0.08) 55%, transparent 80%)', opacity: 0.5 }} />
           <div className="motion-hero-spotlight" />
+          <div className="hero-moon-wrap">
+            <div className="hero-moon" />
+            <div className="hero-moon-star" />
+          </div>
         </div>
 
         {/* Layer 3: Celestial trail (idle + lazy chunk) + faint grain */}

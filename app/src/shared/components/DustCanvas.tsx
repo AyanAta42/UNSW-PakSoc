@@ -23,10 +23,12 @@ interface Star {
   twinkleSpeed: number
 }
 
-/** Fewer particles on coarse/low-DPR screens keeps the loop cheap. */
+/** Fewer particles on phones / high-DPR screens keeps the loop cheap. */
 const HI_DPR = typeof window !== 'undefined' && (window.devicePixelRatio || 1) > 1.5
-const DUST_COUNT = HI_DPR ? 16 : 20
-const STAR_COUNT = HI_DPR ? 12 : 16
+const LITE = typeof window !== 'undefined'
+  && window.matchMedia('(max-width: 1023px), (pointer: coarse)').matches
+const DUST_COUNT = LITE ? 10 : HI_DPR ? 16 : 20
+const STAR_COUNT = LITE ? 12 : HI_DPR ? 12 : 16
 
 /**
  * Single-canvas dust motes + pinned twinkling stars (x/y/opacity only).

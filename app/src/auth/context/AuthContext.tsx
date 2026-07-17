@@ -11,16 +11,22 @@ export interface AuthCtx {
 
 const AuthContext = createContext<AuthCtx | null>(null)
 
-/** Supabase persists sessions as `sb-<ref>-auth-token` — cheap check that
- *  avoids parsing ~200KB of supabase-js for anonymous visitors. */
-function hasStoredSession(): boolean {
+/** Supabase persists sessions as `sb-<ref>-auth-token` JSON. Reading it directly
+ *  lets us show the logged-in UI instantly without parsing ~200KB of supabase-js;
+ *  the real client reconciles (refresh/sign-out) once it boots. */
+function readStoredSession(): Session | null {
   try {
     for (let i = 0; i < localStorage.length; i++) {
       const k = localStorage.key(i)
-      if (k?.startsWith('sb-') && k.endsWith('-auth-token')) return true
+      if (k?.startsWith('sb-') && k.endsWith('-auth-token')) {
+        const raw = localStorage.getItem(k)
+        if (!raw) return null
+        const parsed = JSON.parse(raw) as Session
+        return parsed?.user ? parsed : null
+      }
     }
-  } catch { /* private mode */ }
-  return false
+  } catch { /* private mode / corrupt entry */ }
+  return null
 }
 
 /**
@@ -29,8 +35,8 @@ function hasStoredSession(): boolean {
  * login interaction or after a long idle.
  */
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [user, setUser] = useState<User | null>(null)
-  const [session, setSession] = useState<Session | null>(null)
+  const [session, setSession] = useState<Session | null>(readStoredSession)
+  const [user, setUser] = useState<User | null>(() => session?.user ?? null)
   const [loading, setLoading] = useState(false)
 
   useEffect(() => {
@@ -79,9 +85,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         fallbackId = setTimeout(() => { void boot() }, 12_000)
       }
     }
-    // Anonymous visitors never need supabase-js — skip the idle boot entirely
+    // Auth pages load the supabase chunk anyway — boot now so the
+    // onAuthStateChange subscription exists before the post-login redirect.
+    // Anonymous visitors elsewhere never need supabase-js — skip the idle boot
     // and let the pointer-down handler load it on login intent.
-    if (hasStoredSession()) fallbackId = setTimeout(scheduleIdle, 5_000)
+    const path = window.location.pathname
+    if (path === '/login' || path.startsWith('/auth/')) {
+      void boot()
+    } else if (readStoredSession()) {
+      fallbackId = setTimeout(scheduleIdle, 5_000)
+    }
 
     return () => {
       alive = false

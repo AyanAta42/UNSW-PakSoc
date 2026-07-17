@@ -12,9 +12,8 @@ import { MobileEventSheet } from './components/MobileEventSheet'
 import { useNavigate } from 'react-router-dom'
 import { ACCENT, PALETTE } from '@/config/theme'
 
-const AmbientBackground = lazy(() =>
-  import('@/shared/components/AmbientBackground').then(m => ({ default: m.AmbientBackground })),
-)
+import { AmbientBackground } from '@/shared/components/AmbientBackground'
+
 const LocationSidebar = lazy(() =>
   import('./components/LocationSidebar').then(m => ({ default: m.LocationSidebar })),
 )
@@ -61,7 +60,6 @@ export default function HomePage() {
   const navigate = useNavigate()
   const { user, avatarUrl: authAvatar } = useAuth()
   const { events, loading, ready: eventsReady } = usePublicEvents()
-  const [ambientReady, setAmbientReady] = useState(false)
   const [avatarUrl, setAvatarUrl] = useState<string | undefined>()
   const [avatarBroken, setAvatarBroken] = useState(false)
   const [selectedId, setSelectedId] = useState<string | null>(null)
@@ -73,13 +71,9 @@ export default function HomePage() {
 
   useEffect(() => {
     if (!eventsReady) return
-    // Fonts + ambient after the timer/popups are already live
+    // Fonts after the timer/popups are already live
     const fontsId = window.setTimeout(loadFonts, 1500)
-    const ambientId = window.setTimeout(() => setAmbientReady(true), 2500)
-    return () => {
-      clearTimeout(fontsId)
-      clearTimeout(ambientId)
-    }
+    return () => clearTimeout(fontsId)
   }, [eventsReady])
 
   useEffect(() => {
@@ -137,17 +131,15 @@ export default function HomePage() {
 
   return (
     <div style={{
-      background: PALETTE.page,
+      // Same static aurora tint as the html shell — the animated layers fade
+      // in over it, so the background never pops
+      background: `radial-gradient(58vw 55vh at 88% -8%, rgba(34,197,94,0.13), transparent 68%) no-repeat ${PALETTE.page}`,
       color: PALETTE.dark,
       fontFamily: 'system-ui, sans-serif',
       minHeight: '100vh',
       position: 'relative',
     }}>
-      {ambientReady && (
-        <Suspense fallback={null}>
-          <AmbientBackground />
-        </Suspense>
-      )}
+      <AmbientBackground />
 
       <Navbar
         user={user}
