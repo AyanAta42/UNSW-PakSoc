@@ -3,7 +3,7 @@
 @tailwind utilities;
 
 html {
-  background: #030303;
+  background: #030408;
   color-scheme: dark;
   scroll-behavior: smooth;
   overflow-x: hidden;
@@ -173,6 +173,12 @@ body {
   0%   { transform: translate(-52%, -3%) scale(1) rotate(-1.5deg); }
   50%  { transform: translate(-48%, 3%) scale(1.06) rotate(1.5deg); }
   100% { transform: translate(-51%, -1%) scale(1.02) rotate(-1deg); }
+}
+
+@keyframes auroraRibbonSway {
+  0%   { transform: translate3d(-4%, -2%, 0) rotate(10deg) scaleY(1); }
+  50%  { transform: translate3d(3%, 2%, 0) rotate(14deg) scaleY(1.08); }
+  100% { transform: translate3d(-2%, 0%, 0) rotate(9deg) scaleY(1.02); }
 }
 
 @keyframes grainShift {
@@ -536,15 +542,16 @@ body {
 
 .ambient-layer-a {
   background:
-    radial-gradient(38% 38% at 25% 30%, rgba(34, 197, 94, 0.09), transparent 62%),
-    radial-gradient(42% 42% at 78% 72%, rgba(20, 83, 45, 0.12), transparent 62%);
+    radial-gradient(38% 38% at 25% 30%, rgba(34, 197, 94, 0.14), transparent 62%),
+    radial-gradient(42% 42% at 78% 72%, rgba(16, 95, 58, 0.17), transparent 62%);
   animation: ambientDriftA var(--ambient-slow) ease-in-out infinite alternate;
 }
 
 .ambient-layer-b {
   background:
-    radial-gradient(30% 30% at 80% 22%, rgba(14, 165, 233, 0.035), transparent 60%),
-    radial-gradient(34% 34% at 22% 78%, rgba(34, 197, 94, 0.05), transparent 60%);
+    radial-gradient(30% 30% at 80% 22%, rgba(34, 211, 238, 0.08), transparent 60%),
+    radial-gradient(26% 30% at 12% 18%, rgba(139, 92, 246, 0.06), transparent 60%),
+    radial-gradient(34% 34% at 22% 78%, rgba(34, 197, 94, 0.07), transparent 60%);
   animation: ambientDriftB 38s ease-in-out infinite alternate;
 }
 
@@ -554,13 +561,40 @@ body {
   left: 50%;
   width: 110vw;
   height: 85vh;
-  opacity: 0.07;
+  opacity: 0.12;
   /* No filter: blur() here — a 160px blur over a full-viewport layer stalls
-     phone GPUs for seconds on first raster. The gradient is already soft. */
-  background: radial-gradient(closest-side, rgba(34, 197, 94, 0.7), rgba(20, 83, 45, 0.35) 50%, transparent 78%);
+     phone GPUs for seconds on first raster. The gradients are already soft. */
+  background:
+    radial-gradient(42% 58% at 32% 38%, rgba(34, 197, 94, 0.6), transparent 72%),
+    radial-gradient(36% 52% at 58% 28%, rgba(34, 211, 238, 0.42), transparent 70%),
+    radial-gradient(44% 60% at 76% 52%, rgba(139, 92, 246, 0.32), transparent 74%);
   transform: translate(-50%, 0);
   backface-visibility: hidden;
   animation: auroraFloat 34s ease-in-out infinite alternate;
+}
+
+/* Tall aurora curtain sweeping green → teal → cyan → violet. Soft edges come
+   from the gradient stops + radial mask, not filter: blur() (GPU-safe). */
+.ambient-aurora-ribbon {
+  position: absolute;
+  top: -35%;
+  left: 16%;
+  width: 66vw;
+  height: 150vh;
+  opacity: 0.055;
+  background: linear-gradient(
+    100deg,
+    transparent 22%,
+    rgba(34, 197, 94, 0.55) 38%,
+    rgba(45, 212, 191, 0.5) 50%,
+    rgba(34, 211, 238, 0.4) 60%,
+    rgba(139, 92, 246, 0.32) 70%,
+    transparent 84%
+  );
+  -webkit-mask-image: radial-gradient(55% 55% at 50% 42%, #000 30%, transparent 100%);
+  mask-image: radial-gradient(55% 55% at 50% 42%, #000 30%, transparent 100%);
+  backface-visibility: hidden;
+  animation: auroraRibbonSway 44s ease-in-out infinite alternate;
 }
 
 .ambient-grain {
@@ -599,6 +633,7 @@ body {
 /* Pause ambient/hero loops when tab hidden or a modal/sheet is open */
 .ambient-paused .ambient-layer,
 .ambient-paused .ambient-aurora,
+.ambient-paused .ambient-aurora-ribbon,
 .ambient-paused .ambient-grain,
 .ambient-paused .motion-hero-gradient,
 .ambient-paused .motion-hero-spotlight,
@@ -613,6 +648,7 @@ body {
 .ambient-paused .motion-skeleton::after,
 .modal-open .ambient-layer,
 .modal-open .ambient-aurora,
+.modal-open .ambient-aurora-ribbon,
 .modal-open .ambient-grain,
 .modal-open .motion-hero-gradient,
 .modal-open .motion-hero-spotlight,

@@ -49,6 +49,7 @@ export function AmbientBackground() {
         <div className="ambient-layer ambient-layer-a" />
         <div className="ambient-layer ambient-layer-b" />
         <div className="ambient-aurora" />
+        <div className="ambient-aurora-ribbon" />
         {!isLiteDevice() && <div className="ambient-grain" />}
       </div>
       {enhance && (

@@ -1,3 +1,4 @@
+import { useEffect, useRef } from 'react'
 import type { DbEvent } from '@/events/types/Event'
 import { DeferredMapEmbed } from '@/maps/components/DeferredMapEmbed'
 import { mapEmbedSrc } from '@/maps/components/CachedMapEmbed'
@@ -6,11 +7,34 @@ import { ACCENT, PALETTE } from '@/config/theme'
 
 interface Props { mapEvent: DbEvent | null; featured: DbEvent | null; now: Date }
 
+const STICKY_TOP = 72
+const BOTTOM_GAP = 20
+
 export function LocationSidebar({ mapEvent, featured, now }: Props) {
   const desktopMapSrc = mapEvent ? mapEmbedSrc(mapEvent.location) : null
+  const ref = useRef<HTMLDivElement>(null)
+
+  // When the sidebar is taller than the viewport, shift the sticky anchor up so
+  // it pins by its bottom edge — the timeline ends level with the story wall.
+  useEffect(() => {
+    const el = ref.current
+    if (!el) return
+    const update = () => {
+      const overflow = el.offsetHeight + STICKY_TOP + BOTTOM_GAP - window.innerHeight
+      el.style.top = `${overflow > 0 ? STICKY_TOP - overflow : STICKY_TOP}px`
+    }
+    update()
+    const ro = new ResizeObserver(update)
+    ro.observe(el)
+    window.addEventListener('resize', update)
+    return () => {
+      ro.disconnect()
+      window.removeEventListener('resize', update)
+    }
+  }, [])
 
   return (
-    <div className="hidden lg:flex flex-col gap-4 flex-[3] sticky top-[72px]">
+    <div ref={ref} className="hidden lg:flex flex-col gap-4 flex-[3] sticky top-[72px]">
       <div className="motion-glow">
       <div style={{ background: PALETTE.card, border: `1px solid ${PALETTE.border}`, borderRadius: 18, boxShadow: PALETTE.shadowMd }}
         className="overflow-hidden flex flex-col">

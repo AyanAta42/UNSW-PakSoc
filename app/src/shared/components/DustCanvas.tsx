@@ -14,11 +14,24 @@ interface Particle {
   fadeSpeed: number
 }
 
+interface Star {
+  x: number
+  y: number
+  arm: number
+  baseOpacity: number
+  twinklePhase: number
+  twinkleSpeed: number
+}
+
 /** Fewer particles on coarse/low-DPR screens keeps the loop cheap. */
-const COUNT = typeof window !== 'undefined' && (window.devicePixelRatio || 1) > 1.5 ? 28 : 36
+const HI_DPR = typeof window !== 'undefined' && (window.devicePixelRatio || 1) > 1.5
+const DUST_COUNT = HI_DPR ? 16 : 20
+const STAR_COUNT = HI_DPR ? 12 : 16
 
 /**
- * Single-canvas dust motes (transform-equivalent: x/y/opacity only).
+ * Single-canvas dust motes + pinned twinkling stars (x/y/opacity only).
+ * Stars are two crossed fillRects — cheaper than arc paths, and the
+ * overlapping centre pixel composites brighter for free.
  * No canvas shadows — those were a per-frame paint tax. Pauses when hidden.
  */
 export function DustCanvas() {
@@ -36,6 +49,19 @@ export function DustCanvas() {
     let raf = 0
     let last = performance.now()
 
+    function spawnStar(): Star {
+      return {
+        x: Math.random() * width,
+        y: Math.random() * height,
+        arm: 1.4 + Math.random() * 2.2,
+        baseOpacity: 0.25 + Math.random() * 0.5,
+        twinklePhase: Math.random() * Math.PI * 2,
+        twinkleSpeed: 0.0006 + Math.random() * 0.0014,
+      }
+    }
+
+    const stars: Star[] = Array.from({ length: STAR_COUNT }, spawnStar)
+
     function resize() {
       width = window.innerWidth
       height = window.innerHeight
@@ -45,6 +71,8 @@ export function DustCanvas() {
       canvas!.style.width = `${width}px`
       canvas!.style.height = `${height}px`
       ctx!.setTransform(dpr, 0, 0, dpr, 0, 0)
+      // Re-scatter so stars never sit stranded outside the new viewport
+      for (let i = 0; i < stars.length; i++) stars[i] = spawnStar()
     }
 
     function spawn(fromBottom: boolean): Particle {
@@ -56,14 +84,14 @@ export function DustCanvas() {
         drift: (Math.random() - 0.5) * 0.14,
         driftPhase: Math.random() * Math.PI * 2,
         driftSpeed: 0.0005 + Math.random() * 0.001,
-        baseOpacity: 0.05 + Math.random() * 0.22,
+        baseOpacity: 0.09 + Math.random() * 0.26,
         fadePhase: Math.random() * Math.PI * 2,
         fadeSpeed: 0.0003 + Math.random() * 0.0007,
       }
     }
 
     resize()
-    const particles: Particle[] = Array.from({ length: COUNT }, () => spawn(false))
+    const particles: Particle[] = Array.from({ length: DUST_COUNT }, () => spawn(false))
 
     function frame(now: number) {
       raf = requestAnimationFrame(frame)
@@ -71,6 +99,16 @@ export function DustCanvas() {
       last = now
 
       ctx!.clearRect(0, 0, width, height)
+
+      for (const s of stars) {
+        s.twinklePhase += s.twinkleSpeed * dt
+        const tw = 0.5 + 0.5 * Math.sin(s.twinklePhase)
+        // Squared twinkle: long dim rests with brief bright sparkles
+        const opacity = s.baseOpacity * (0.18 + 0.82 * tw * tw)
+        ctx!.fillStyle = `rgba(214, 242, 250, ${opacity.toFixed(3)})`
+        ctx!.fillRect(s.x - s.arm, s.y - 0.5, s.arm * 2, 1)
+        ctx!.fillRect(s.x - 0.5, s.y - s.arm, 1, s.arm * 2)
+      }
 
       for (const p of particles) {
         p.y -= p.vy * dt * 0.06

@@ -209,7 +209,7 @@ export default function HomePage() {
           </div>
         </div>
 
-        <div className="hidden lg:block flex-[3] min-w-0">
+        <div className="hidden lg:block flex-[3] min-w-0 self-stretch">
           <Suspense fallback={<div className="motion-skeleton h-80 rounded-xl" />}>
             <LocationSidebar mapEvent={featured ?? banner} featured={featured} now={now} />
           </Suspense>

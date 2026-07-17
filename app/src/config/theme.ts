@@ -8,7 +8,7 @@ export const ACCENT_TEXT  = '#FFFFFF'
 
 // ─── Backgrounds ─────────────────────────────────────────────────────────────
 export const PALETTE = {
-  page:    '#030303',
+  page:    '#030408',
   navbar:  '#050505',
   navbarGlass: 'rgba(8, 8, 8, 0.42)',
   card:    '#0A0A0A',
