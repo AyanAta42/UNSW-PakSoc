@@ -129,7 +129,7 @@ export default defineConfig(({ mode }) => {
           } else {
             out = out.replace('<!-- EVENTS_BOOT -->', '')
           }
-          out = out.replace('<!-- BOOT_UI -->', bootUiScript())
+          out = out.replace('<!--BOOT_UI-->', bootUiScript())
           return out
         },
       },
