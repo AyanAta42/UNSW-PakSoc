@@ -1,13 +1,10 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import {
-  getCachedPublicEvents,
-  loadPublicEvents,
-} from '@/events/services/publicEventsBootstrap'
-import { AllEventsCard }     from '@/events/components/AllEventsCard'
-import { EventDetailModal }  from '@/events/components/EventDetailModal'
-import type { DbEvent }      from '@/events/types/Event'
-import { ACCENT, PALETTE }   from '@/config/theme'
+import { usePublicEvents } from '@/events/context/PublicEventsContext'
+import { AllEventsCard } from '@/events/components/AllEventsCard'
+import { EventDetailModal } from '@/events/components/EventDetailModal'
+import type { DbEvent } from '@/events/types/Event'
+import { ACCENT, PALETTE } from '@/config/theme'
 
 function EventSection({ title, color, events, onSelect }: {
   title: string; color: string; events: DbEvent[]; onSelect: (ev: DbEvent) => void
@@ -29,15 +26,9 @@ function EventSection({ title, color, events, onSelect }: {
 }
 
 export default function AllEventsPage() {
-  const navigate              = useNavigate()
-  const cached                = getCachedPublicEvents()
-  const [events, setEvents]   = useState<DbEvent[]>(() => cached ?? [])
-  const [loading, setLoading] = useState(() => !cached)
+  const navigate = useNavigate()
+  const { events, loading } = usePublicEvents()
   const [selected, setSelected] = useState<DbEvent | null>(null)
-
-  useEffect(() => {
-    loadPublicEvents().then(setEvents).catch(console.error).finally(() => setLoading(false))
-  }, [])
 
   useEffect(() => {
     const open = !!selected
@@ -49,9 +40,9 @@ export default function AllEventsPage() {
     }
   }, [selected])
 
-  const now      = new Date()
+  const now = new Date()
   const upcoming = events.filter(e => new Date(e.time) > now).sort((a, b) => +new Date(a.time) - +new Date(b.time))
-  const ended    = events.filter(e => new Date(e.time) <= now).sort((a, b) => +new Date(b.time) - +new Date(a.time))
+  const ended = events.filter(e => new Date(e.time) <= now).sort((a, b) => +new Date(b.time) - +new Date(a.time))
 
   return (
     <div style={{ minHeight: '100vh', background: PALETTE.page, fontFamily: 'system-ui, sans-serif' }}>
@@ -65,9 +56,9 @@ export default function AllEventsPage() {
       </nav>
 
       <div className="max-w-[1100px] mx-auto px-6 md:px-8 py-8">
-        {loading && (
+        {loading && events.length === 0 && (
           <div className="grid grid-cols-[repeat(auto-fill,minmax(260px,1fr))] gap-4">
-            {[1,2,3,4].map(i => (
+            {[1, 2, 3, 4].map(i => (
               <div key={i} className="motion-skeleton h-44" style={{ borderRadius: 18, border: `1px solid ${PALETTE.border}` }} />
             ))}
           </div>
@@ -77,9 +68,9 @@ export default function AllEventsPage() {
             <div className="text-base font-bold" style={{ color: PALETTE.muted }}>No events yet — check back soon.</div>
           </div>
         )}
-        {!loading && <>
-          <EventSection title="Upcoming" color={ACCENT}          events={upcoming} onSelect={setSelected} />
-          <EventSection title="Ended"    color={PALETTE.disabled} events={ended}    onSelect={setSelected} />
+        {events.length > 0 && <>
+          <EventSection title="Upcoming" color={ACCENT} events={upcoming} onSelect={setSelected} />
+          <EventSection title="Ended" color={PALETTE.disabled} events={ended} onSelect={setSelected} />
         </>}
       </div>
 

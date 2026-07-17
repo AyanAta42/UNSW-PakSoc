@@ -1,8 +1,5 @@
 import { useState, useEffect, useMemo, lazy, Suspense } from 'react'
-import {
-  getCachedPublicEvents,
-  loadPublicEvents,
-} from '@/events/services/publicEventsBootstrap'
+import { usePublicEvents } from '@/events/context/PublicEventsContext'
 import { useAuth } from '@/auth/hooks/useAuth'
 import type { DbEvent } from '@/events/types/Event'
 import { Navbar } from './components/Navbar'
@@ -10,9 +7,9 @@ import { HeroBanner } from './components/HeroBanner'
 import { PublicEventCard } from './components/PublicEventCard'
 import { EventCardSkeleton } from './components/EventCardSkeleton'
 import { Footer } from './components/Footer'
+import { MobileEventSheet } from './components/MobileEventSheet'
 import { useNavigate } from 'react-router-dom'
 import { ACCENT, PALETTE } from '@/config/theme'
-import { parseTimeline } from '@/events/utils/parseTimeline'
 
 const AmbientBackground = lazy(() =>
   import('@/shared/components/AmbientBackground').then(m => ({ default: m.AmbientBackground })),
@@ -23,19 +20,9 @@ const LocationSidebar = lazy(() =>
 const SocialWall = lazy(() =>
   import('./components/SocialWall').then(m => ({ default: m.SocialWall })),
 )
-const MobileEventSheet = lazy(() =>
-  import('./components/MobileEventSheet').then(m => ({ default: m.MobileEventSheet })),
-)
 const EditProfileModal = lazy(() =>
   import('./components/EditProfileModal').then(m => ({ default: m.EditProfileModal })),
 )
-
-function normalizeEvents(rows: DbEvent[]): DbEvent[] {
-  return rows.map(ev => ({
-    ...ev,
-    timeline: parseTimeline((ev as unknown as { timeline?: unknown }).timeline),
-  }))
-}
 
 function loadFonts() {
   if (document.getElementById('paksoc-fonts')) return
@@ -43,20 +30,17 @@ function loadFonts() {
   mark.id = 'paksoc-fonts'
   document.head.appendChild(mark)
 
-  const pre1 = document.createElement('link')
-  pre1.rel = 'preconnect'
-  pre1.href = 'https://fonts.googleapis.com'
-  document.head.appendChild(pre1)
-  const pre2 = document.createElement('link')
-  pre2.rel = 'preconnect'
-  pre2.href = 'https://fonts.gstatic.com'
-  pre2.crossOrigin = 'anonymous'
-  document.head.appendChild(pre2)
-  const pre3 = document.createElement('link')
-  pre3.rel = 'preconnect'
-  pre3.href = 'https://api.fontshare.com'
-  pre3.crossOrigin = 'anonymous'
-  document.head.appendChild(pre3)
+  for (const [rel, href, cross] of [
+    ['preconnect', 'https://fonts.googleapis.com', false],
+    ['preconnect', 'https://fonts.gstatic.com', true],
+    ['preconnect', 'https://api.fontshare.com', true],
+  ] as const) {
+    const link = document.createElement('link')
+    link.rel = rel
+    link.href = href
+    if (cross) link.crossOrigin = 'anonymous'
+    document.head.appendChild(link)
+  }
 
   for (const href of [
     'https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap',
@@ -71,19 +55,10 @@ function loadFonts() {
   }
 }
 
-function prefetchHomeOverlays() {
-  void import('./components/MobileEventSheet')
-  void import('./components/EditProfileModal')
-  void import('./components/LocationSidebar')
-}
-
 export default function HomePage() {
   const navigate = useNavigate()
   const { user, avatarUrl: authAvatar } = useAuth()
-  const cached = getCachedPublicEvents()
-  const [events, setEvents] = useState<DbEvent[]>(() => (cached ? normalizeEvents(cached) : []))
-  const [eventsReady, setEventsReady] = useState(() => !!cached)
-  const [loading, setLoading] = useState(() => !cached)
+  const { events, loading, ready: eventsReady } = usePublicEvents()
   const [extrasReady, setExtrasReady] = useState(false)
   const [avatarUrl, setAvatarUrl] = useState<string | undefined>()
   const [avatarBroken, setAvatarBroken] = useState(false)
@@ -94,29 +69,13 @@ export default function HomePage() {
   const meta = user?.user_metadata ?? {}
   const initial = (meta.full_name ?? meta.name ?? user?.email ?? '?')[0]?.toUpperCase()
 
+  // After events are ready, load non-critical chrome once
   useEffect(() => {
-    let alive = true
-    loadPublicEvents()
-      .then(next => {
-        if (!alive) return
-        setEvents(normalizeEvents(next))
-        setEventsReady(true)
-      })
-      .catch(console.error)
-      .finally(() => {
-        if (!alive) return
-        setLoading(false)
-        setEventsReady(true)
-        window.dispatchEvent(new Event('paksoc:events-ready'))
-        // ONLY after events are on screen: fonts, ambience, overlays, below-fold
-        loadFonts()
-        window.setTimeout(() => {
-          setExtrasReady(true)
-          prefetchHomeOverlays()
-        }, 50)
-      })
-    return () => { alive = false }
-  }, [])
+    if (!eventsReady) return
+    loadFonts()
+    const t = window.setTimeout(() => setExtrasReady(true), 50)
+    return () => clearTimeout(t)
+  }, [eventsReady])
 
   useEffect(() => {
     setAvatarBroken(false)
@@ -174,7 +133,6 @@ export default function HomePage() {
       minHeight: '100vh',
       position: 'relative',
     }}>
-      {/* Ambience waits until events are displayed */}
       {extrasReady && (
         <Suspense fallback={null}>
           <AmbientBackground />
@@ -194,7 +152,6 @@ export default function HomePage() {
         <div className="flex flex-col gap-0 lg:gap-5 flex-[7] min-w-0 w-full">
           <HeroBanner banner={banner} loading={loading && !banner} />
 
-          {/* Events: always visible immediately — no reveal animation delay */}
           <div className="bg-transparent rounded-none px-4 py-4 lg:px-6 lg:py-5">
             <div className="flex items-center justify-between mb-5">
               <span className="text-[10px] font-bold tracking-widest uppercase" style={{ color: PALETTE.muted }}>Events</span>
@@ -254,10 +211,9 @@ export default function HomePage() {
         )}
       </div>
 
+      {/* Eager sheet — opens instantly on first tap (no lazy chunk wait) */}
       {mobileEvent && (
-        <Suspense fallback={null}>
-          <MobileEventSheet event={mobileEvent} now={now} onClose={() => setMobileEvent(null)} />
-        </Suspense>
+        <MobileEventSheet event={mobileEvent} now={now} onClose={() => setMobileEvent(null)} />
       )}
       {editOpen && user && (
         <Suspense fallback={null}>
