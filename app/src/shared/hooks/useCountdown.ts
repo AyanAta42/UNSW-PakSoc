@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useLayoutEffect, useState } from 'react'
 
 interface Countdown {
   days: number
@@ -20,41 +20,25 @@ function calc(iso: string): Countdown {
   }
 }
 
-/** Live countdown — computes the first value synchronously so digits aren't stuck at 00. */
+/**
+ * Live countdown — value is always computed fresh on render (instant correct digits),
+ * and a layout-effect interval forces a re-render every second so it ticks immediately.
+ */
 export function useCountdown(iso: string | undefined): Countdown {
-  const [cd, setCd] = useState<Countdown>(() => (iso ? calc(iso) : ZERO))
+  const [, setBeat] = useState(0)
 
-  useEffect(() => {
-    if (!iso) {
-      setCd(ZERO)
-      return
-    }
-
-    const tick = () => setCd(calc(iso))
-    tick() // immediate — don't wait for the first interval
-
-    let id: ReturnType<typeof setInterval> | undefined
-    const start = () => {
-      if (id !== undefined || document.hidden) return
-      id = setInterval(tick, 1000)
-    }
-    const stop = () => {
-      if (id === undefined) return
-      clearInterval(id)
-      id = undefined
-    }
-    const onVisibility = () => {
-      if (document.hidden) stop()
-      else { tick(); start() }
-    }
-
-    start()
-    document.addEventListener('visibilitychange', onVisibility)
+  useLayoutEffect(() => {
+    if (!iso) return
+    const id = window.setInterval(() => {
+      if (!document.hidden) setBeat(n => n + 1)
+    }, 1000)
+    const onVis = () => { if (!document.hidden) setBeat(n => n + 1) }
+    document.addEventListener('visibilitychange', onVis)
     return () => {
-      stop()
-      document.removeEventListener('visibilitychange', onVisibility)
+      clearInterval(id)
+      document.removeEventListener('visibilitychange', onVis)
     }
   }, [iso])
 
-  return cd
+  return iso ? calc(iso) : ZERO
 }

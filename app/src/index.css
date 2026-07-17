@@ -262,15 +262,12 @@ body {
   pointer-events: none;
 }
 
+/* Hero content visible immediately — no opacity:0 gate on the live timer */
 .motion-hero-title,
 .motion-hero-details,
 .motion-hero-actions {
-  opacity: 0;
-  animation: fadeUp var(--motion-slow) var(--motion-ease) forwards;
+  opacity: 1;
 }
-
-.motion-hero-details { animation-delay: 100ms; }
-.motion-hero-actions { animation-delay: 180ms; }
 
 /* ─── Reveal / stagger ─────────────────────────────────────────────────────── */
 .motion-reveal {

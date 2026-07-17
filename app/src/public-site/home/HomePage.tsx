@@ -75,9 +75,13 @@ export default function HomePage() {
 
   useEffect(() => {
     if (!eventsReady) return
-    loadFonts()
-    const t = window.setTimeout(() => setAmbientReady(true), 300)
-    return () => clearTimeout(t)
+    // Fonts + ambient after the timer/popups are already live
+    const fontsId = window.setTimeout(loadFonts, 1500)
+    const ambientId = window.setTimeout(() => setAmbientReady(true), 2500)
+    return () => {
+      clearTimeout(fontsId)
+      clearTimeout(ambientId)
+    }
   }, [eventsReady])
 
   useEffect(() => {
@@ -210,9 +214,13 @@ export default function HomePage() {
         </div>
 
         <div className="hidden lg:block flex-[3] min-w-0">
-          <Suspense fallback={<div className="motion-skeleton h-80 rounded-xl" />}>
-            <LocationSidebar mapEvent={featured ?? banner} featured={featured} now={now} />
-          </Suspense>
+          {ambientReady ? (
+            <Suspense fallback={<div className="motion-skeleton h-80 rounded-xl" />}>
+              <LocationSidebar mapEvent={featured ?? banner} featured={featured} now={now} />
+            </Suspense>
+          ) : (
+            <div className="motion-skeleton h-80 rounded-xl" />
+          )}
         </div>
       </div>
 
