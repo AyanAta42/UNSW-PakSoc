@@ -262,12 +262,15 @@ body {
   pointer-events: none;
 }
 
-/* Hero content must be visible on first paint — never opacity:0 while waiting on CSS/JS */
 .motion-hero-title,
 .motion-hero-details,
 .motion-hero-actions {
-  opacity: 1;
+  opacity: 0;
+  animation: fadeUp var(--motion-slow) var(--motion-ease) forwards;
 }
+
+.motion-hero-details { animation-delay: 100ms; }
+.motion-hero-actions { animation-delay: 180ms; }
 
 /* ─── Reveal / stagger ─────────────────────────────────────────────────────── */
 .motion-reveal {
@@ -650,6 +653,9 @@ body {
   }
 
   .motion-reveal,
+  .motion-hero-title,
+  .motion-hero-details,
+  .motion-hero-actions,
   .motion-stagger > * {
     opacity: 1 !important;
     transform: none !important;

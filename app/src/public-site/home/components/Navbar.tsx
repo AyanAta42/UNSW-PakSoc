@@ -33,7 +33,7 @@ export function Navbar({ user, avatarUrl, avatarBroken, initial, onAvatarError, 
               width={36}
               height={36}
               decoding="async"
-              loading="lazy"
+              fetchPriority="high"
               className="w-full h-full rounded-full object-cover"
             />
           </div>

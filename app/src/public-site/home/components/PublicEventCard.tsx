@@ -1,30 +1,22 @@
 import type { DbEvent } from '@/events/types/Event'
-import { dateParts } from '@/events/utils/dateParts'
+import { dateParts }    from '@/events/utils/dateParts'
 import { eventImageUrl } from '@/events/utils/eventImageUrl'
 import { ACCENT, PALETTE } from '@/config/theme'
 
-interface Props {
-  event: DbEvent
-  selected: boolean
-  now: Date
-  onClick: () => void
-  /** First cards get high fetch priority so posters appear with the timer. */
-  priority?: boolean
-}
+interface Props { event: DbEvent; selected: boolean; now: Date; onClick: () => void }
 
-/** Event card — image loads immediately (no idle delay). */
-export function PublicEventCard({ event: ev, selected, now, onClick, priority = false }: Props) {
+export function PublicEventCard({ event: ev, selected, now, onClick }: Props) {
   const { month, day, time } = dateParts(ev.time, ev.end_time)
-  const img = eventImageUrl(ev)
+  const img   = eventImageUrl(ev)
   const ended = new Date(ev.time) <= now
 
   return (
     <div onClick={onClick}
       style={{
-        background: PALETTE.card,
-        border: `1px solid ${selected ? ACCENT : PALETTE.border}`,
+        background:   PALETTE.card,
+        border:       `1px solid ${selected ? ACCENT : PALETTE.border}`,
         borderRadius: 18,
-        boxShadow: selected ? '0 0 40px rgba(34,197,94,0.12)' : PALETTE.shadowSm,
+        boxShadow:    selected ? '0 0 40px rgba(34,197,94,0.12)' : PALETTE.shadowSm,
       }}
       className="motion-card overflow-hidden cursor-pointer flex flex-col min-w-0 w-full">
 
@@ -35,9 +27,8 @@ export function PublicEventCard({ event: ev, selected, now, onClick, priority = 
               alt={ev.name}
               width={400}
               height={120}
-              loading={priority ? 'eager' : 'lazy'}
+              loading="lazy"
               decoding="async"
-              fetchPriority={priority ? 'high' : 'auto'}
               className="motion-card-poster w-full h-full object-cover"
             />
           : <div className="motion-card-poster w-full h-full" style={{ background: `linear-gradient(135deg, ${PALETTE.cardAlt}, ${PALETTE.card})` }} />
@@ -47,7 +38,7 @@ export function PublicEventCard({ event: ev, selected, now, onClick, priority = 
         <div className="absolute top-2 left-2 px-2.5 py-1 text-center"
           style={{ background: 'rgba(10,10,10,0.9)', border: `1px solid ${PALETTE.border}`, borderRadius: 10 }}>
           <div className="font-extrabold tracking-widest" style={{ fontSize: 9, color: ended ? PALETTE.muted : ACCENT }}>{month}</div>
-          <div className="text-base font-extrabold leading-none" style={{ color: ended ? PALETTE.muted : ACCENT }}>{day}</div>
+          <div className="text-base font-extrabold leading-none"    style={{ color: ended ? PALETTE.muted : ACCENT }}>{day}</div>
         </div>
       </div>
 

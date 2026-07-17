@@ -7,6 +7,7 @@ import { HeroBanner } from './components/HeroBanner'
 import { PublicEventCard } from './components/PublicEventCard'
 import { EventCardSkeleton } from './components/EventCardSkeleton'
 import { Footer } from './components/Footer'
+import { SocialWall } from './components/SocialWall'
 import { MobileEventSheet } from './components/MobileEventSheet'
 import { EventDetailModal } from '@/events/components/EventDetailModal'
 import { useNavigate } from 'react-router-dom'
@@ -17,9 +18,6 @@ const AmbientBackground = lazy(() =>
 )
 const LocationSidebar = lazy(() =>
   import('./components/LocationSidebar').then(m => ({ default: m.LocationSidebar })),
-)
-const SocialWall = lazy(() =>
-  import('./components/SocialWall').then(m => ({ default: m.SocialWall })),
 )
 const EditProfileModal = lazy(() =>
   import('./components/EditProfileModal').then(m => ({ default: m.EditProfileModal })),
@@ -186,30 +184,28 @@ export default function HomePage() {
                 <div className="grid w-full grid-cols-1 md:grid-cols-3 gap-4 md:hidden">
                   {phoneEvents.length === 0
                     ? <p style={{ color: PALETTE.muted }} className="text-sm m-0 col-span-full">No events yet — check back soon.</p>
-                    : phoneEvents.map((ev, i) => (
-                      <PublicEventCard key={ev.id} event={ev} selected={selectedId === ev.id || (!selectedId && ev.id === featured?.id)} now={now} priority={i < 2} onClick={() => openEvent(ev)} />
+                    : phoneEvents.map(ev => (
+                      <PublicEventCard key={ev.id} event={ev} selected={selectedId === ev.id || (!selectedId && ev.id === featured?.id)} now={now} onClick={() => openEvent(ev)} />
                     ))}
                 </div>
                 <div className="grid w-full grid-cols-1 md:grid-cols-3 gap-4 hidden md:grid">
                   {allPublic.length === 0
                     ? <p style={{ color: PALETTE.muted }} className="text-sm m-0 col-span-full">No events yet — announce some from Events Manager.</p>
-                    : allPublic.slice(0, 3).map((ev, i) => (
-                      <PublicEventCard key={ev.id} event={ev} selected={selectedId === ev.id || (!selectedId && ev.id === featured?.id)} now={now} priority={i < 2} onClick={() => openEvent(ev)} />
+                    : allPublic.slice(0, 3).map(ev => (
+                      <PublicEventCard key={ev.id} event={ev} selected={selectedId === ev.id || (!selectedId && ev.id === featured?.id)} now={now} onClick={() => openEvent(ev)} />
                     ))}
                 </div>
               </>
             )}
           </div>
 
-          {/* Social wall deferred — never blocks timer / event popups */}
+          {/* Social wall is local placeholders — always on screen, never gated */}
           <div className="bg-transparent rounded-none px-4 py-4 lg:px-6 lg:py-5">
             <div className="flex items-center justify-between mb-5">
               <span className="text-[10px] font-bold tracking-widest uppercase" style={{ color: PALETTE.muted }}>Social Wall</span>
               <a href="#" style={{ color: ACCENT }} className="text-xs font-semibold no-underline hover:opacity-80">View on Instagram →</a>
             </div>
-            <Suspense fallback={<div className="motion-skeleton h-40 rounded-xl" />}>
-              <SocialWall />
-            </Suspense>
+            <SocialWall />
           </div>
         </div>
 

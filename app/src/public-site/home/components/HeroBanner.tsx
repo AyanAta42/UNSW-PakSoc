@@ -3,6 +3,7 @@ import type { DbEvent } from '@/events/types/Event'
 import { useCountdown }    from '@/shared/hooks/useCountdown'
 import { getEventButtons, getCtaVariant } from '@/events/utils/getEventButtons'
 import { EventCtaButton }  from '@/events/components/EventCtaButton'
+import { OdometerNumber }  from '@/shared/components/OdometerNumber'
 import { prefersReducedMotion, useParallaxLayers, type ParallaxLayer } from '@/shared/motion'
 import { ACCENT, ACCENT_GLOW, PALETTE } from '@/config/theme'
 
@@ -103,17 +104,10 @@ export function HeroBanner({ banner, loading }: Props) {
               <div className="flex gap-2.5 w-fit">
                 {(['days','hrs','mins','secs'] as const).map((k, i) => {
                   const val = [cd.days, cd.hrs, cd.mins, cd.secs][i]
-                  const digits = String(Math.max(0, val)).padStart(2, '0').slice(-2)
                   return (
                     <div key={k} className="text-center min-w-[54px] md:min-w-[66px] shrink-0 px-2.5 py-2 md:px-3.5 md:py-2.5"
                       style={{ background: 'rgba(10,10,10,0.92)', border: `1px solid ${PALETTE.border}`, borderRadius: 14 }}>
-                      {/* Plain digits — visible before CSS/odometer; never blocked on stylesheet */}
-                      <div
-                        style={{ color: ACCENT_GLOW, lineHeight: 1, fontWeight: 900, fontVariantNumeric: 'tabular-nums', fontSize: 'inherit' }}
-                        className="font-black tabular-nums text-2xl md:text-[30px]"
-                      >
-                        {digits}
-                      </div>
+                      <OdometerNumber value={val} style={{ color: ACCENT_GLOW, lineHeight: 1, fontWeight: 900 }} className="font-black tabular-nums text-2xl md:text-[30px]" />
                       <div style={{ color: PALETTE.secondary, fontSize: 8 }} className="uppercase tracking-widest mt-1.5 font-bold md:text-[9px]">{k}</div>
                     </div>
                   )
