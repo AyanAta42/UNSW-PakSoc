@@ -15,7 +15,7 @@ interface Props {
  * Renders a lightweight placeholder first, then mounts CachedMapEmbed after a
  * short delay so sheet/modal open animations stay smooth.
  */
-export function DeferredMapEmbed({ src, cacheId, title, className, style, delayMs = 220 }: Props) {
+export function DeferredMapEmbed({ src, cacheId, title, className, style, delayMs = 450 }: Props) {
   const [ready, setReady] = useState(false)
 
   useEffect(() => {

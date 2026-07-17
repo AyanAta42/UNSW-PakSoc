@@ -57,7 +57,7 @@ export function MobileEventSheet({ event, now, onClose }: Props) {
   }
 
   return (
-    <div className="fixed inset-0 z-[60] lg:hidden">
+    <div className="fixed inset-0 z-[60]">
       <div
         className="absolute inset-0 bg-black/55 transition-opacity duration-[220ms]"
         style={{ opacity: closing ? 0 : Math.max(0, 1 - dragY / 500) }}

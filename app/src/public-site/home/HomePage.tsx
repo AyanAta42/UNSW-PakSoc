@@ -7,7 +7,9 @@ import { HeroBanner } from './components/HeroBanner'
 import { PublicEventCard } from './components/PublicEventCard'
 import { EventCardSkeleton } from './components/EventCardSkeleton'
 import { Footer } from './components/Footer'
+import { SocialWall } from './components/SocialWall'
 import { MobileEventSheet } from './components/MobileEventSheet'
+import { EventDetailModal } from '@/events/components/EventDetailModal'
 import { useNavigate } from 'react-router-dom'
 import { ACCENT, PALETTE } from '@/config/theme'
 
@@ -16,9 +18,6 @@ const AmbientBackground = lazy(() =>
 )
 const LocationSidebar = lazy(() =>
   import('./components/LocationSidebar').then(m => ({ default: m.LocationSidebar })),
-)
-const SocialWall = lazy(() =>
-  import('./components/SocialWall').then(m => ({ default: m.SocialWall })),
 )
 const EditProfileModal = lazy(() =>
   import('./components/EditProfileModal').then(m => ({ default: m.EditProfileModal })),
@@ -55,25 +54,29 @@ function loadFonts() {
   }
 }
 
+function isPhone(): boolean {
+  return typeof window !== 'undefined' && window.matchMedia('(max-width: 1023px)').matches
+}
+
 export default function HomePage() {
   const navigate = useNavigate()
   const { user, avatarUrl: authAvatar } = useAuth()
   const { events, loading, ready: eventsReady } = usePublicEvents()
-  const [extrasReady, setExtrasReady] = useState(false)
+  const [ambientReady, setAmbientReady] = useState(false)
   const [avatarUrl, setAvatarUrl] = useState<string | undefined>()
   const [avatarBroken, setAvatarBroken] = useState(false)
   const [selectedId, setSelectedId] = useState<string | null>(null)
-  const [mobileEvent, setMobileEvent] = useState<DbEvent | null>(null)
+  const [sheetEvent, setSheetEvent] = useState<DbEvent | null>(null)
+  const [modalEvent, setModalEvent] = useState<DbEvent | null>(null)
   const [editOpen, setEditOpen] = useState(false)
 
   const meta = user?.user_metadata ?? {}
   const initial = (meta.full_name ?? meta.name ?? user?.email ?? '?')[0]?.toUpperCase()
 
-  // After events are ready, load non-critical chrome once
   useEffect(() => {
     if (!eventsReady) return
     loadFonts()
-    const t = window.setTimeout(() => setExtrasReady(true), 50)
+    const t = window.setTimeout(() => setAmbientReady(true), 300)
     return () => clearTimeout(t)
   }, [eventsReady])
 
@@ -90,7 +93,7 @@ export default function HomePage() {
     return () => { alive = false }
   }, [user, authAvatar, eventsReady])
 
-  const overlayOpen = !!mobileEvent || editOpen
+  const overlayOpen = !!sheetEvent || !!modalEvent || editOpen
   useEffect(() => {
     document.body.style.overflow = overlayOpen ? 'hidden' : ''
     document.documentElement.classList.toggle('modal-open', overlayOpen)
@@ -113,9 +116,16 @@ export default function HomePage() {
     return { phoneEvents, allPublic, banner, featured, now }
   }, [events, selectedId])
 
+  /** Always open a popup instantly — sheet on phone, modal on desktop. */
   function openEvent(ev: DbEvent) {
     setSelectedId(ev.id)
-    if (window.matchMedia('(max-width: 1023px)').matches) setMobileEvent(ev)
+    if (isPhone()) {
+      setModalEvent(null)
+      setSheetEvent(ev)
+    } else {
+      setSheetEvent(null)
+      setModalEvent(ev)
+    }
   }
 
   function handleEditProfile() {
@@ -133,7 +143,7 @@ export default function HomePage() {
       minHeight: '100vh',
       position: 'relative',
     }}>
-      {extrasReady && (
+      {ambientReady && (
         <Suspense fallback={null}>
           <AmbientBackground />
         </Suspense>
@@ -189,31 +199,28 @@ export default function HomePage() {
             )}
           </div>
 
-          {extrasReady && (
-            <div className="bg-transparent rounded-none px-4 py-4 lg:px-6 lg:py-5">
-              <div className="flex items-center justify-between mb-5">
-                <span className="text-[10px] font-bold tracking-widest uppercase" style={{ color: PALETTE.muted }}>Social Wall</span>
-                <a href="#" style={{ color: ACCENT }} className="text-xs font-semibold no-underline hover:opacity-80">View on Instagram →</a>
-              </div>
-              <Suspense fallback={<div className="motion-skeleton h-40 rounded-xl" />}>
-                <SocialWall />
-              </Suspense>
+          {/* Social wall is local placeholders — always on screen, never gated */}
+          <div className="bg-transparent rounded-none px-4 py-4 lg:px-6 lg:py-5">
+            <div className="flex items-center justify-between mb-5">
+              <span className="text-[10px] font-bold tracking-widest uppercase" style={{ color: PALETTE.muted }}>Social Wall</span>
+              <a href="#" style={{ color: ACCENT }} className="text-xs font-semibold no-underline hover:opacity-80">View on Instagram →</a>
             </div>
-          )}
+            <SocialWall />
+          </div>
         </div>
 
-        {extrasReady && (
-          <div className="hidden lg:block flex-[3] min-w-0">
-            <Suspense fallback={<div className="motion-skeleton h-80 rounded-xl" />}>
-              <LocationSidebar mapEvent={featured ?? banner} featured={featured} now={now} />
-            </Suspense>
-          </div>
-        )}
+        <div className="hidden lg:block flex-[3] min-w-0">
+          <Suspense fallback={<div className="motion-skeleton h-80 rounded-xl" />}>
+            <LocationSidebar mapEvent={featured ?? banner} featured={featured} now={now} />
+          </Suspense>
+        </div>
       </div>
 
-      {/* Eager sheet — opens instantly on first tap (no lazy chunk wait) */}
-      {mobileEvent && (
-        <MobileEventSheet event={mobileEvent} now={now} onClose={() => setMobileEvent(null)} />
+      {sheetEvent && (
+        <MobileEventSheet event={sheetEvent} now={now} onClose={() => setSheetEvent(null)} />
+      )}
+      {modalEvent && (
+        <EventDetailModal event={modalEvent} now={now} onClose={() => setModalEvent(null)} />
       )}
       {editOpen && user && (
         <Suspense fallback={null}>
