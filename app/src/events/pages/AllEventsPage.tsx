@@ -1,6 +1,9 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { fetchPublicEvents } from '@/events/services/fetchPublicEvents'
+import {
+  getCachedPublicEvents,
+  loadPublicEvents,
+} from '@/events/services/publicEventsBootstrap'
 import { AllEventsCard }     from '@/events/components/AllEventsCard'
 import { EventDetailModal }  from '@/events/components/EventDetailModal'
 import type { DbEvent }      from '@/events/types/Event'
@@ -27,11 +30,14 @@ function EventSection({ title, color, events, onSelect }: {
 
 export default function AllEventsPage() {
   const navigate              = useNavigate()
-  const [events, setEvents]   = useState<DbEvent[]>([])
-  const [loading, setLoading] = useState(true)
+  const cached                = getCachedPublicEvents()
+  const [events, setEvents]   = useState<DbEvent[]>(() => cached ?? [])
+  const [loading, setLoading] = useState(() => !cached)
   const [selected, setSelected] = useState<DbEvent | null>(null)
 
-  useEffect(() => { fetchPublicEvents().then(setEvents).catch(console.error).finally(() => setLoading(false)) }, [])
+  useEffect(() => {
+    loadPublicEvents().then(setEvents).catch(console.error).finally(() => setLoading(false))
+  }, [])
 
   useEffect(() => {
     const open = !!selected

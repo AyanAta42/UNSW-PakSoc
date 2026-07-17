@@ -54,8 +54,8 @@ export function HeroBanner({ banner, loading }: Props) {
     }
   }, [])
 
-  if (!banner) return null
-  const btns = getEventButtons(banner.buttons)
+  if (!banner && !loading) return null
+  const btns = banner ? getEventButtons(banner.buttons) : []
 
   return (
     <div className="motion-glow motion-glow-hero px-4 pt-4 lg:p-0">
@@ -93,7 +93,7 @@ export function HeroBanner({ banner, loading }: Props) {
 
           <div className="flex-1 min-h-6 md:min-h-0" />
 
-          {loading && (
+          {(loading || !banner) && (
             <div className="rounded-xl h-[80px] md:h-28 motion-skeleton shrink-0"
               style={{ border: `1px solid ${PALETTE.border}` }} />
           )}
@@ -147,3 +147,4 @@ export function HeroBanner({ banner, loading }: Props) {
     </div>
   )
 }
+

@@ -1,5 +1,8 @@
 import { useState, useEffect, useMemo, lazy, Suspense } from 'react'
-import { fetchPublicEvents } from '@/events/services/fetchPublicEvents'
+import {
+  getCachedPublicEvents,
+  loadPublicEvents,
+} from '@/events/services/publicEventsBootstrap'
 import { useAuth } from '@/auth/hooks/useAuth'
 import type { DbEvent } from '@/events/types/Event'
 import { Navbar } from './components/Navbar'
@@ -28,7 +31,7 @@ const EditProfileModal = lazy(() =>
   import('./components/EditProfileModal').then(m => ({ default: m.EditProfileModal })),
 )
 
-/** Prefetch interaction chunks right after first paint so sheets still open instantly. */
+/** Prefetch interaction chunks after data is on screen. */
 function prefetchHomeOverlays() {
   void import('./components/MobileEventSheet')
   void import('./components/EditProfileModal')
@@ -38,8 +41,9 @@ function prefetchHomeOverlays() {
 export default function HomePage() {
   const navigate = useNavigate()
   const { user, avatarUrl: authAvatar } = useAuth()
-  const [events, setEvents] = useState<DbEvent[]>([])
-  const [loading, setLoading] = useState(true)
+  const cached = getCachedPublicEvents()
+  const [events, setEvents] = useState<DbEvent[]>(() => cached ?? [])
+  const [loading, setLoading] = useState(() => !cached)
   const [avatarUrl, setAvatarUrl] = useState<string | undefined>()
   const [avatarBroken, setAvatarBroken] = useState(false)
   const [selectedId, setSelectedId] = useState<string | null>(null)
@@ -53,12 +57,17 @@ export default function HomePage() {
   const initial = (meta.full_name ?? meta.name ?? user?.email ?? '?')[0]?.toUpperCase()
 
   useEffect(() => {
-    fetchPublicEvents().then(setEvents).catch(console.error).finally(() => setLoading(false))
-  }, [])
-
-  useEffect(() => {
-    const t = window.setTimeout(prefetchHomeOverlays, 100)
-    return () => clearTimeout(t)
+    let alive = true
+    loadPublicEvents()
+      .then(next => { if (alive) setEvents(next) })
+      .catch(console.error)
+      .finally(() => {
+        if (!alive) return
+        setLoading(false)
+        // Prefetch overlays only after events settled — don't fight the API for bandwidth
+        window.setTimeout(prefetchHomeOverlays, 200)
+      })
+    return () => { alive = false }
   }, [])
 
   useEffect(() => {
@@ -129,7 +138,7 @@ export default function HomePage() {
 
       <div className="relative z-10 flex gap-0 lg:gap-5 px-0 lg:px-8 py-0 lg:py-5 max-w-[1400px] mx-auto items-start w-full">
         <div className="flex flex-col gap-0 lg:gap-5 flex-[7] min-w-0 w-full">
-          {banner && <HeroBanner banner={banner} loading={loading} />}
+          {(banner || loading) && <HeroBanner banner={banner} loading={loading && !banner} />}
 
           <div ref={eventsReveal.ref} data-visible={eventsReveal.visible} style={eventsReveal.style}
             className="motion-reveal bg-transparent rounded-none px-4 py-4 lg:px-6 lg:py-5">
@@ -137,8 +146,12 @@ export default function HomePage() {
               <span className="motion-heading text-[10px] font-bold tracking-widest uppercase">Events</span>
               <button onClick={() => navigate('/all-events')} style={{ color: ACCENT }} className="text-xs font-semibold bg-transparent border-none cursor-pointer hover:opacity-80">View All Events →</button>
             </div>
-            {loading && <div className="grid w-full grid-cols-1 md:grid-cols-3 gap-4">{[1, 2, 3].map(i => <div key={i} className="motion-skeleton h-52 rounded-xl min-w-0" />)}</div>}
-            {!loading && <>
+            {loading && events.length === 0 && (
+              <div className="grid w-full grid-cols-1 md:grid-cols-3 gap-4">
+                {[1, 2, 3].map(i => <div key={i} className="motion-skeleton h-52 rounded-xl min-w-0" />)}
+              </div>
+            )}
+            {(!loading || events.length > 0) && <>
               <div className="motion-stagger grid w-full grid-cols-1 md:grid-cols-3 gap-4 md:hidden">
                 {phoneEvents.length === 0
                   ? <p style={{ color: PALETTE.muted }} className="text-sm m-0 col-span-full">No events yet — check back soon.</p>
