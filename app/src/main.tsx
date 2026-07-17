@@ -3,9 +3,17 @@ import App from './App.tsx'
 import './index.css'
 import { getCachedPublicEvents, prefetchPublicEvents } from '@/events/services/publicEventsBootstrap'
 
+declare global {
+  interface Window {
+    __PAKSOC_STOP_BOOT__?: () => void
+    __PAKSOC_REVEAL_APP__?: () => void
+    __PAKSOC_SHELL_READY__?: boolean
+  }
+}
+
 /**
- * Mount ASAP. Boot shell already has live timer + popups.
- * Prefer cache so we never block the interactive React handoff on network.
+ * Mount React into hidden #root. The HTML shell keeps the live timer + buttons
+ * until HomePage signals it's ready — then we swap.
  */
 async function start() {
   const cached = getCachedPublicEvents()
@@ -13,13 +21,24 @@ async function start() {
     try {
       await prefetchPublicEvents()
     } catch {
-      /* boot shell may still be showing data */
+      /* shell may still be interactive */
     }
   } else {
     void prefetchPublicEvents()
   }
-  window.__PAKSOC_STOP_BOOT__?.()
-  ReactDOM.createRoot(document.getElementById('root')!).render(<App />)
+
+  const rootEl = document.getElementById('root')
+  if (!rootEl) return
+  rootEl.hidden = true
+
+  let revealed = false
+  window.__PAKSOC_REVEAL_APP__ = () => {
+    if (revealed) return
+    revealed = true
+    window.__PAKSOC_STOP_BOOT__?.()
+  }
+
+  ReactDOM.createRoot(rootEl).render(<App />)
 }
 
 void start()

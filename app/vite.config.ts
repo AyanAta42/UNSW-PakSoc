@@ -2,7 +2,6 @@ import { defineConfig, loadEnv, type Plugin } from 'vite'
 import react from '@vitejs/plugin-react'
 import path from 'path'
 
-/** Slim select — timer + cards + images only. Timeline/buttons load with React later if needed. */
 const COLS = 'id,name,time,end_time,location,price,public,image_url,buttons,timeline'
 
 function eventsBootScript(url: string, anonKey: string): string {
@@ -15,20 +14,15 @@ function eventsBootScript(url: string, anonKey: string): string {
   var a=document.createElement('link');
   a.rel='preconnect'; a.href=base; a.crossOrigin='anonymous';
   document.head.appendChild(a);
-  var b=document.createElement('link');
-  b.rel='dns-prefetch'; b.href=base;
-  document.head.appendChild(b);
   var q=base+'/rest/v1/events?select=${encodeURIComponent(COLS)}&public=eq.true&order=time.asc';
   window.__PAKSOC_EVENTS_P__=fetch(q,{
     headers:{apikey:key,Authorization:'Bearer '+key,Accept:'application/json'},
-    priority:'high',
-    cache:'default'
+    priority:'high'
   }).then(function(r){ if(!r.ok) throw new Error('events '+r.status); return r.json(); })
     .then(function(rows){
       try{ localStorage.setItem('paksoc:public-events:v1', JSON.stringify({at:Date.now(),events:rows})); }catch(e){}
       return rows;
     });
-  // Warm poster images from cache in <head> — earliest possible moment
   try{
     var raw=localStorage.getItem('paksoc:public-events:v1');
     if(raw){
@@ -53,14 +47,14 @@ function eventsBootScript(url: string, anonKey: string): string {
 }
 
 /**
- * Highest priority path:
- * 1) paint timer + event images the instant events/cache are available
- * 2) ONLY THEN download React (so it can't steal bandwidth from timer/images)
+ * The HTML shell IS the working homepage until React is ready.
+ * Timer + CTA buttons + event popups work with zero React.
+ * React downloads only after the shell is interactive, and mounts into a hidden #root.
  */
 function bootUiScript(): string {
   return `<script>
 (function(){
-  var timer=null, target=null, stopped=false, byId={}, painted=false, warmed={};
+  var timer=null, target=null, stopped=false, byId={}, interactive=false, warmed={};
   var FALLBACK={raunaq:'/raunaq.webp',khel:'/khel.webp',iftar:'/iftar.webp',cricket:'/cricket.webp'};
   function pad(n){ n=n|0; return (n<10?'0':'')+n; }
   function esc(t){
@@ -114,7 +108,7 @@ function bootUiScript(): string {
     if(high) try{ l.fetchPriority='high'; }catch(e){}
     document.head.appendChild(l);
     var im=new Image();
-    try{ im.fetchPriority=high?'high':'low'; }catch(e){}
+    try{ im.fetchPriority=high?'high':'auto'; }catch(e){}
     im.decoding='async';
     im.src=src;
   }
@@ -126,6 +120,20 @@ function bootUiScript(): string {
     }
     if(!Array.isArray(raw)) return [];
     return raw.filter(function(b){ return b&&b.label&&String(b.label).trim(); });
+  }
+  function ctaHtml(ev, btns){
+    if(!btns.length){
+      return '<button type="button" class="bs-btn pri" data-open-event="'+esc(ev.id)+'">View details</button>';
+    }
+    return btns.map(function(b,i){
+      var href=b.url&&String(b.url).trim();
+      var cls=(i===1||btns.length===1)?'pri':'sec';
+      if(href){
+        return '<a class="bs-btn '+cls+'" href="'+esc(href)+'" target="_blank" rel="noopener noreferrer">'+esc(b.label)+'</a>';
+      }
+      // Empty URL → still a WORKING button (opens event sheet)
+      return '<button type="button" class="bs-btn '+cls+'" data-open-event="'+esc(ev.id)+'">'+esc(b.label)+'</button>';
+    }).join('');
   }
   function fmtWhen(iso){
     try{
@@ -150,22 +158,21 @@ function bootUiScript(): string {
       +'<div class="bs-title">'+esc(ev.name)+'</div>'
       +'<div class="bs-meta">◷ '+esc(fmtWhen(ev.time))+'</div>'
       +'<div class="bs-meta">◎ '+esc(ev.location||'')+'</div>'
-      +'<div class="bs-badge '+(ended?'ended':'up')+'">'+(ended?'Ended':'Upcoming')+'</div>';
-    if(!ended&&btns.length){
-      html+='<div class="bs-ctas">'+btns.map(function(b,i){
-        var href=b.url&&String(b.url).trim()?esc(b.url):'#';
-        var cls=i===1||btns.length===1?'pri':'sec';
-        return '<a class="bs-btn '+cls+'" href="'+href+'" target="_blank" rel="noopener noreferrer">'+esc(b.label)+'</a>';
-      }).join('')+'</div>';
-    } else {
-      html+='<p class="bs-hint">Tap Register when links are posted.</p>';
-    }
+      +'<div class="bs-badge '+(ended?'ended':'up')+'">'+(ended?'Ended':'Upcoming')+'</div>'
+      +'<div class="bs-ctas">'+ctaHtml(ev, ended?[]:btns)+'</div>';
     body.innerHTML=html;
     sheet.hidden=false;
     document.documentElement.classList.add('boot-sheet-open');
   }
   function goApp(){
     if(window.__PAKSOC_LOAD_APP__) window.__PAKSOC_LOAD_APP__();
+  }
+  function markInteractive(){
+    if(interactive) return;
+    interactive=true;
+    window.__PAKSOC_SHELL_READY__=true;
+    // Keep network free for timer/images/buttons for a beat, then download React behind the scenes
+    setTimeout(goApp, 1200);
   }
   function apply(rows){
     if(!rows||!rows.length||stopped) return;
@@ -179,15 +186,17 @@ function bootUiScript(): string {
       .sort(function(a,b){return new Date(b.time)-new Date(a.time);});
     var banner=upcoming[0]||null;
     var nameEl=document.getElementById('boot-name');
+    var ctas=document.getElementById('boot-ctas');
     if(banner){
       if(nameEl){ nameEl.textContent=banner.name||'Upcoming event'; nameEl.classList.remove('pending'); }
       startTimer(banner.time);
+      if(ctas) ctas.innerHTML=ctaHtml(banner, buttonsOf(banner));
     } else {
       if(nameEl){ nameEl.textContent='No upcoming events'; nameEl.classList.remove('pending'); }
       setCell('boot-d',0); setCell('boot-h',0); setCell('boot-m',0); setCell('boot-s',0);
+      if(ctas) ctas.innerHTML='';
     }
     var list=(upcoming.length?upcoming:past).slice(0,3);
-    // Warm images FIRST — before React — so posters win the network
     for(var j=0;j<list.length;j++) warmImage(imgSrc(list[j]), j<2);
     var grid=document.getElementById('boot-events');
     if(grid&&list.length){
@@ -196,17 +205,13 @@ function bootUiScript(): string {
         var poster=src
           ? '<img class="poster-img" src="'+esc(src)+'" alt="" width="400" height="120" decoding="async"'+(idx===0?' fetchpriority="high"':'')+'>'
           : '<div class="poster"></div>';
-        return '<button type="button" class="card" data-eid="'+esc(ev.id)+'">'
+        return '<button type="button" class="card" data-open-event="'+esc(ev.id)+'">'
           +poster+'<div class="body"><p class="t">'
           +esc(ev.name)+'</p><p class="m">'+esc(ev.location||'')+'</p>'
           +'<p class="tap">Tap for details →</p></div></button>';
       }).join('');
     }
-    if(!painted){
-      painted=true;
-      // Timer + images are on screen — NOW start React
-      goApp();
-    }
+    markInteractive();
   }
   function fromCache(){
     try{
@@ -221,17 +226,22 @@ function bootUiScript(): string {
     var t=e.target;
     if(!t||!t.closest) return;
     if(t.closest('[data-boot-close]')){ closeSheet(); return; }
-    var card=t.closest('#boot-events [data-eid]');
-    if(card){ openSheet(card.getAttribute('data-eid')); return; }
+    var open=t.closest('[data-open-event]');
+    if(open){
+      e.preventDefault();
+      openSheet(open.getAttribute('data-open-event'));
+    }
   });
 
   var cached=fromCache();
   if(cached) apply(cached);
   if(window.__PAKSOC_EVENTS_P__){
-    window.__PAKSOC_EVENTS_P__.then(apply).catch(function(){ goApp(); });
+    window.__PAKSOC_EVENTS_P__.then(apply).catch(function(){ markInteractive(); goApp(); });
+  } else if(!cached) {
+    setTimeout(function(){ markInteractive(); goApp(); }, 400);
   }
-  // Safety: if events are slow, start React after 700ms so the page isn't stuck
-  setTimeout(goApp, 700);
+  // Never start React before shell has had a chance — hard cap only if events hang
+  setTimeout(function(){ if(!interactive){ markInteractive(); goApp(); } }, 2500);
 
   window.__PAKSOC_STOP_BOOT__=function(){
     stopped=true;
@@ -240,6 +250,10 @@ function bootUiScript(): string {
     closeSheet();
     var sheet=document.getElementById('boot-sheet');
     if(sheet) sheet.remove();
+    var shell=document.getElementById('boot-shell');
+    if(shell) shell.remove();
+    var root=document.getElementById('root');
+    if(root) root.hidden=false;
   };
 })();
 </script>`

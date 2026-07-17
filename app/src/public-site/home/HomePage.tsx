@@ -79,7 +79,18 @@ export default function HomePage() {
     if (!eventsReady) return
     loadFonts()
     const t = window.setTimeout(() => setAmbientReady(true), 300)
-    return () => clearTimeout(t)
+    // Reveal React only after home has events + a painted frame — shell stays live until then
+    const reveal = () => window.__PAKSOC_REVEAL_APP__?.()
+    const id = window.requestAnimationFrame(() => {
+      window.requestAnimationFrame(reveal)
+    })
+    // Safety: never leave shell forever if rAF stalls
+    const fallback = window.setTimeout(reveal, 800)
+    return () => {
+      clearTimeout(t)
+      clearTimeout(fallback)
+      cancelAnimationFrame(id)
+    }
   }, [eventsReady])
 
   useEffect(() => {

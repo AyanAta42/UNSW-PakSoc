@@ -1,5 +1,5 @@
-import { lazy, Suspense } from 'react'
-import { BrowserRouter, Routes, Route } from 'react-router-dom'
+import { lazy, Suspense, useEffect } from 'react'
+import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom'
 import { AuthProvider } from '@/auth/context/AuthContext'
 import { CurrentMemberProvider } from '@/roles/context/CurrentMemberContext'
 import { PublicEventsProvider } from '@/events/context/PublicEventsContext'
@@ -15,12 +15,22 @@ const ManageRolesPage = lazy(() => import('@/roles/pages/ManageRolesPage'))
 const ManageTasksPage = lazy(() => import('@/tasks/pages/ManageTasksPage'))
 const RoleRoute = lazy(() => import('@/core/router/RoleRoute'))
 
+/** Non-home routes must reveal React immediately (no home shell). */
+function RevealNonHome() {
+  const { pathname } = useLocation()
+  useEffect(() => {
+    if (pathname !== '/') window.__PAKSOC_REVEAL_APP__?.()
+  }, [pathname])
+  return null
+}
+
 function App() {
   return (
     <BrowserRouter>
       <AuthProvider>
         <CurrentMemberProvider>
           <PublicEventsProvider>
+            <RevealNonHome />
             <Suspense fallback={null}>
               <Routes>
                 <Route path="/" element={<HomePage />} />
