@@ -2,9 +2,16 @@ import type { DbEvent } from '@/events/types/Event'
 import { fetchPublicEvents } from '@/events/services/fetchPublicEvents'
 
 const CACHE_KEY = 'paksoc:public-events:v1'
-const CACHE_MAX_AGE_MS = 5 * 60 * 1000
 
 type CachePayload = { at: number; events: DbEvent[] }
+
+declare global {
+  interface Window {
+    /** Set by the inline head boot script — starts before React downloads. */
+    __PAKSOC_EVENTS_P__?: Promise<unknown>
+    __PAKSOC_EVENTS_CACHE_KEY__?: string
+  }
+}
 
 let inflight: Promise<DbEvent[]> | null = null
 
@@ -22,52 +29,51 @@ function readCache(): DbEvent[] | null {
 
 function writeCache(events: DbEvent[]) {
   try {
-    const payload: CachePayload = { at: Date.now(), events }
-    localStorage.setItem(CACHE_KEY, JSON.stringify(payload))
+    localStorage.setItem(CACHE_KEY, JSON.stringify({ at: Date.now(), events } satisfies CachePayload))
   } catch {
     /* quota / private mode */
   }
 }
 
-function cacheIsFresh(): boolean {
-  try {
-    const raw = localStorage.getItem(CACHE_KEY)
-    if (!raw) return false
-    const parsed = JSON.parse(raw) as CachePayload
-    return typeof parsed?.at === 'number' && Date.now() - parsed.at < CACHE_MAX_AGE_MS
-  } catch {
-    return false
-  }
+function adoptBootPromise(): Promise<DbEvent[]> | null {
+  const boot = typeof window !== 'undefined' ? window.__PAKSOC_EVENTS_P__ : undefined
+  if (!boot) return null
+  return Promise.resolve(boot).then((raw) => {
+    const rows = raw as Record<string, unknown>[]
+    if (!Array.isArray(rows)) throw new Error('boot events payload invalid')
+    // Timeline is already JSON from PostgREST; HomePage parse happens in fetchPublicEvents path.
+    // Boot script returns raw rows — map lightly here.
+    return rows as unknown as DbEvent[]
+  })
 }
 
-/** Kick off the network fetch as early as possible (call from main.tsx). */
+/** Kick off / reuse the earliest possible events request. */
 export function prefetchPublicEvents(): Promise<DbEvent[]> {
-  if (!inflight) {
-    inflight = fetchPublicEvents()
-      .then(events => {
+  if (inflight) return inflight
+
+  const fromBoot = adoptBootPromise()
+  inflight = (fromBoot ?? fetchPublicEvents())
+    .then(events => {
+      writeCache(events)
+      return events
+    })
+    .catch(async (err) => {
+      // If boot failed, fall through to the module fetch once
+      if (fromBoot) {
+        const events = await fetchPublicEvents()
         writeCache(events)
         return events
-      })
-      .finally(() => {
-        /* keep resolved promise for awaiters; allow refresh later */
-      })
-  }
+      }
+      throw err
+    })
+
   return inflight
 }
 
-/** Instant cache (may be stale) for first paint. */
 export function getCachedPublicEvents(): DbEvent[] | null {
   return readCache()
 }
 
-export function hasFreshPublicEventsCache(): boolean {
-  return cacheIsFresh()
-}
-
-/**
- * Prefer fresh network data; fall back to cache if the request fails.
- * If cache exists, callers can paint it immediately while this resolves.
- */
 export async function loadPublicEvents(): Promise<DbEvent[]> {
   try {
     return await prefetchPublicEvents()

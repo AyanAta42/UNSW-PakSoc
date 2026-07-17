@@ -12,8 +12,8 @@ export interface AuthCtx {
 const AuthContext = createContext<AuthCtx | null>(null)
 
 /**
- * Shared auth state. Supabase client (~200 KB) is deferred until after the
- * public events request has had a head start, so cold loads aren't starved.
+ * Auth/supabase-js loads only after public events have been displayed
+ * (or after a long fallback / login interaction).
  */
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null)
@@ -23,10 +23,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     let alive = true
     let unsubscribe: (() => void) | undefined
-    let idleId: number | undefined
-    let timeoutId: ReturnType<typeof setTimeout> | undefined
+    let booted = false
+    let fallbackId: ReturnType<typeof setTimeout> | undefined
 
     const boot = async () => {
+      if (booted || !alive) return
+      booted = true
       const { supabase } = await import('@/core/supabase/client')
       if (!alive) return
 
@@ -44,32 +46,23 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       unsubscribe = () => subscription.unsubscribe()
     }
 
-    const schedule = () => {
-      // Give the events fetch ~1.2s of uncontended bandwidth on cold loads
-      if (typeof window.requestIdleCallback === 'function') {
-        idleId = window.requestIdleCallback(() => { void boot() }, { timeout: 1800 })
-      } else {
-        timeoutId = setTimeout(() => { void boot() }, 1200)
-      }
-    }
+    const onEventsReady = () => { void boot() }
+    window.addEventListener('paksoc:events-ready', onEventsReady)
 
-    // Start sooner if the user tries to log in / open account UI
+    // Fallback if the home page never fires (other routes)
+    fallbackId = setTimeout(() => { void boot() }, 4000)
+
     const onInteract = (e: Event) => {
       const t = e.target as HTMLElement | null
-      if (t?.closest?.('[data-cta], a[href="/login"], button')) {
-        void boot()
-      }
+      if (t?.closest?.('[data-cta], a[href="/login"], button')) void boot()
     }
     document.addEventListener('pointerdown', onInteract, { passive: true })
-    schedule()
 
     return () => {
       alive = false
+      window.removeEventListener('paksoc:events-ready', onEventsReady)
       document.removeEventListener('pointerdown', onInteract)
-      if (idleId !== undefined && typeof window.cancelIdleCallback === 'function') {
-        window.cancelIdleCallback(idleId)
-      }
-      if (timeoutId !== undefined) clearTimeout(timeoutId)
+      if (fallbackId !== undefined) clearTimeout(fallbackId)
       unsubscribe?.()
     }
   }, [])
