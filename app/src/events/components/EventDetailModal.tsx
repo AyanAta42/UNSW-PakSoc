@@ -1,5 +1,6 @@
 import type { DbEvent } from '@/events/types/Event'
-import { CachedMapEmbed, mapEmbedSrc } from '@/maps/components/CachedMapEmbed'
+import { DeferredMapEmbed } from '@/maps/components/DeferredMapEmbed'
+import { mapEmbedSrc } from '@/maps/components/CachedMapEmbed'
 import { EventDetailContent }          from '@/public-site/home/components/EventDetailContent'
 import { getEventButtons, getCtaVariant }             from '@/events/utils/getEventButtons'
 import { EventCtaButton }              from '@/events/components/EventCtaButton'
@@ -13,7 +14,7 @@ export function EventDetailModal({ event, now, onClose }: Props) {
 
   return (
     <div className="fixed inset-0 z-[70] flex items-end sm:items-center justify-center p-0 sm:p-6">
-      <div className="motion-backdrop absolute inset-0 bg-black/60 backdrop-blur-[3px]" onClick={onClose} />
+      <div className="motion-backdrop absolute inset-0 bg-black/55" onClick={onClose} />
       <div style={{ background: PALETTE.modal, boxShadow: PALETTE.shadowLg, borderRadius: 24, border: `1px solid ${PALETTE.border}` }}
         className="motion-modal relative w-full sm:max-w-lg rounded-t-[24px] sm:rounded-[24px] max-h-[88vh] flex flex-col"
         onClick={e => e.stopPropagation()}>
@@ -31,7 +32,7 @@ export function EventDetailModal({ event, now, onClose }: Props) {
           <div>
             <div style={{ color: PALETTE.muted }} className="text-[10px] font-bold uppercase tracking-widest mb-2">Location</div>
             <div style={{ height: 180, borderRadius: 16, border: `1px solid ${PALETTE.border}`, overflow: 'hidden' }}>
-              <CachedMapEmbed cacheId={`all-events-${event.id}`} src={mapEmbedSrc(event.location)} title="Event location map" className="w-full h-full" />
+              <DeferredMapEmbed cacheId={`all-events-${event.id}`} src={mapEmbedSrc(event.location)} title="Event location map" className="w-full h-full" delayMs={280} />
             </div>
             <div style={{ color: PALETTE.muted }} className="text-xs mt-2 flex items-center gap-1.5">
               <span style={{ color: ACCENT }}>◎</span>{event.location}

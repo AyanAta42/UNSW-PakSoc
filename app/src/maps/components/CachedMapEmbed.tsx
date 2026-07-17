@@ -16,7 +16,7 @@ function ensureIframe(cacheId: string, title: string) {
     iframe = document.createElement('iframe')
     iframe.width = '100%'; iframe.height = '100%'
     iframe.style.border = '0'; iframe.style.display = 'block'
-    iframe.setAttribute('loading', 'eager')
+    iframe.setAttribute('loading', 'lazy')
     iframe.setAttribute('referrerPolicy', 'no-referrer-when-downgrade')
     iframe.setAttribute('allowfullscreen', '')
     iframeCache.set(cacheId, iframe)

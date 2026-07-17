@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import type { DbEvent } from '@/events/types/Event'
-import { CachedMapEmbed, mapEmbedSrc } from '@/maps/components/CachedMapEmbed'
+import { DeferredMapEmbed } from '@/maps/components/DeferredMapEmbed'
+import { mapEmbedSrc } from '@/maps/components/CachedMapEmbed'
 import { EventDetailContent }          from './EventDetailContent'
 import { getEventButtons, getCtaVariant }             from '@/events/utils/getEventButtons'
 import { EventCtaButton }              from '@/events/components/EventCtaButton'
@@ -9,7 +10,7 @@ import { ACCENT, PALETTE }             from '@/config/theme'
 interface Props { event: DbEvent; now: Date; onClose: () => void }
 
 const CLOSE_THRESHOLD = 60
-const CLOSE_DURATION_MS = 280
+const CLOSE_DURATION_MS = 220
 
 export function MobileEventSheet({ event, now, onClose }: Props) {
   const upcoming  = new Date(event.time) > now
@@ -58,7 +59,7 @@ export function MobileEventSheet({ event, now, onClose }: Props) {
   return (
     <div className="fixed inset-0 z-[60] lg:hidden">
       <div
-        className="absolute inset-0 bg-black/60 backdrop-blur-[3px] transition-opacity duration-[280ms]"
+        className="absolute inset-0 bg-black/55 transition-opacity duration-[220ms]"
         style={{ opacity: closing ? 0 : Math.max(0, 1 - dragY / 500) }}
         onClick={closeWithAnimation}
       />
@@ -72,7 +73,7 @@ export function MobileEventSheet({ event, now, onClose }: Props) {
           transition: dragging ? 'none' : `transform ${CLOSE_DURATION_MS}ms cubic-bezier(0.4, 0, 1, 1)`,
           willChange: 'transform',
         }}
-        className="absolute bottom-0 left-0 right-0 max-h-[88vh] flex flex-col animate-[slideUp_0.28s_ease-out]"
+        className="absolute bottom-0 left-0 right-0 max-h-[88vh] flex flex-col animate-[slideUp_0.22s_ease-out]"
         onClick={e => e.stopPropagation()}
         onTouchStart={onTouchStart}
         onTouchMove={onTouchMove}
@@ -102,7 +103,7 @@ export function MobileEventSheet({ event, now, onClose }: Props) {
           <div>
             <div style={{ color: PALETTE.muted }} className="text-[10px] font-bold uppercase tracking-widest mb-2.5">Location</div>
             <div style={{ height: 200, borderRadius: 16, border: `1px solid ${PALETTE.border}`, overflow: 'hidden', background: PALETTE.card }}>
-              <CachedMapEmbed cacheId="home-map-sheet" src={mapEmbedSrc(event.location)} title="Event location map" className="w-full h-full" />
+              <DeferredMapEmbed cacheId="home-map-sheet" src={mapEmbedSrc(event.location)} title="Event location map" className="w-full h-full" delayMs={280} />
             </div>
             <div style={{ color: PALETTE.muted }} className="text-xs mt-2 flex items-center gap-1.5">
               <span style={{ color: ACCENT }}>◎</span>{event.location}

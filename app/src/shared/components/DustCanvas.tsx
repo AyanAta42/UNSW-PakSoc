@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react'
-import { prefersReducedMotion } from '@/shared/motion'
+import { isFxPaused, onFxPauseChange, prefersReducedMotion } from '@/shared/motion'
 
 interface Particle {
   x: number
@@ -89,7 +89,7 @@ export function DustCanvas() {
     }
 
     function start() {
-      if (raf || document.hidden) return
+      if (raf || isFxPaused()) return
       last = performance.now()
       raf = requestAnimationFrame(frame)
     }
@@ -97,18 +97,17 @@ export function DustCanvas() {
       cancelAnimationFrame(raf)
       raf = 0
     }
-    function onVisibility() {
-      if (document.hidden) stop()
-      else start()
-    }
 
     start()
     window.addEventListener('resize', resize, { passive: true })
-    document.addEventListener('visibilitychange', onVisibility)
+    const unsubPause = onFxPauseChange(() => {
+      if (isFxPaused()) stop()
+      else start()
+    })
     return () => {
       stop()
       window.removeEventListener('resize', resize)
-      document.removeEventListener('visibilitychange', onVisibility)
+      unsubPause()
     }
   }, [])
 

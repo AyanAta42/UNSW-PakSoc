@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react'
-import { prefersReducedMotion } from '@/shared/motion'
+import { isFxPaused, onFxPauseChange, prefersReducedMotion } from '@/shared/motion'
 
 /**
  * Soft emerald cursor wash — DOM updates via rAF lerp only (no React state).
@@ -49,7 +49,7 @@ export function MouseSpotlight() {
     }
 
     function start() {
-      if (raf || document.hidden) return
+      if (raf || isFxPaused()) return
       raf = requestAnimationFrame(frame)
     }
     function stop() {
@@ -58,6 +58,7 @@ export function MouseSpotlight() {
     }
 
     function onMove(e: PointerEvent) {
+      if (isFxPaused()) return
       targetX = e.clientX
       targetY = e.clientY
       if (!visible) visible = true
@@ -75,21 +76,19 @@ export function MouseSpotlight() {
         start()
       }
     }
-    function onVisibility() {
-      if (document.hidden) stop()
-      else start()
-    }
 
     window.addEventListener('pointermove', onMove, { passive: true })
     document.addEventListener('mouseover', onOver)
     document.addEventListener('mouseout', onOut)
-    document.addEventListener('visibilitychange', onVisibility)
+    const unsubPause = onFxPauseChange(() => {
+      if (isFxPaused()) stop()
+    })
     return () => {
       stop()
       window.removeEventListener('pointermove', onMove)
       document.removeEventListener('mouseover', onOver)
       document.removeEventListener('mouseout', onOut)
-      document.removeEventListener('visibilitychange', onVisibility)
+      unsubPause()
     }
   }, [])
 

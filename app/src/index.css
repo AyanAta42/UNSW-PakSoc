@@ -601,7 +601,7 @@ body {
   backface-visibility: hidden;
 }
 
-/* Pause all ambient/hero loops when the tab is hidden */
+/* Pause ambient/hero loops when tab hidden or a modal/sheet is open */
 .ambient-paused .ambient-layer,
 .ambient-paused .ambient-aurora,
 .ambient-paused .ambient-grain,
@@ -615,8 +615,30 @@ body {
 .ambient-paused .motion-glow::before,
 .ambient-paused .motion-primary::before,
 .ambient-paused .motion-primary::after,
-.ambient-paused .motion-skeleton::after {
+.ambient-paused .motion-skeleton::after,
+.modal-open .ambient-layer,
+.modal-open .ambient-aurora,
+.modal-open .ambient-grain,
+.modal-open .motion-hero-gradient,
+.modal-open .motion-hero-spotlight,
+.modal-open .motion-hero-grain,
+.modal-open .motion-hero-streak,
+.modal-open .motion-hero-aurora,
+.modal-open .motion-light-rays,
+.modal-open .motion-card::after,
+.modal-open .motion-glow::before,
+.modal-open .motion-primary::before,
+.modal-open .motion-primary::after,
+.modal-open .motion-skeleton::after {
   animation-play-state: paused !important;
+}
+
+/* Hide heavy canvases while overlays are open (keeps paint free) */
+.modal-open .ambient-dust,
+.modal-open .ambient-spotlight,
+.modal-open .hero-celestial-trail {
+  visibility: hidden !important;
+  opacity: 0 !important;
 }
 
 @media (prefers-reduced-motion: reduce) {

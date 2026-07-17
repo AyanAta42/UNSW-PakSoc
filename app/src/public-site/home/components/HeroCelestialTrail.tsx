@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react'
-import { prefersReducedMotion } from '@/shared/motion'
+import { isFxPaused, onFxPauseChange, prefersReducedMotion } from '@/shared/motion'
 
 type Kind = 'star' | 'crescent'
 
@@ -120,14 +120,18 @@ export function HeroCelestialTrail() {
       const rect = parent!.getBoundingClientRect()
       w = Math.max(1, Math.floor(rect.width))
       h = Math.max(1, Math.floor(rect.height))
-      dpr = Math.min(window.devicePixelRatio || 1, 1.5)
+      dpr = Math.min(window.devicePixelRatio || 1, 1.25)
       canvas!.width = Math.floor(w * dpr)
       canvas!.height = Math.floor(h * dpr)
       canvas!.style.width = `${w}px`
       canvas!.style.height = `${h}px`
       ctx!.setTransform(dpr, 0, 0, dpr, 0, 0)
-      // Density scales with area; keep visual weight ~15–20%
-      const count = Math.round(Math.min(280, Math.max(140, (w * h) / 520)))
+      // Leaner on phone so open animations stay snappy
+      const narrow = w < 640
+      const count = Math.round(Math.min(
+        narrow ? 90 : 160,
+        Math.max(narrow ? 48 : 80, (w * h) / (narrow ? 1100 : 720)),
+      ))
       build(count)
     }
 
@@ -201,7 +205,7 @@ export function HeroCelestialTrail() {
     }
 
     function startLoop() {
-      if (raf || document.hidden || reduced) return
+      if (raf || isFxPaused() || reduced) return
       raf = requestAnimationFrame(frame)
     }
     function stopLoop() {
@@ -219,16 +223,15 @@ export function HeroCelestialTrail() {
     })
     ro.observe(parent)
 
-    const onVisibility = () => {
-      if (document.hidden) stopLoop()
+    const unsubPause = onFxPauseChange(() => {
+      if (isFxPaused()) stopLoop()
       else if (!reduced) startLoop()
-    }
-    document.addEventListener('visibilitychange', onVisibility)
+    })
 
     return () => {
       stopLoop()
       ro.disconnect()
-      document.removeEventListener('visibilitychange', onVisibility)
+      unsubPause()
     }
   }, [])
 
@@ -236,7 +239,7 @@ export function HeroCelestialTrail() {
     <canvas
       ref={canvasRef}
       aria-hidden
-      className="pointer-events-none absolute inset-0 z-[1]"
+      className="hero-celestial-trail pointer-events-none absolute inset-0 z-[1]"
     />
   )
 }

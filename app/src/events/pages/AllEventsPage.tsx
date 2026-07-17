@@ -33,6 +33,16 @@ export default function AllEventsPage() {
 
   useEffect(() => { fetchPublicEvents().then(setEvents).catch(console.error).finally(() => setLoading(false)) }, [])
 
+  useEffect(() => {
+    const open = !!selected
+    document.body.style.overflow = open ? 'hidden' : ''
+    document.documentElement.classList.toggle('modal-open', open)
+    return () => {
+      document.body.style.overflow = ''
+      document.documentElement.classList.remove('modal-open')
+    }
+  }, [selected])
+
   const now      = new Date()
   const upcoming = events.filter(e => new Date(e.time) > now).sort((a, b) => +new Date(a.time) - +new Date(b.time))
   const ended    = events.filter(e => new Date(e.time) <= now).sort((a, b) => +new Date(b.time) - +new Date(a.time))

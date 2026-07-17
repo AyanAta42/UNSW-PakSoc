@@ -2,7 +2,6 @@ import { useState, useEffect, useMemo, lazy, Suspense } from 'react'
 import type { User }            from '@supabase/supabase-js'
 import { fetchPublicEvents }    from '@/events/services/fetchPublicEvents'
 import { fetchMemberAvatar }    from '@/members/services/fetchMemberAvatar'
-import { fetchMemberName }      from '@/members/services/fetchMemberName'
 import { useAuth }              from '@/auth/hooks/useAuth'
 import type { DbEvent }         from '@/events/types/Event'
 import { Navbar }               from './components/Navbar'
@@ -11,18 +10,15 @@ import { PublicEventCard }      from './components/PublicEventCard'
 import { LocationSidebar }      from './components/LocationSidebar'
 import { SocialWall }           from './components/SocialWall'
 import { Footer }               from './components/Footer'
+import { MobileEventSheet }     from './components/MobileEventSheet'
+import { EditProfileModal }     from './components/EditProfileModal'
 import { useNavigate } from 'react-router-dom'
 import { ACCENT, PALETTE } from '@/config/theme'
 import { useReveal } from '@/shared/hooks/useReveal'
 
+/** Ambient stays lazy — never blocks interaction UI. */
 const AmbientBackground = lazy(() =>
   import('@/shared/components/AmbientBackground').then(m => ({ default: m.AmbientBackground })),
-)
-const MobileEventSheet = lazy(() =>
-  import('./components/MobileEventSheet').then(m => ({ default: m.MobileEventSheet })),
-)
-const EditProfileModal = lazy(() =>
-  import('./components/EditProfileModal').then(m => ({ default: m.EditProfileModal })),
 )
 
 export default function HomePage() {
@@ -35,7 +31,6 @@ export default function HomePage() {
   const [selectedId, setSelectedId]     = useState<string | null>(null)
   const [mobileEvent, setMobileEvent]   = useState<DbEvent | null>(null)
   const [editOpen, setEditOpen]         = useState(false)
-  // Ordered entrance: hero → sidebar → event cards → remaining
   const sidebarReveal = useReveal<HTMLDivElement>({ delay: 120 })
   const eventsReveal = useReveal<HTMLDivElement>({ delay: 220 })
   const socialReveal = useReveal<HTMLDivElement>({ delay: 340 })
@@ -52,12 +47,17 @@ export default function HomePage() {
     fetchMemberAvatar(user.id).then(url => setAvatarUrl(url ?? undefined)).catch(() => {})
   }, [user, authAvatar])
 
+  // Instant overlays: pause heavy ambience + lock body scroll while open
+  const overlayOpen = !!mobileEvent || editOpen
   useEffect(() => {
-    document.body.style.overflow = mobileEvent ? 'hidden' : ''
-    return () => { document.body.style.overflow = '' }
-  }, [mobileEvent])
+    document.body.style.overflow = overlayOpen ? 'hidden' : ''
+    document.documentElement.classList.toggle('modal-open', overlayOpen)
+    return () => {
+      document.body.style.overflow = ''
+      document.documentElement.classList.remove('modal-open')
+    }
+  }, [overlayOpen])
 
-  // Stable "now" for this render cycle — avoid new Date() in every map callback
   const { phoneEvents, allPublic, banner, featured, now } = useMemo(() => {
     const now = new Date()
     const upcoming = [...events].filter(ev => new Date(ev.time) > now).sort((a,b) => +new Date(a.time) - +new Date(b.time))
@@ -76,10 +76,9 @@ export default function HomePage() {
     if (window.matchMedia('(max-width: 1023px)').matches) setMobileEvent(ev)
   }
 
-  async function handleEditProfile() {
+  /** Open instantly — never wait on network before showing the modal. */
+  function handleEditProfile() {
     if (!user) return
-    const saved = await fetchMemberName(user.id)
-    if (saved) meta.full_name = saved
     setEditOpen(true)
   }
 
@@ -133,10 +132,8 @@ export default function HomePage() {
         </div>
       </div>
 
-      <Suspense fallback={null}>
-        {mobileEvent && <MobileEventSheet event={mobileEvent} now={now} onClose={() => setMobileEvent(null)} />}
-        {editOpen && user && <EditProfileModal user={user} initial={initial ?? '?'} onClose={() => setEditOpen(false)} />}
-      </Suspense>
+      {mobileEvent && <MobileEventSheet event={mobileEvent} now={now} onClose={() => setMobileEvent(null)} />}
+      {editOpen && user && <EditProfileModal user={user} initial={initial ?? '?'} onClose={() => setEditOpen(false)} />}
       <div className="relative z-10"><Footer /></div>
     </div>
   )

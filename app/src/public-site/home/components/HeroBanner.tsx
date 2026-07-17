@@ -1,10 +1,10 @@
-import { useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import type { DbEvent } from '@/events/types/Event'
 import { useCountdown }    from '@/shared/hooks/useCountdown'
 import { getEventButtons, getCtaVariant } from '@/events/utils/getEventButtons'
 import { EventCtaButton }  from '@/events/components/EventCtaButton'
 import { OdometerNumber }  from '@/shared/components/OdometerNumber'
-import { useParallaxLayers, type ParallaxLayer } from '@/shared/motion'
+import { prefersReducedMotion, useParallaxLayers, type ParallaxLayer } from '@/shared/motion'
 import { HeroCelestialTrail } from './HeroCelestialTrail'
 import { ACCENT, ACCENT_GLOW, PALETTE } from '@/config/theme'
 
@@ -22,6 +22,7 @@ export function HeroBanner({ banner, loading }: Props) {
   const contentRef = useRef<HTMLDivElement>(null)
   const ctaRef = useRef<HTMLDivElement>(null)
   const layersRef = useRef<ParallaxLayer[]>([])
+  const [trailReady, setTrailReady] = useState(false)
 
   layersRef.current = [
     { depth: BG_DEPTH, el: bgRef.current },
@@ -30,6 +31,25 @@ export function HeroBanner({ banner, loading }: Props) {
     { depth: CONTENT_DEPTH, el: ctaRef.current },
   ]
   useParallaxLayers(heroRef, layersRef)
+
+  // Defer canvas trail until idle so first paint + popups stay free
+  useEffect(() => {
+    if (prefersReducedMotion()) return
+    let idleId: number | undefined
+    let timeoutId: ReturnType<typeof setTimeout> | undefined
+    const go = () => setTrailReady(true)
+    if (typeof window.requestIdleCallback === 'function') {
+      idleId = window.requestIdleCallback(go, { timeout: 1200 })
+    } else {
+      timeoutId = setTimeout(go, 450)
+    }
+    return () => {
+      if (idleId !== undefined && typeof window.cancelIdleCallback === 'function') {
+        window.cancelIdleCallback(idleId)
+      }
+      if (timeoutId !== undefined) clearTimeout(timeoutId)
+    }
+  }, [])
 
   if (!banner) return null
   const btns = getEventButtons(banner.buttons)
@@ -53,8 +73,8 @@ export function HeroBanner({ banner, loading }: Props) {
           <div className="motion-hero-spotlight" />
         </div>
 
-        {/* Layer 3: Celestial trail (bottom-left → top-right) + faint grain */}
-        <HeroCelestialTrail />
+        {/* Layer 3: Celestial trail (idle-mounted) + faint grain */}
+        {trailReady && <HeroCelestialTrail />}
         <div aria-hidden className="motion-hero-grain" />
 
         {/* Layer 4: Content */}

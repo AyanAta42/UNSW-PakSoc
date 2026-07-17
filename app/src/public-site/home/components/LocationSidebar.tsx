@@ -1,5 +1,6 @@
 import type { DbEvent } from '@/events/types/Event'
-import { CachedMapEmbed, mapEmbedSrc } from '@/maps/components/CachedMapEmbed'
+import { DeferredMapEmbed } from '@/maps/components/DeferredMapEmbed'
+import { mapEmbedSrc } from '@/maps/components/CachedMapEmbed'
 import { EventDetailContent }          from './EventDetailContent'
 import { ACCENT, PALETTE } from '@/config/theme'
 
@@ -18,7 +19,7 @@ export function LocationSidebar({ mapEvent, featured, now }: Props) {
         </div>
         <div className="motion-map mx-5" style={{ height: 220, borderRadius: 16, border: `1px solid ${PALETTE.border}`, overflow: 'hidden' }}>
           {desktopMapSrc
-            ? <CachedMapEmbed cacheId="home-map-desktop" src={desktopMapSrc} title="Event location map" className="w-full h-full" />
+            ? <DeferredMapEmbed cacheId="home-map-desktop" src={desktopMapSrc} title="Event location map" className="w-full h-full" delayMs={400} />
             : <div className="w-full h-full flex items-center justify-center" style={{ background: PALETTE.cardAlt }}>
                 <span style={{ color: PALETTE.muted }} className="text-sm">No events to show</span>
               </div>
