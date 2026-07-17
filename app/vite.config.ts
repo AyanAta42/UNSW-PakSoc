@@ -26,16 +26,20 @@ function eventsBootScript(url: string, anonKey: string): string {
 }
 
 /**
- * Timer-first boot UI:
- * 1) blank skeleton countdown (never fake 00s)
- * 2) when events arrive → live timer + text cards (NO images)
- * 3) then start downloading React
+ * Functional shell BEFORE React:
+ * When events arrive → live timer + names + clickable popups together.
+ * React downloads in parallel; images stay out of this path.
  */
 function bootUiScript(): string {
   return `<script>
 (function(){
-  var timer=null, target=null, stopped=false, ready=false;
+  var timer=null, target=null, stopped=false, byId={};
   function pad(n){ n=n|0; return (n<10?'0':'')+n; }
+  function esc(t){
+    return String(t==null?'':t).replace(/[&<>"']/g,function(ch){
+      return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[ch];
+    });
+  }
   function calc(iso){
     var diff=new Date(iso).getTime()-Date.now();
     if(!(diff>0)) return {d:0,h:0,m:0,s:0};
@@ -62,21 +66,61 @@ function bootUiScript(): string {
   }
   function startTimer(iso){
     target=iso;
-    ready=true;
     var wrap=document.getElementById('boot-cd');
     if(wrap) wrap.setAttribute('data-ready','1');
     paintCd();
     if(timer) clearInterval(timer);
     timer=setInterval(paintCd,1000);
-    if(window.__PAKSOC_LOAD_APP__) window.__PAKSOC_LOAD_APP__();
   }
-  function esc(t){
-    return String(t==null?'':t).replace(/[&<>"']/g,function(ch){
-      return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[ch];
-    });
+  function buttonsOf(ev){
+    var raw=ev&&ev.buttons;
+    if(!raw) return [];
+    if(typeof raw==='string'){
+      try{ raw=JSON.parse(raw); }catch(e){ return []; }
+    }
+    if(!Array.isArray(raw)) return [];
+    return raw.filter(function(b){ return b&&b.label&&String(b.label).trim(); });
+  }
+  function fmtWhen(iso){
+    try{
+      return new Date(iso).toLocaleString(undefined,{weekday:'short',month:'short',day:'numeric',hour:'numeric',minute:'2-digit'});
+    }catch(e){ return ''; }
+  }
+  function closeSheet(){
+    var sheet=document.getElementById('boot-sheet');
+    if(sheet) sheet.hidden=true;
+    document.documentElement.classList.remove('boot-sheet-open');
+  }
+  function openSheet(id){
+    var ev=byId[id];
+    if(!ev) return;
+    var body=document.getElementById('boot-sheet-body');
+    var sheet=document.getElementById('boot-sheet');
+    if(!body||!sheet) return;
+    var ended=new Date(ev.time).getTime()<=Date.now();
+    var btns=buttonsOf(ev);
+    var html='<div class="bs-title">'+esc(ev.name)+'</div>'
+      +'<div class="bs-meta">◷ '+esc(fmtWhen(ev.time))+'</div>'
+      +'<div class="bs-meta">◎ '+esc(ev.location||'')+'</div>'
+      +'<div class="bs-badge '+(ended?'ended':'up')+'">'+(ended?'Ended':'Upcoming')+'</div>';
+    if(!ended&&btns.length){
+      html+='<div class="bs-ctas">'+btns.map(function(b,i){
+        var href=b.url&&String(b.url).trim()?esc(b.url):'#';
+        var cls=i===1||btns.length===1?'pri':'sec';
+        return '<a class="bs-btn '+cls+'" href="'+href+'" target="_blank" rel="noopener noreferrer">'+esc(b.label)+'</a>';
+      }).join('')+'</div>';
+    } else {
+      html+='<p class="bs-hint">Tap Register when links are posted.</p>';
+    }
+    body.innerHTML=html;
+    sheet.hidden=false;
+    document.documentElement.classList.add('boot-sheet-open');
   }
   function apply(rows){
     if(!rows||!rows.length||stopped) return;
+    byId={};
+    for(var i=0;i<rows.length;i++) byId[rows[i].id]=rows[i];
+    window.__PAKSOC_BOOT_EVENTS__=rows;
     var now=Date.now();
     var upcoming=rows.filter(function(e){return new Date(e.time).getTime()>now;})
       .sort(function(a,b){return new Date(a.time)-new Date(b.time);});
@@ -89,15 +133,16 @@ function bootUiScript(): string {
       startTimer(banner.time);
     } else {
       if(nameEl){ nameEl.textContent='No upcoming events'; nameEl.classList.remove('pending'); }
-      if(window.__PAKSOC_LOAD_APP__) window.__PAKSOC_LOAD_APP__();
+      setCell('boot-d',0); setCell('boot-h',0); setCell('boot-m',0); setCell('boot-s',0);
     }
     var list=(upcoming.length?upcoming:past).slice(0,3);
     var grid=document.getElementById('boot-events');
     if(!grid||!list.length) return;
-    // Text + meta only — images intentionally omitted (load last in React)
     grid.innerHTML=list.map(function(ev){
-      return '<div class="card"><div class="poster"></div><div class="body"><p class="t">'
-        +esc(ev.name)+'</p><p class="m">'+esc(ev.location||'')+'</p></div></div>';
+      return '<button type="button" class="card" data-eid="'+esc(ev.id)+'">'
+        +'<div class="poster"></div><div class="body"><p class="t">'
+        +esc(ev.name)+'</p><p class="m">'+esc(ev.location||'')+'</p>'
+        +'<p class="tap">Tap for details →</p></div></button>';
     }).join('');
   }
   function fromCache(){
@@ -108,21 +153,30 @@ function bootUiScript(): string {
       return parsed&&parsed.events?parsed.events:null;
     }catch(e){ return null; }
   }
+
+  document.addEventListener('click', function(e){
+    var t=e.target;
+    if(!t||!t.closest) return;
+    if(t.closest('[data-boot-close]')){ closeSheet(); return; }
+    var card=t.closest('#boot-events [data-eid]');
+    if(card){ openSheet(card.getAttribute('data-eid')); return; }
+  });
+
   var cached=fromCache();
   if(cached) apply(cached);
   if(window.__PAKSOC_EVENTS_P__){
-    window.__PAKSOC_EVENTS_P__.then(apply).catch(function(){
-      if(window.__PAKSOC_LOAD_APP__) window.__PAKSOC_LOAD_APP__();
-    });
-  } else if(!cached) {
-    if(window.__PAKSOC_LOAD_APP__) setTimeout(function(){ window.__PAKSOC_LOAD_APP__(); }, 400);
+    window.__PAKSOC_EVENTS_P__.then(apply).catch(function(){});
   }
-  // Hard cap: start React within 1s even if events are slow
-  setTimeout(function(){ if(window.__PAKSOC_LOAD_APP__) window.__PAKSOC_LOAD_APP__(); }, 1000);
+  // React in parallel — never wait on events for the app download
+  if(window.__PAKSOC_LOAD_APP__) window.__PAKSOC_LOAD_APP__();
+
   window.__PAKSOC_STOP_BOOT__=function(){
     stopped=true;
     if(timer) clearInterval(timer);
     timer=null;
+    closeSheet();
+    var sheet=document.getElementById('boot-sheet');
+    if(sheet) sheet.remove();
   };
 })();
 </script>`
@@ -142,12 +196,12 @@ function paksocBootPlugin(supabaseUrl: string, anonKey: string): Plugin {
           out = out.replace('<!-- EVENTS_BOOT -->', '')
         }
 
-        // CSS must not block the boot shell / timer
+        // Keep CSS non-blocking for first paint, but preload so React UI isn't CSS-starved
         out = out.replace(
           /<link\s+rel="stylesheet"([^>]*?)href="([^"]+\.css)"([^>]*)>/g,
-          '<link rel="stylesheet"$1href="$2"$3 media="print" onload="this.media=\'all\'">',
+          '<link rel="preload" href="$2" as="style" onload="this.onload=null;this.rel=\'stylesheet\'">'
+          + '<noscript><link rel="stylesheet" href="$2"></noscript>',
         )
-        // Do not preload React until timer path has started the app loader
         out = out.replace(/<link\s+rel="modulepreload"[^>]*>\s*/g, '')
 
         const modRe = /<script\s+type="module"[^>]*\ssrc="([^"]+)"[^>]*><\/script>/
@@ -155,8 +209,7 @@ function paksocBootPlugin(supabaseUrl: string, anonKey: string): Plugin {
         const appSrc = modMatch?.[1] ?? ''
         if (modMatch) out = out.replace(modMatch[0], '')
 
-        out = out.replace('<!--BOOT_UI-->', bootUiScript())
-
+        // Define loader FIRST, then boot UI (which starts the download immediately)
         const loader = `<script>
 (function(){
   var started=false;
@@ -178,6 +231,7 @@ function paksocBootPlugin(supabaseUrl: string, anonKey: string): Plugin {
 })();
 </script>`
         out = out.replace('<!--APP_LOADER-->', loader)
+        out = out.replace('<!--BOOT_UI-->', bootUiScript())
         return out
       },
     },

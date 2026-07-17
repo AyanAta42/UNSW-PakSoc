@@ -7,7 +7,6 @@ import { HeroBanner } from './components/HeroBanner'
 import { PublicEventCard } from './components/PublicEventCard'
 import { EventCardSkeleton } from './components/EventCardSkeleton'
 import { Footer } from './components/Footer'
-import { SocialWall } from './components/SocialWall'
 import { MobileEventSheet } from './components/MobileEventSheet'
 import { EventDetailModal } from '@/events/components/EventDetailModal'
 import { useNavigate } from 'react-router-dom'
@@ -18,6 +17,9 @@ const AmbientBackground = lazy(() =>
 )
 const LocationSidebar = lazy(() =>
   import('./components/LocationSidebar').then(m => ({ default: m.LocationSidebar })),
+)
+const SocialWall = lazy(() =>
+  import('./components/SocialWall').then(m => ({ default: m.SocialWall })),
 )
 const EditProfileModal = lazy(() =>
   import('./components/EditProfileModal').then(m => ({ default: m.EditProfileModal })),
@@ -199,13 +201,15 @@ export default function HomePage() {
             )}
           </div>
 
-          {/* Social wall is local placeholders — always on screen, never gated */}
+          {/* Social wall deferred — never blocks timer / event popups */}
           <div className="bg-transparent rounded-none px-4 py-4 lg:px-6 lg:py-5">
             <div className="flex items-center justify-between mb-5">
               <span className="text-[10px] font-bold tracking-widest uppercase" style={{ color: PALETTE.muted }}>Social Wall</span>
               <a href="#" style={{ color: ACCENT }} className="text-xs font-semibold no-underline hover:opacity-80">View on Instagram →</a>
             </div>
-            <SocialWall />
+            <Suspense fallback={<div className="motion-skeleton h-40 rounded-xl" />}>
+              <SocialWall />
+            </Suspense>
           </div>
         </div>
 
