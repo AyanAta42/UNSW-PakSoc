@@ -1,7 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import type { User } from '@supabase/supabase-js'
-import { signOut }        from '@/auth/services/signOut'
 import { usePermissions } from '@/roles/hooks/usePermissions'
 import { UserDropdown }   from './UserDropdown'
 import { ACCENT, ACCENT_TEXT, GLASS_CHIP, GLASS_NAV, PALETTE } from '@/config/theme'
@@ -28,7 +27,15 @@ export function Navbar({ user, avatarUrl, avatarBroken, initial, onAvatarError, 
             style={GLASS_CHIP}
             className="w-9 h-9 rounded-full p-0.5 shrink-0"
           >
-            <img src="/logo.png" alt="PakSoc UNSW" className="w-full h-full rounded-full object-cover" />
+            <img
+              src="/logo.webp"
+              alt="PakSoc UNSW"
+              width={36}
+              height={36}
+              decoding="async"
+              fetchPriority="high"
+              className="w-full h-full rounded-full object-cover"
+            />
           </div>
           <div className="min-w-0">
             <div style={{ color: PALETTE.dark }} className="font-bold text-sm leading-tight truncate">PakSoc UNSW</div>
@@ -66,7 +73,12 @@ export function Navbar({ user, avatarUrl, avatarBroken, initial, onAvatarError, 
               </button>
               {menuOpen && <UserDropdown user={user} avatarUrl={avatarUrl} initial={initial}
                 onEditProfile={() => { setMenuOpen(false); onEditProfile() }}
-                onSignOut={() => { setMenuOpen(false); signOut().then(() => navigate('/login')) }}
+                onSignOut={() => {
+                  setMenuOpen(false)
+                  void import('@/auth/services/signOut')
+                    .then(m => m.signOut())
+                    .then(() => navigate('/login'))
+                }}
                 onClose={() => setMenuOpen(false)} />}
             </div>
           ) : (

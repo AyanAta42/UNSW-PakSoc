@@ -1,8 +1,8 @@
 const FALLBACK: Record<string, string> = {
-  raunaq: '/raunaq.png',
-  khel:   '/khel.png',
-  iftar:  '/iftar.png',
-  cricket:'/cricket.png',
+  raunaq: '/raunaq.webp',
+  khel:   '/khel.webp',
+  iftar:  '/iftar.webp',
+  cricket:'/cricket.webp',
 }
 
 /** Returns the event's uploaded image URL or a keyword-matched fallback. */

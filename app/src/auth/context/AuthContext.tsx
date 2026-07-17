@@ -1,9 +1,8 @@
 import { createContext, useContext, useEffect, useMemo, useState } from 'react'
 import type { User, Session } from '@supabase/supabase-js'
-import { supabase } from '@/core/supabase/client'
 import { getAvatarUrl } from '@/auth/utils/getAvatarUrl'
 
-interface AuthCtx {
+export interface AuthCtx {
   user: User | null
   session: Session | null
   loading: boolean
@@ -12,7 +11,10 @@ interface AuthCtx {
 
 const AuthContext = createContext<AuthCtx | null>(null)
 
-/** Single shared auth subscription for the whole app (avoids N× getSession listeners). */
+/**
+ * Shared auth state. Supabase client is dynamically imported after mount so the
+ * anonymous homepage can paint without downloading ~200 KB of supabase-js first.
+ */
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null)
   const [session, setSession] = useState<Session | null>(null)
@@ -20,22 +22,33 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     let alive = true
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (!alive) return
-      setSession(session)
-      setUser(session?.user ?? null)
-      setLoading(false)
-    })
+    let unsubscribe: (() => void) | undefined
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setSession(session)
-      setUser(session?.user ?? null)
+    const boot = async () => {
+      const { supabase } = await import('@/core/supabase/client')
+      if (!alive) return
+
+      const { data: { session: initial } } = await supabase.auth.getSession()
+      if (!alive) return
+      setSession(initial)
+      setUser(initial?.user ?? null)
       setLoading(false)
-    })
+
+      const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, next) => {
+        setSession(next)
+        setUser(next?.user ?? null)
+        setLoading(false)
+      })
+      unsubscribe = () => subscription.unsubscribe()
+    }
+
+    // Yield to first paint, then load auth (still ASAP for logged-in chrome)
+    const t = window.setTimeout(() => { void boot() }, 0)
 
     return () => {
       alive = false
-      subscription.unsubscribe()
+      clearTimeout(t)
+      unsubscribe?.()
     }
   }, [])
 

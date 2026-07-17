@@ -1,12 +1,15 @@
-import { useEffect, useRef, useState } from 'react'
+import { lazy, Suspense, useEffect, useRef, useState } from 'react'
 import type { DbEvent } from '@/events/types/Event'
 import { useCountdown }    from '@/shared/hooks/useCountdown'
 import { getEventButtons, getCtaVariant } from '@/events/utils/getEventButtons'
 import { EventCtaButton }  from '@/events/components/EventCtaButton'
 import { OdometerNumber }  from '@/shared/components/OdometerNumber'
 import { prefersReducedMotion, useParallaxLayers, type ParallaxLayer } from '@/shared/motion'
-import { HeroCelestialTrail } from './HeroCelestialTrail'
 import { ACCENT, ACCENT_GLOW, PALETTE } from '@/config/theme'
+
+const HeroCelestialTrail = lazy(() =>
+  import('./HeroCelestialTrail').then(m => ({ default: m.HeroCelestialTrail })),
+)
 
 interface Props { banner: DbEvent | null; loading: boolean }
 
@@ -73,8 +76,12 @@ export function HeroBanner({ banner, loading }: Props) {
           <div className="motion-hero-spotlight" />
         </div>
 
-        {/* Layer 3: Celestial trail (idle-mounted) + faint grain */}
-        {trailReady && <HeroCelestialTrail />}
+        {/* Layer 3: Celestial trail (idle + lazy chunk) + faint grain */}
+        {trailReady && (
+          <Suspense fallback={null}>
+            <HeroCelestialTrail />
+          </Suspense>
+        )}
         <div aria-hidden className="motion-hero-grain" />
 
         {/* Layer 4: Content */}

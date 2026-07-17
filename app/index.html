@@ -13,13 +13,18 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <title>PakSoc UNSW</title>
 
-    <!-- Non-blocking fonts: swap + media=print trick so first paint isn't blocked -->
+    <!-- Instant dark shell before JS/CSS arrive -->
+    <style>
+      html, body, #root { background: #050505; margin: 0; min-height: 100%; color: #F8FAFC; }
+    </style>
+
+    <!-- Non-blocking fonts: fewer weights = less bandwidth on cold load -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link rel="preconnect" href="https://api.fontshare.com" crossorigin />
     <link
       rel="stylesheet"
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap"
       media="print"
       onload="this.media='all'"
     />
@@ -30,7 +35,7 @@
       onload="this.media='all'"
     />
     <noscript>
-      <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+      <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet" />
       <link href="https://api.fontshare.com/v2/css?f[]=satoshi@900&display=swap" rel="stylesheet" />
     </noscript>
   </head>

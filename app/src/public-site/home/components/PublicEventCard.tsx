@@ -22,7 +22,15 @@ export function PublicEventCard({ event: ev, selected, now, onClick }: Props) {
 
       <div className="relative overflow-hidden" style={{ height: 120 }}>
         {img
-          ? <img src={img} alt={ev.name} className="motion-card-poster w-full h-full object-cover" />
+          ? <img
+              src={img}
+              alt={ev.name}
+              width={400}
+              height={120}
+              loading="lazy"
+              decoding="async"
+              className="motion-card-poster w-full h-full object-cover"
+            />
           : <div className="motion-card-poster w-full h-full" style={{ background: `linear-gradient(135deg, ${PALETTE.cardAlt}, ${PALETTE.card})` }} />
         }
         <div className="absolute inset-0" style={{ background: 'linear-gradient(to top, rgba(0,0,0,0.65) 0%, transparent 50%)' }} />
