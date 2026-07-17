@@ -1,4 +1,4 @@
-import { defineConfig, loadEnv } from 'vite'
+import { defineConfig, loadEnv, type Plugin } from 'vite'
 import react from '@vitejs/plugin-react'
 import path from 'path'
 
@@ -25,12 +25,17 @@ function eventsBootScript(url: string, anonKey: string): string {
 </script>`
 }
 
-/** Instant countdown + cards from cache/network — runs before React downloads. */
+/**
+ * Timer-first boot UI:
+ * 1) blank skeleton countdown (never fake 00s)
+ * 2) when events arrive → live timer + text cards (NO images)
+ * 3) then start downloading React
+ */
 function bootUiScript(): string {
   return `<script>
 (function(){
-  var timer=null, target=null, stopped=false;
-  function pad(n){ return (n<10?'0':'')+n; }
+  var timer=null, target=null, stopped=false, ready=false;
+  function pad(n){ n=n|0; return (n<10?'0':'')+n; }
   function calc(iso){
     var diff=new Date(iso).getTime()-Date.now();
     if(!(diff>0)) return {d:0,h:0,m:0,s:0};
@@ -41,23 +46,29 @@ function bootUiScript(): string {
       s:Math.floor((diff%60000)/1000)
     };
   }
+  function setCell(id, val){
+    var el=document.getElementById(id);
+    if(!el) return;
+    el.classList.remove('sk');
+    el.textContent=pad(val);
+  }
   function paintCd(){
     if(!target||stopped) return;
     var c=calc(target);
-    var d=document.getElementById('boot-d');
-    var h=document.getElementById('boot-h');
-    var m=document.getElementById('boot-m');
-    var s=document.getElementById('boot-s');
-    if(d) d.textContent=pad(c.d);
-    if(h) h.textContent=pad(c.h);
-    if(m) m.textContent=pad(c.m);
-    if(s) s.textContent=pad(c.s);
+    setCell('boot-d', c.d);
+    setCell('boot-h', c.h);
+    setCell('boot-m', c.m);
+    setCell('boot-s', c.s);
   }
   function startTimer(iso){
     target=iso;
+    ready=true;
+    var wrap=document.getElementById('boot-cd');
+    if(wrap) wrap.setAttribute('data-ready','1');
     paintCd();
     if(timer) clearInterval(timer);
     timer=setInterval(paintCd,1000);
+    if(window.__PAKSOC_LOAD_APP__) window.__PAKSOC_LOAD_APP__();
   }
   function esc(t){
     return String(t==null?'':t).replace(/[&<>"']/g,function(ch){
@@ -74,19 +85,18 @@ function bootUiScript(): string {
     var banner=upcoming[0]||null;
     var nameEl=document.getElementById('boot-name');
     if(banner){
-      if(nameEl) nameEl.textContent=banner.name||'Upcoming event';
+      if(nameEl){ nameEl.textContent=banner.name||'Upcoming event'; nameEl.classList.remove('pending'); }
       startTimer(banner.time);
-    } else if(nameEl){
-      nameEl.textContent='No upcoming events';
+    } else {
+      if(nameEl){ nameEl.textContent='No upcoming events'; nameEl.classList.remove('pending'); }
+      if(window.__PAKSOC_LOAD_APP__) window.__PAKSOC_LOAD_APP__();
     }
     var list=(upcoming.length?upcoming:past).slice(0,3);
     var grid=document.getElementById('boot-events');
     if(!grid||!list.length) return;
+    // Text + meta only — images intentionally omitted (load last in React)
     grid.innerHTML=list.map(function(ev){
-      var img=ev.image_url
-        ? '<img src="'+esc(ev.image_url)+'" alt="" width="400" height="120" loading="eager" decoding="async"/>'
-        : '';
-      return '<div class="card"><div class="poster">'+img+'</div><div class="body"><p class="t">'
+      return '<div class="card"><div class="poster"></div><div class="body"><p class="t">'
         +esc(ev.name)+'</p><p class="m">'+esc(ev.location||'')+'</p></div></div>';
     }).join('');
   }
@@ -101,8 +111,14 @@ function bootUiScript(): string {
   var cached=fromCache();
   if(cached) apply(cached);
   if(window.__PAKSOC_EVENTS_P__){
-    window.__PAKSOC_EVENTS_P__.then(apply).catch(function(){});
+    window.__PAKSOC_EVENTS_P__.then(apply).catch(function(){
+      if(window.__PAKSOC_LOAD_APP__) window.__PAKSOC_LOAD_APP__();
+    });
+  } else if(!cached) {
+    if(window.__PAKSOC_LOAD_APP__) setTimeout(function(){ window.__PAKSOC_LOAD_APP__(); }, 400);
   }
+  // Hard cap: start React within 1s even if events are slow
+  setTimeout(function(){ if(window.__PAKSOC_LOAD_APP__) window.__PAKSOC_LOAD_APP__(); }, 1000);
   window.__PAKSOC_STOP_BOOT__=function(){
     stopped=true;
     if(timer) clearInterval(timer);
@@ -110,6 +126,62 @@ function bootUiScript(): string {
   };
 })();
 </script>`
+}
+
+function paksocBootPlugin(supabaseUrl: string, anonKey: string): Plugin {
+  return {
+    name: 'paksoc-events-boot',
+    transformIndexHtml: {
+      order: 'post',
+      handler(html) {
+        let out = html
+
+        if (supabaseUrl && anonKey) {
+          out = out.replace('<!-- EVENTS_BOOT -->', eventsBootScript(supabaseUrl, anonKey))
+        } else {
+          out = out.replace('<!-- EVENTS_BOOT -->', '')
+        }
+
+        // CSS must not block the boot shell / timer
+        out = out.replace(
+          /<link\s+rel="stylesheet"([^>]*?)href="([^"]+\.css)"([^>]*)>/g,
+          '<link rel="stylesheet"$1href="$2"$3 media="print" onload="this.media=\'all\'">',
+        )
+        // Do not preload React until timer path has started the app loader
+        out = out.replace(/<link\s+rel="modulepreload"[^>]*>\s*/g, '')
+
+        const modRe = /<script\s+type="module"[^>]*\ssrc="([^"]+)"[^>]*><\/script>/
+        const modMatch = out.match(modRe)
+        const appSrc = modMatch?.[1] ?? ''
+        if (modMatch) out = out.replace(modMatch[0], '')
+
+        out = out.replace('<!--BOOT_UI-->', bootUiScript())
+
+        const loader = `<script>
+(function(){
+  var started=false;
+  var src=${JSON.stringify(appSrc)};
+  window.__PAKSOC_LOAD_APP__=function(){
+    if(started||!src) return;
+    started=true;
+    var pre=document.createElement('link');
+    pre.rel='modulepreload';
+    pre.href=src;
+    pre.crossOrigin='';
+    document.head.appendChild(pre);
+    var s=document.createElement('script');
+    s.type='module';
+    s.crossOrigin='';
+    s.src=src;
+    document.body.appendChild(s);
+  };
+})();
+</script>`
+        out = out.replace('<!--APP_LOADER-->', loader)
+        return out
+      },
+    },
+  }
 }
 
 export default defineConfig(({ mode }) => {
@@ -120,19 +192,7 @@ export default defineConfig(({ mode }) => {
   return {
     plugins: [
       react(),
-      {
-        name: 'paksoc-events-boot',
-        transformIndexHtml(html) {
-          let out = html
-          if (supabaseUrl && anonKey) {
-            out = out.replace('<!-- EVENTS_BOOT -->', eventsBootScript(supabaseUrl, anonKey))
-          } else {
-            out = out.replace('<!-- EVENTS_BOOT -->', '')
-          }
-          out = out.replace('<!--BOOT_UI-->', bootUiScript())
-          return out
-        },
-      },
+      paksocBootPlugin(supabaseUrl, anonKey),
     ],
     resolve: {
       alias: {
@@ -142,12 +202,7 @@ export default defineConfig(({ mode }) => {
     build: {
       target: 'es2020',
       cssCodeSplit: true,
-      modulePreload: {
-        polyfill: false,
-        // Only preload React — leave router/app to load after first paint of boot shell
-        resolveDependencies: (_filename, deps) =>
-          deps.filter((d) => d.includes('react-vendor')),
-      },
+      modulePreload: { polyfill: false, resolveDependencies: () => [] },
       rollupOptions: {
         output: {
           manualChunks(id) {
