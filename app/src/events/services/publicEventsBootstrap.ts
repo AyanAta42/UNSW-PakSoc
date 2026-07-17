@@ -10,6 +10,7 @@ type CachePayload = { at: number; events: DbEvent[] }
 declare global {
   interface Window {
     __PAKSOC_EVENTS_P__?: Promise<unknown>
+    __PAKSOC_STOP_BOOT__?: () => void
   }
 }
 
