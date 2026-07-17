@@ -1,10 +1,15 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { usePublicEvents } from '@/events/context/PublicEventsContext'
 import { AllEventsCard } from '@/events/components/AllEventsCard'
 import { EventDetailModal } from '@/events/components/EventDetailModal'
+import { EventDetailContent } from '@/public-site/home/components/EventDetailContent'
 import type { DbEvent } from '@/events/types/Event'
 import { ACCENT, PALETTE } from '@/config/theme'
+
+function isPhone(): boolean {
+  return typeof window !== 'undefined' && window.matchMedia('(max-width: 1023px)').matches
+}
 
 function EventSection({ title, color, events, onSelect }: {
   title: string; color: string; events: DbEvent[]; onSelect: (ev: DbEvent) => void
@@ -28,21 +33,33 @@ function EventSection({ title, color, events, onSelect }: {
 export default function AllEventsPage() {
   const navigate = useNavigate()
   const { events, loading } = usePublicEvents()
-  const [selected, setSelected] = useState<DbEvent | null>(null)
+  const [selectedId, setSelectedId] = useState<string | null>(null)
+  const [modalEvent, setModalEvent] = useState<DbEvent | null>(null)
 
   useEffect(() => {
-    const open = !!selected
+    const open = !!modalEvent
     document.body.style.overflow = open ? 'hidden' : ''
     document.documentElement.classList.toggle('modal-open', open)
     return () => {
       document.body.style.overflow = ''
       document.documentElement.classList.remove('modal-open')
     }
-  }, [selected])
+  }, [modalEvent])
 
   const now = new Date()
-  const upcoming = events.filter(e => new Date(e.time) > now).sort((a, b) => +new Date(a.time) - +new Date(b.time))
-  const ended = events.filter(e => new Date(e.time) <= now).sort((a, b) => +new Date(b.time) - +new Date(a.time))
+  const { upcoming, ended, featured } = useMemo(() => {
+    const now = new Date()
+    const upcoming = events.filter(e => new Date(e.time) > now).sort((a, b) => +new Date(a.time) - +new Date(b.time))
+    const ended = events.filter(e => new Date(e.time) <= now).sort((a, b) => +new Date(b.time) - +new Date(a.time))
+    const featured = events.find(e => e.id === selectedId) ?? upcoming[0] ?? ended[0] ?? null
+    return { upcoming, ended, featured }
+  }, [events, selectedId])
+
+  /** Phone: open the popup. Desktop: no popup — select and show in the side panel. */
+  function selectEvent(ev: DbEvent) {
+    setSelectedId(ev.id)
+    if (isPhone()) setModalEvent(ev)
+  }
 
   return (
     <div style={{ minHeight: '100vh', background: PALETTE.page, fontFamily: 'system-ui, sans-serif' }}>
@@ -55,26 +72,39 @@ export default function AllEventsPage() {
         <span style={{ color: PALETTE.dark }} className="font-extrabold text-[15px]">All Events</span>
       </nav>
 
-      <div className="max-w-[1100px] mx-auto px-6 md:px-8 py-8">
-        {loading && events.length === 0 && (
-          <div className="grid grid-cols-[repeat(auto-fill,minmax(260px,1fr))] gap-4">
-            {[1, 2, 3, 4].map(i => (
-              <div key={i} className="motion-skeleton h-44" style={{ borderRadius: 18, border: `1px solid ${PALETTE.border}` }} />
-            ))}
-          </div>
+      <div className="max-w-[1400px] mx-auto px-6 md:px-8 py-8 flex gap-6 items-start">
+        <div className="flex-1 min-w-0">
+          {loading && events.length === 0 && (
+            <div className="grid grid-cols-[repeat(auto-fill,minmax(260px,1fr))] gap-4">
+              {[1, 2, 3, 4].map(i => (
+                <div key={i} className="motion-skeleton h-44" style={{ borderRadius: 18, border: `1px solid ${PALETTE.border}` }} />
+              ))}
+            </div>
+          )}
+          {!loading && events.length === 0 && (
+            <div className="flex flex-col items-center justify-center py-28 text-center">
+              <div className="text-base font-bold" style={{ color: PALETTE.muted }}>No events yet — check back soon.</div>
+            </div>
+          )}
+          {events.length > 0 && <>
+            <EventSection title="Upcoming" color={ACCENT} events={upcoming} onSelect={selectEvent} />
+            <EventSection title="Ended" color={PALETTE.disabled} events={ended} onSelect={selectEvent} />
+          </>}
+        </div>
+
+        {featured && (
+          <aside className="hidden lg:block w-[340px] shrink-0 sticky top-[72px]">
+            <div style={{ background: PALETTE.card, border: `1px solid ${PALETTE.border}`, borderRadius: 18, boxShadow: PALETTE.shadowMd }}
+              className="overflow-hidden flex flex-col">
+              <div className="px-5 pt-5 pb-5 flex flex-col gap-3.5">
+                <EventDetailContent event={featured} now={now} />
+              </div>
+            </div>
+          </aside>
         )}
-        {!loading && events.length === 0 && (
-          <div className="flex flex-col items-center justify-center py-28 text-center">
-            <div className="text-base font-bold" style={{ color: PALETTE.muted }}>No events yet — check back soon.</div>
-          </div>
-        )}
-        {events.length > 0 && <>
-          <EventSection title="Upcoming" color={ACCENT} events={upcoming} onSelect={setSelected} />
-          <EventSection title="Ended" color={PALETTE.disabled} events={ended} onSelect={setSelected} />
-        </>}
       </div>
 
-      {selected && <EventDetailModal event={selected} now={now} onClose={() => setSelected(null)} />}
+      {modalEvent && <EventDetailModal event={modalEvent} now={now} onClose={() => setModalEvent(null)} />}
     </div>
   )
 }

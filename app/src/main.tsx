@@ -7,3 +7,11 @@ import { prefetchPublicEvents } from '@/events/services/publicEventsBootstrap'
 void prefetchPublicEvents()
 
 ReactDOM.createRoot(document.getElementById('root')!).render(<App />)
+
+// Register the service worker after first paint so it never delays the UI.
+// Precaches the app shell + images; subsequent opens are served entirely from cache.
+if (import.meta.env.PROD && 'serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    void import('virtual:pwa-register').then(({ registerSW }) => registerSW({ immediate: true }))
+  })
+}

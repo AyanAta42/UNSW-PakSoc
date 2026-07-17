@@ -1,5 +1,6 @@
 import { defineConfig, loadEnv } from 'vite'
 import react from '@vitejs/plugin-react'
+import { VitePWA } from 'vite-plugin-pwa'
 import path from 'path'
 
 const COLS = 'id,name,time,end_time,location,price,public,image_url,buttons,timeline'
@@ -41,6 +42,63 @@ export default defineConfig(({ mode }) => {
           return html.replace('<!-- EVENTS_BOOT -->', eventsBootScript(supabaseUrl, anonKey))
         },
       },
+      VitePWA({
+        registerType: 'autoUpdate',
+        injectRegister: null, // registered manually in main.tsx
+        manifest: false, // keep the hand-written public/manifest.webmanifest
+        workbox: {
+          // Precache the whole app shell: JS, CSS, HTML, fonts and every public image
+          globPatterns: ['**/*.{js,css,html,svg,png,webp,woff2}'],
+          maximumFileSizeToCacheInBytes: 5 * 1024 * 1024,
+          navigateFallback: '/index.html',
+          navigateFallbackDenylist: [/^\/api\//],
+          cleanupOutdatedCaches: true,
+          clientsClaim: true,
+          skipWaiting: true,
+          runtimeCaching: [
+            {
+              // Public events data — serve cached instantly, refresh in background
+              urlPattern: /^https:\/\/[^/]+\.supabase\.co\/rest\/v1\/events/,
+              handler: 'StaleWhileRevalidate',
+              options: {
+                cacheName: 'events-api',
+                expiration: { maxEntries: 32, maxAgeSeconds: 7 * 24 * 60 * 60 },
+                cacheableResponse: { statuses: [0, 200] },
+              },
+            },
+            {
+              // Event images from Supabase storage
+              urlPattern: /^https:\/\/[^/]+\.supabase\.co\/storage\/v1\/object\//,
+              handler: 'CacheFirst',
+              options: {
+                cacheName: 'event-images',
+                expiration: { maxEntries: 120, maxAgeSeconds: 30 * 24 * 60 * 60 },
+                cacheableResponse: { statuses: [0, 200] },
+              },
+            },
+            {
+              // Font stylesheets (Google Fonts / Fontshare)
+              urlPattern: /^https:\/\/(fonts\.googleapis\.com|api\.fontshare\.com)\//,
+              handler: 'StaleWhileRevalidate',
+              options: {
+                cacheName: 'font-styles',
+                expiration: { maxEntries: 16, maxAgeSeconds: 30 * 24 * 60 * 60 },
+                cacheableResponse: { statuses: [0, 200] },
+              },
+            },
+            {
+              // Font files — immutable, cache aggressively
+              urlPattern: /^https:\/\/(fonts\.gstatic\.com|cdn\.fontshare\.com)\//,
+              handler: 'CacheFirst',
+              options: {
+                cacheName: 'font-files',
+                expiration: { maxEntries: 32, maxAgeSeconds: 365 * 24 * 60 * 60 },
+                cacheableResponse: { statuses: [0, 200] },
+              },
+            },
+          ],
+        },
+      }),
     ],
     resolve: {
       alias: {

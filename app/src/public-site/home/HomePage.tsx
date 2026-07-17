@@ -9,7 +9,6 @@ import { EventCardSkeleton } from './components/EventCardSkeleton'
 import { Footer } from './components/Footer'
 import { SocialWall } from './components/SocialWall'
 import { MobileEventSheet } from './components/MobileEventSheet'
-import { EventDetailModal } from '@/events/components/EventDetailModal'
 import { useNavigate } from 'react-router-dom'
 import { ACCENT, PALETTE } from '@/config/theme'
 
@@ -67,7 +66,6 @@ export default function HomePage() {
   const [avatarBroken, setAvatarBroken] = useState(false)
   const [selectedId, setSelectedId] = useState<string | null>(null)
   const [sheetEvent, setSheetEvent] = useState<DbEvent | null>(null)
-  const [modalEvent, setModalEvent] = useState<DbEvent | null>(null)
   const [editOpen, setEditOpen] = useState(false)
 
   const meta = user?.user_metadata ?? {}
@@ -97,7 +95,7 @@ export default function HomePage() {
     return () => { alive = false }
   }, [user, authAvatar, eventsReady])
 
-  const overlayOpen = !!sheetEvent || !!modalEvent || editOpen
+  const overlayOpen = !!sheetEvent || editOpen
   useEffect(() => {
     document.body.style.overflow = overlayOpen ? 'hidden' : ''
     document.documentElement.classList.toggle('modal-open', overlayOpen)
@@ -120,15 +118,13 @@ export default function HomePage() {
     return { phoneEvents, allPublic, banner, featured, now }
   }, [events, selectedId])
 
-  /** Always open a popup instantly — sheet on phone, modal on desktop. */
+  /** Phone: open the bottom sheet. Desktop: no popup — select and show in the sidebar. */
   function openEvent(ev: DbEvent) {
     setSelectedId(ev.id)
     if (isPhone()) {
-      setModalEvent(null)
       setSheetEvent(ev)
     } else {
       setSheetEvent(null)
-      setModalEvent(ev)
     }
   }
 
@@ -214,21 +210,14 @@ export default function HomePage() {
         </div>
 
         <div className="hidden lg:block flex-[3] min-w-0">
-          {ambientReady ? (
-            <Suspense fallback={<div className="motion-skeleton h-80 rounded-xl" />}>
-              <LocationSidebar mapEvent={featured ?? banner} featured={featured} now={now} />
-            </Suspense>
-          ) : (
-            <div className="motion-skeleton h-80 rounded-xl" />
-          )}
+          <Suspense fallback={<div className="motion-skeleton h-80 rounded-xl" />}>
+            <LocationSidebar mapEvent={featured ?? banner} featured={featured} now={now} />
+          </Suspense>
         </div>
       </div>
 
       {sheetEvent && (
         <MobileEventSheet event={sheetEvent} now={now} onClose={() => setSheetEvent(null)} />
-      )}
-      {modalEvent && (
-        <EventDetailModal event={modalEvent} now={now} onClose={() => setModalEvent(null)} />
       )}
       {editOpen && user && (
         <Suspense fallback={null}>
