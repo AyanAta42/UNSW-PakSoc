@@ -2,6 +2,7 @@ import { defineConfig, loadEnv, type Plugin } from 'vite'
 import react from '@vitejs/plugin-react'
 import path from 'path'
 
+/** Slim select — timer + cards + images only. Timeline/buttons load with React later if needed. */
 const COLS = 'id,name,time,end_time,location,price,public,image_url,buttons,timeline'
 
 function eventsBootScript(url: string, anonKey: string): string {
@@ -11,29 +12,56 @@ function eventsBootScript(url: string, anonKey: string): string {
 (function(){
   var base=${safeUrl}, key=${safeKey};
   if(!base||!key) return;
-  var link=document.createElement('link');
-  link.rel='preconnect'; link.href=base; link.crossOrigin='anonymous';
-  document.head.appendChild(link);
+  var a=document.createElement('link');
+  a.rel='preconnect'; a.href=base; a.crossOrigin='anonymous';
+  document.head.appendChild(a);
+  var b=document.createElement('link');
+  b.rel='dns-prefetch'; b.href=base;
+  document.head.appendChild(b);
   var q=base+'/rest/v1/events?select=${encodeURIComponent(COLS)}&public=eq.true&order=time.asc';
-  window.__PAKSOC_EVENTS_P__=fetch(q,{headers:{apikey:key,Authorization:'Bearer '+key,Accept:'application/json'}})
-    .then(function(r){ if(!r.ok) throw new Error('events '+r.status); return r.json(); })
+  window.__PAKSOC_EVENTS_P__=fetch(q,{
+    headers:{apikey:key,Authorization:'Bearer '+key,Accept:'application/json'},
+    priority:'high',
+    cache:'default'
+  }).then(function(r){ if(!r.ok) throw new Error('events '+r.status); return r.json(); })
     .then(function(rows){
       try{ localStorage.setItem('paksoc:public-events:v1', JSON.stringify({at:Date.now(),events:rows})); }catch(e){}
       return rows;
     });
+  // Warm poster images from cache in <head> — earliest possible moment
+  try{
+    var raw=localStorage.getItem('paksoc:public-events:v1');
+    if(raw){
+      var parsed=JSON.parse(raw);
+      var evs=parsed&&parsed.events?parsed.events:[];
+      var now=Date.now();
+      var up=evs.filter(function(e){return new Date(e.time).getTime()>now;})
+        .sort(function(a,b){return new Date(a.time)-new Date(b.time);});
+      var list=(up.length?up:evs).slice(0,3);
+      for(var i=0;i<list.length;i++){
+        var src=list[i]&&list[i].image_url;
+        if(!src) continue;
+        var l=document.createElement('link');
+        l.rel='preload'; l.as='image'; l.href=src;
+        try{ l.fetchPriority=i===0?'high':'auto'; }catch(e){}
+        document.head.appendChild(l);
+      }
+    }
+  }catch(e){}
 })();
 </script>`
 }
 
 /**
- * Functional shell BEFORE React:
- * When events arrive → live timer + names + clickable popups together.
- * React downloads in parallel; images stay out of this path.
+ * Highest priority path:
+ * 1) paint timer + event images the instant events/cache are available
+ * 2) ONLY THEN download React (so it can't steal bandwidth from timer/images)
  */
 function bootUiScript(): string {
   return `<script>
 (function(){
-  var timer=null, target=null, stopped=false, byId={};
+  var timer=null, target=null, stopped=false, byId={}, painted=false, warmed={};
+  var FALLBACK={raunaq:'/raunaq.webp',khel:'/khel.webp',iftar:'/iftar.webp',cricket:'/cricket.webp'};
   function pad(n){ n=n|0; return (n<10?'0':'')+n; }
   function esc(t){
     return String(t==null?'':t).replace(/[&<>"']/g,function(ch){
@@ -72,6 +100,24 @@ function bootUiScript(): string {
     if(timer) clearInterval(timer);
     timer=setInterval(paintCd,1000);
   }
+  function imgSrc(ev){
+    if(ev&&ev.image_url) return String(ev.image_url);
+    var name=(ev&&ev.name?String(ev.name):'').toLowerCase();
+    for(var k in FALLBACK){ if(name.indexOf(k)!==-1) return FALLBACK[k]; }
+    return '';
+  }
+  function warmImage(src, high){
+    if(!src||warmed[src]) return;
+    warmed[src]=1;
+    var l=document.createElement('link');
+    l.rel='preload'; l.as='image'; l.href=src;
+    if(high) try{ l.fetchPriority='high'; }catch(e){}
+    document.head.appendChild(l);
+    var im=new Image();
+    try{ im.fetchPriority=high?'high':'low'; }catch(e){}
+    im.decoding='async';
+    im.src=src;
+  }
   function buttonsOf(ev){
     var raw=ev&&ev.buttons;
     if(!raw) return [];
@@ -99,7 +145,9 @@ function bootUiScript(): string {
     if(!body||!sheet) return;
     var ended=new Date(ev.time).getTime()<=Date.now();
     var btns=buttonsOf(ev);
-    var html='<div class="bs-title">'+esc(ev.name)+'</div>'
+    var src=imgSrc(ev);
+    var html=(src?'<img class="bs-img" src="'+esc(src)+'" alt="" decoding="async">':'')
+      +'<div class="bs-title">'+esc(ev.name)+'</div>'
       +'<div class="bs-meta">◷ '+esc(fmtWhen(ev.time))+'</div>'
       +'<div class="bs-meta">◎ '+esc(ev.location||'')+'</div>'
       +'<div class="bs-badge '+(ended?'ended':'up')+'">'+(ended?'Ended':'Upcoming')+'</div>';
@@ -115,6 +163,9 @@ function bootUiScript(): string {
     body.innerHTML=html;
     sheet.hidden=false;
     document.documentElement.classList.add('boot-sheet-open');
+  }
+  function goApp(){
+    if(window.__PAKSOC_LOAD_APP__) window.__PAKSOC_LOAD_APP__();
   }
   function apply(rows){
     if(!rows||!rows.length||stopped) return;
@@ -136,14 +187,26 @@ function bootUiScript(): string {
       setCell('boot-d',0); setCell('boot-h',0); setCell('boot-m',0); setCell('boot-s',0);
     }
     var list=(upcoming.length?upcoming:past).slice(0,3);
+    // Warm images FIRST — before React — so posters win the network
+    for(var j=0;j<list.length;j++) warmImage(imgSrc(list[j]), j<2);
     var grid=document.getElementById('boot-events');
-    if(!grid||!list.length) return;
-    grid.innerHTML=list.map(function(ev){
-      return '<button type="button" class="card" data-eid="'+esc(ev.id)+'">'
-        +'<div class="poster"></div><div class="body"><p class="t">'
-        +esc(ev.name)+'</p><p class="m">'+esc(ev.location||'')+'</p>'
-        +'<p class="tap">Tap for details →</p></div></button>';
-    }).join('');
+    if(grid&&list.length){
+      grid.innerHTML=list.map(function(ev, idx){
+        var src=imgSrc(ev);
+        var poster=src
+          ? '<img class="poster-img" src="'+esc(src)+'" alt="" width="400" height="120" decoding="async"'+(idx===0?' fetchpriority="high"':'')+'>'
+          : '<div class="poster"></div>';
+        return '<button type="button" class="card" data-eid="'+esc(ev.id)+'">'
+          +poster+'<div class="body"><p class="t">'
+          +esc(ev.name)+'</p><p class="m">'+esc(ev.location||'')+'</p>'
+          +'<p class="tap">Tap for details →</p></div></button>';
+      }).join('');
+    }
+    if(!painted){
+      painted=true;
+      // Timer + images are on screen — NOW start React
+      goApp();
+    }
   }
   function fromCache(){
     try{
@@ -165,10 +228,10 @@ function bootUiScript(): string {
   var cached=fromCache();
   if(cached) apply(cached);
   if(window.__PAKSOC_EVENTS_P__){
-    window.__PAKSOC_EVENTS_P__.then(apply).catch(function(){});
+    window.__PAKSOC_EVENTS_P__.then(apply).catch(function(){ goApp(); });
   }
-  // React in parallel — never wait on events for the app download
-  if(window.__PAKSOC_LOAD_APP__) window.__PAKSOC_LOAD_APP__();
+  // Safety: if events are slow, start React after 700ms so the page isn't stuck
+  setTimeout(goApp, 700);
 
   window.__PAKSOC_STOP_BOOT__=function(){
     stopped=true;
@@ -196,7 +259,6 @@ function paksocBootPlugin(supabaseUrl: string, anonKey: string): Plugin {
           out = out.replace('<!-- EVENTS_BOOT -->', '')
         }
 
-        // Keep CSS non-blocking for first paint, but preload so React UI isn't CSS-starved
         out = out.replace(
           /<link\s+rel="stylesheet"([^>]*?)href="([^"]+\.css)"([^>]*)>/g,
           '<link rel="preload" href="$2" as="style" onload="this.onload=null;this.rel=\'stylesheet\'">'
@@ -209,7 +271,6 @@ function paksocBootPlugin(supabaseUrl: string, anonKey: string): Plugin {
         const appSrc = modMatch?.[1] ?? ''
         if (modMatch) out = out.replace(modMatch[0], '')
 
-        // Define loader FIRST, then boot UI (which starts the download immediately)
         const loader = `<script>
 (function(){
   var started=false;

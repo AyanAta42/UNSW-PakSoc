@@ -186,15 +186,15 @@ export default function HomePage() {
                 <div className="grid w-full grid-cols-1 md:grid-cols-3 gap-4 md:hidden">
                   {phoneEvents.length === 0
                     ? <p style={{ color: PALETTE.muted }} className="text-sm m-0 col-span-full">No events yet — check back soon.</p>
-                    : phoneEvents.map(ev => (
-                      <PublicEventCard key={ev.id} event={ev} selected={selectedId === ev.id || (!selectedId && ev.id === featured?.id)} now={now} onClick={() => openEvent(ev)} />
+                    : phoneEvents.map((ev, i) => (
+                      <PublicEventCard key={ev.id} event={ev} selected={selectedId === ev.id || (!selectedId && ev.id === featured?.id)} now={now} priority={i < 2} onClick={() => openEvent(ev)} />
                     ))}
                 </div>
                 <div className="grid w-full grid-cols-1 md:grid-cols-3 gap-4 hidden md:grid">
                   {allPublic.length === 0
                     ? <p style={{ color: PALETTE.muted }} className="text-sm m-0 col-span-full">No events yet — announce some from Events Manager.</p>
-                    : allPublic.slice(0, 3).map(ev => (
-                      <PublicEventCard key={ev.id} event={ev} selected={selectedId === ev.id || (!selectedId && ev.id === featured?.id)} now={now} onClick={() => openEvent(ev)} />
+                    : allPublic.slice(0, 3).map((ev, i) => (
+                      <PublicEventCard key={ev.id} event={ev} selected={selectedId === ev.id || (!selectedId && ev.id === featured?.id)} now={now} priority={i < 2} onClick={() => openEvent(ev)} />
                     ))}
                 </div>
               </>

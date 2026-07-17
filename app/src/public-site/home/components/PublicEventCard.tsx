@@ -1,34 +1,22 @@
-import { useEffect, useState } from 'react'
 import type { DbEvent } from '@/events/types/Event'
 import { dateParts } from '@/events/utils/dateParts'
 import { eventImageUrl } from '@/events/utils/eventImageUrl'
 import { ACCENT, PALETTE } from '@/config/theme'
 
-interface Props { event: DbEvent; selected: boolean; now: Date; onClick: () => void }
+interface Props {
+  event: DbEvent
+  selected: boolean
+  now: Date
+  onClick: () => void
+  /** First cards get high fetch priority so posters appear with the timer. */
+  priority?: boolean
+}
 
-/** Event card — text first; poster image mounts after idle so timer/UI win the network. */
-export function PublicEventCard({ event: ev, selected, now, onClick }: Props) {
+/** Event card — image loads immediately (no idle delay). */
+export function PublicEventCard({ event: ev, selected, now, onClick, priority = false }: Props) {
   const { month, day, time } = dateParts(ev.time, ev.end_time)
   const img = eventImageUrl(ev)
   const ended = new Date(ev.time) <= now
-  const [showImage, setShowImage] = useState(false)
-
-  useEffect(() => {
-    let idleId: number | undefined
-    let timeoutId: ReturnType<typeof setTimeout> | undefined
-    const go = () => setShowImage(true)
-    if (typeof window.requestIdleCallback === 'function') {
-      idleId = window.requestIdleCallback(go, { timeout: 2500 })
-    } else {
-      timeoutId = setTimeout(go, 1200)
-    }
-    return () => {
-      if (idleId !== undefined && typeof window.cancelIdleCallback === 'function') {
-        window.cancelIdleCallback(idleId)
-      }
-      if (timeoutId !== undefined) clearTimeout(timeoutId)
-    }
-  }, [])
 
   return (
     <div onClick={onClick}
@@ -41,15 +29,15 @@ export function PublicEventCard({ event: ev, selected, now, onClick }: Props) {
       className="motion-card overflow-hidden cursor-pointer flex flex-col min-w-0 w-full">
 
       <div className="relative overflow-hidden" style={{ height: 120 }}>
-        {showImage && img
+        {img
           ? <img
               src={img}
               alt={ev.name}
               width={400}
               height={120}
-              loading="lazy"
+              loading={priority ? 'eager' : 'lazy'}
               decoding="async"
-              fetchPriority="low"
+              fetchPriority={priority ? 'high' : 'auto'}
               className="motion-card-poster w-full h-full object-cover"
             />
           : <div className="motion-card-poster w-full h-full" style={{ background: `linear-gradient(135deg, ${PALETTE.cardAlt}, ${PALETTE.card})` }} />
