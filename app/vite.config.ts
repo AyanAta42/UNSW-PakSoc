@@ -171,8 +171,8 @@ function bootUiScript(): string {
     if(interactive) return;
     interactive=true;
     window.__PAKSOC_SHELL_READY__=true;
-    // Keep network free for timer/images/buttons for a beat, then download React behind the scenes
-    setTimeout(goApp, 1200);
+    // Preload React in the background for /login etc — but NEVER replace this shell on "/"
+    setTimeout(goApp, 2000);
   }
   function apply(rows){
     if(!rows||!rows.length||stopped) return;
@@ -211,6 +211,8 @@ function bootUiScript(): string {
           +'<p class="tap">Tap for details →</p></div></button>';
       }).join('');
     }
+    var more=document.getElementById('boot-more');
+    if(more) more.hidden=false;
     markInteractive();
   }
   function fromCache(){

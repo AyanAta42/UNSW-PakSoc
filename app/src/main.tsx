@@ -12,8 +12,9 @@ declare global {
 }
 
 /**
- * Mount React into hidden #root. The HTML shell keeps the live timer + buttons
- * until HomePage signals it's ready — then we swap.
+ * Mount React into a hidden #root.
+ * On "/" the HTML shell stays visible forever (live timer + buttons).
+ * React only takes over when navigating to another route.
  */
 async function start() {
   const cached = getCachedPublicEvents()
@@ -34,6 +35,8 @@ async function start() {
   let revealed = false
   window.__PAKSOC_REVEAL_APP__ = () => {
     if (revealed) return
+    // Homepage keeps the live HTML shell — never swap it for React
+    if (window.location.pathname === '/' || window.location.pathname === '') return
     revealed = true
     window.__PAKSOC_STOP_BOOT__?.()
   }
