@@ -71,7 +71,7 @@ export function HeroBanner({ banner, loading }: Props) {
         {/* Layer 2: Soft aurora + right-side spotlight */}
         <div ref={glowRef} aria-hidden className="absolute inset-0 motion-parallax-layer">
           <div className="absolute -left-[8%] -top-[35%] w-[55%] h-[160%] motion-hero-aurora"
-            style={{ background: 'radial-gradient(closest-side, rgba(34,197,94,0.35), transparent 72%)', filter: 'blur(70px)', opacity: 0.45 }} />
+            style={{ background: 'radial-gradient(closest-side, rgba(34,197,94,0.3), rgba(34,197,94,0.1) 55%, transparent 80%)', opacity: 0.45 }} />
           <div className="motion-hero-spotlight" />
         </div>
 

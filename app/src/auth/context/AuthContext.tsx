@@ -11,6 +11,18 @@ export interface AuthCtx {
 
 const AuthContext = createContext<AuthCtx | null>(null)
 
+/** Supabase persists sessions as `sb-<ref>-auth-token` — cheap check that
+ *  avoids parsing ~200KB of supabase-js for anonymous visitors. */
+function hasStoredSession(): boolean {
+  try {
+    for (let i = 0; i < localStorage.length; i++) {
+      const k = localStorage.key(i)
+      if (k?.startsWith('sb-') && k.endsWith('-auth-token')) return true
+    }
+  } catch { /* private mode */ }
+  return false
+}
+
 /**
  * Auth/supabase-js stays OFF the homepage critical path.
  * Public timer + popups must stay responsive — load auth only on
@@ -67,7 +79,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         fallbackId = setTimeout(() => { void boot() }, 12_000)
       }
     }
-    fallbackId = setTimeout(scheduleIdle, 5_000)
+    // Anonymous visitors never need supabase-js — skip the idle boot entirely
+    // and let the pointer-down handler load it on login intent.
+    if (hasStoredSession()) fallbackId = setTimeout(scheduleIdle, 5_000)
 
     return () => {
       alive = false
