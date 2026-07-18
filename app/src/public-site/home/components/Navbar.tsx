@@ -22,21 +22,16 @@ export function Navbar({ user, avatarUrl, avatarBroken, initial, onAvatarError, 
   return (
     <header style={GLASS_NAV} className="glass-nav sticky top-0 z-50 pt-[env(safe-area-inset-top)]">
       <nav className="h-14 px-4 md:px-8 flex items-center justify-between gap-3">
-        <div className="flex items-center gap-2.5 shrink min-w-0">
-          <div
-            style={GLASS_CHIP}
-            className="w-9 h-9 rounded-full p-0.5 shrink-0"
-          >
-            <img
-              src="/logo.webp"
-              alt="PakSoc UNSW"
-              width={36}
-              height={36}
-              decoding="async"
-              fetchPriority="high"
-              className="w-full h-full rounded-full object-cover"
-            />
-          </div>
+        <div className="flex items-center gap-1 shrink min-w-0">
+          <img
+            src="/logo.webp"
+            alt="PakSoc UNSW"
+            width={52}
+            height={52}
+            decoding="async"
+            fetchPriority="high"
+            className="w-[52px] h-[52px] -mr-0.5 rounded-full object-cover shrink-0"
+          />
           <div className="min-w-0">
             <div style={{ color: PALETTE.dark }} className="font-bold text-sm leading-tight truncate">PakSoc UNSW</div>
             <div style={{ color: ACCENT, fontSize: 9 }} className="tracking-widest uppercase truncate">Pakistani Society</div>
@@ -83,9 +78,14 @@ export function Navbar({ user, avatarUrl, avatarBroken, initial, onAvatarError, 
             </div>
           ) : (
             <button onClick={() => navigate('/login')} data-cta
-              style={{ background: ACCENT, color: ACCENT_TEXT, borderRadius: PALETTE.radiusBtn }}
-              className="motion-primary px-4 py-1.5 font-bold text-xs border-none cursor-pointer hover:opacity-90 whitespace-nowrap">
-              Login
+              aria-label="Login" title="Login"
+              style={{ background: ACCENT, color: ACCENT_TEXT, boxShadow: '0 0 20px rgba(34,197,94,0.35)' }}
+              className="motion-primary w-9 h-9 rounded-full border-none cursor-pointer hover:opacity-90 flex items-center justify-center shrink-0">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <circle cx="12" cy="8" r="4" />
+                <path d="M4 21c0-4 3.6-6.5 8-6.5s8 2.5 8 6.5" />
+              </svg>
             </button>
           )}
         </div>

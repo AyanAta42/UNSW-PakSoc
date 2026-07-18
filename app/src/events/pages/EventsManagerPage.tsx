@@ -55,7 +55,7 @@ export default function EventsManagerPage() {
   return (
     <div style={{ minHeight: '100vh', background: PALETTE.page, fontFamily: 'system-ui, sans-serif' }}>
       <nav style={{ background: PALETTE.navbarGlass, backdropFilter: 'blur(16px)', borderBottom: `1px solid ${PALETTE.border}` }}
-        className="sticky top-0 z-50 h-14 flex items-center justify-between px-6">
+        className="sticky top-0 z-50 min-h-[3.5rem] pt-[env(safe-area-inset-top)] flex items-center justify-between px-6">
         <div className="flex items-center gap-3">
           <button onClick={() => navigate('/')}
             style={{ color: PALETTE.muted, background: 'transparent' }}

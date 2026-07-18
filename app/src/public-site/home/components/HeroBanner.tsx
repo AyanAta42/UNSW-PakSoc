@@ -57,12 +57,12 @@ export function HeroBanner({ banner, loading }: Props) {
   const btns = banner ? getEventButtons(banner.buttons) : []
 
   return (
-    <div className="motion-glow motion-glow-hero px-4 pt-4 lg:p-0">
+    <div className="motion-glow motion-glow-hero px-3 pt-4 md:px-4 lg:p-0">
       <div className="motion-hero-enter">
       <div
         ref={heroRef}
-        className="hero-clip overflow-hidden relative flex flex-col min-h-[200px] md:flex-row md:min-h-[250px] rounded-[18px]"
-        style={{ borderRadius: 18, border: `1px solid ${PALETTE.border}`, boxShadow: PALETTE.shadowLg }}
+        className="hero-clip overflow-hidden relative flex flex-col min-h-[220px] md:flex-row md:min-h-[250px] rounded-[18px] border"
+        style={{ borderColor: PALETTE.border, boxShadow: PALETTE.shadowLg }}
       >
 
         {/* Layer 1: Dark emerald gradient */}
@@ -87,7 +87,7 @@ export function HeroBanner({ banner, loading }: Props) {
         <div aria-hidden className="motion-hero-grain" />
 
         {/* Layer 4: Content */}
-        <div ref={contentRef} className="relative z-10 flex flex-col p-5 md:p-8 flex-1 min-h-[200px] md:min-h-0 motion-parallax-layer">
+        <div ref={contentRef} className="relative z-10 flex flex-col p-5 md:p-8 flex-1 min-h-[220px] md:min-h-0 motion-parallax-layer">
           <h1 style={{ fontFamily: '"Satoshi", sans-serif', fontWeight: 900, color: '#F8FAFC' }}
             className="text-2xl md:text-[40px] tracking-tight m-0 leading-none shrink-0 motion-hero-title">
             Next <span style={{ color: ACCENT }}>Event</span>

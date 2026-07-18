@@ -2,7 +2,7 @@ import { useState, useEffect, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { usePublicEvents } from '@/events/context/PublicEventsContext'
 import { AllEventsCard } from '@/events/components/AllEventsCard'
-import { EventDetailModal } from '@/events/components/EventDetailModal'
+import { MobileEventSheet } from '@/public-site/home/components/MobileEventSheet'
 import { EventDetailContent } from '@/public-site/home/components/EventDetailContent'
 import type { DbEvent } from '@/events/types/Event'
 import { ACCENT, PALETTE } from '@/config/theme'
@@ -64,7 +64,7 @@ export default function AllEventsPage() {
   return (
     <div style={{ minHeight: '100vh', background: PALETTE.page, fontFamily: 'system-ui, sans-serif' }}>
       <nav style={{ background: PALETTE.navbarGlass, backdropFilter: 'blur(16px)', borderBottom: `1px solid ${PALETTE.border}` }}
-        className="sticky top-0 z-50 h-14 flex items-center px-6 gap-3">
+        className="sticky top-0 z-50 min-h-[3.5rem] pt-[env(safe-area-inset-top)] flex items-center px-6 gap-3">
         <button onClick={() => navigate('/')}
           style={{ color: PALETTE.muted, background: 'transparent' }}
           className="text-sm font-semibold border-none cursor-pointer hover:text-green-400 transition-colors">← Home</button>
@@ -104,7 +104,7 @@ export default function AllEventsPage() {
         )}
       </div>
 
-      {modalEvent && <EventDetailModal event={modalEvent} now={now} onClose={() => setModalEvent(null)} />}
+      {modalEvent && <MobileEventSheet event={modalEvent} now={now} mapCacheId="all-events-sheet" onClose={() => setModalEvent(null)} />}
     </div>
   )
 }

@@ -45,7 +45,7 @@ export default function ManageRolesPage() {
 
   return (
     <div style={{ background: C.page, minHeight: '100vh', fontFamily: 'system-ui,sans-serif' }}>
-      <nav style={{ background: 'rgba(255,255,255,0.95)', borderBottom: `1px solid ${C.border}` }} className="sticky top-0 z-50 h-14 px-6 flex items-center gap-3">
+      <nav style={{ background: 'rgba(255,255,255,0.95)', borderBottom: `1px solid ${C.border}` }} className="sticky top-0 z-50 min-h-[3.5rem] pt-[env(safe-area-inset-top)] px-6 flex items-center gap-3">
         <button onClick={() => navigate('/')} style={{ color: C.muted }} className="bg-transparent border-none cursor-pointer text-sm hover:opacity-70 p-0 mr-2">← Back</button>
         <img src="/logo.png" alt="PakSoc" className="w-7 h-7 rounded-full object-cover" />
         <span style={{ color: C.dark }} className="font-extrabold text-sm">Manage Roles</span>
