@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { ACCENT, PALETTE } from '@/config/theme'
 import { usePermissions } from '@/roles/hooks/usePermissions'
 import { useRealtimeTable } from '@/core/supabase/useRealtimeTable'
-import { fetchSocialPosts, refreshLatestSocialPost, IG_USERNAME, type SocialPost } from '../services/socialPosts'
+import { fetchSocialPosts, refreshSocialPosts, IG_USERNAME, WALL_SIZE, type SocialPost } from '../services/socialPosts'
 
 const PLACEHOLDERS = [
   { id: 1, type: 'reel', likes: 412, caption: 'Highlights from our last event' },
@@ -39,7 +39,7 @@ function ReelBadge() {
 export function SocialWall() {
   const { isAtLeast } = usePermissions()
   const [posts, setPosts] = useState<SocialPost[]>([])
-  const [refreshing, setRefreshing] = useState(false)
+  const [refreshing, setRefreshing] = useState<number | null>(null)
   const [error, setError] = useState<string | null>(null)
 
   // Served from Supabase only — Instagram is never hit on page load
@@ -56,16 +56,16 @@ export function SocialWall() {
     fetchSocialPosts().then(setPosts).catch(() => {})
   })
 
-  async function handleRefetch() {
-    setRefreshing(true)
+  async function handleRefetch(count: number) {
+    setRefreshing(count)
     setError(null)
     try {
-      await refreshLatestSocialPost()
+      await refreshSocialPosts(count)
       setPosts(await fetchSocialPosts())
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Refetch failed')
     } finally {
-      setRefreshing(false)
+      setRefreshing(null)
     }
   }
 
@@ -73,13 +73,20 @@ export function SocialWall() {
     <>
       <div className="flex items-center gap-3 -mt-3 mb-4">
         <div style={{ color: PALETTE.muted }} className="text-xs">Latest from @{IG_USERNAME}</div>
-        {/* TEMPORARY: exec/president-only manual refetch — pulls latest IG post into Supabase */}
+        {/* TEMPORARY: exec/president-only manual refetch — pulls IG posts into Supabase */}
         {isAtLeast('executive') && (
-          <button onClick={handleRefetch} disabled={refreshing}
-            style={{ color: ACCENT, border: `1px solid ${PALETTE.border}`, background: 'transparent', borderRadius: 8 }}
-            className="text-[10px] font-semibold px-2 py-1 cursor-pointer hover:opacity-80 disabled:opacity-50">
-            {refreshing ? 'Fetching…' : '↻ Refetch latest post'}
-          </button>
+          <>
+            <button onClick={() => handleRefetch(1)} disabled={refreshing !== null}
+              style={{ color: ACCENT, border: `1px solid ${PALETTE.border}`, background: 'transparent', borderRadius: 8 }}
+              className="text-[10px] font-semibold px-2 py-1 cursor-pointer hover:opacity-80 disabled:opacity-50">
+              {refreshing === 1 ? 'Fetching…' : '↻ Latest post'}
+            </button>
+            <button onClick={() => handleRefetch(WALL_SIZE)} disabled={refreshing !== null}
+              style={{ color: ACCENT, border: `1px solid ${PALETTE.border}`, background: 'transparent', borderRadius: 8 }}
+              className="text-[10px] font-semibold px-2 py-1 cursor-pointer hover:opacity-80 disabled:opacity-50">
+              {refreshing === WALL_SIZE ? 'Fetching…' : `↻ Last ${WALL_SIZE} posts`}
+            </button>
+          </>
         )}
       </div>
       {error && <p className="text-xs -mt-2 mb-3" style={{ color: '#EF4444' }}>{error}</p>}
