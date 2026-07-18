@@ -191,11 +191,11 @@ export default function HomePage() {
             )}
           </div>
 
-          {/* Social wall is local placeholders — always on screen, never gated */}
+          {/* Social wall — served from Supabase; execs can refetch from Instagram */}
           <div className="bg-transparent rounded-none px-4 py-4 lg:px-6 lg:py-5">
             <div className="flex items-center justify-between mb-5">
               <span className="text-[10px] font-bold tracking-widest uppercase" style={{ color: PALETTE.muted }}>Social Wall</span>
-              <a href="#" style={{ color: ACCENT }} className="text-xs font-semibold no-underline hover:opacity-80">View on Instagram →</a>
+              <a href="https://www.instagram.com/naxfa_24" target="_blank" rel="noopener noreferrer" style={{ color: ACCENT }} className="text-xs font-semibold no-underline hover:opacity-80">View on Instagram →</a>
             </div>
             <SocialWall />
           </div>
