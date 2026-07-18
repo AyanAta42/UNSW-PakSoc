@@ -1,3 +1,4 @@
+import { useEffect } from 'react'
 import type { Member } from '@/members/types/Member'
 import { getMemberSections } from '@/members/utils/getMemberSections'
 import { MemberPickerRow }   from './MemberPickerRow'
@@ -15,17 +16,24 @@ interface Props {
 
 /** Bottom-sheet member picker used on mobile for task assignment. */
 export function MemberPickerSheet({ open, title = 'Choose a member', members, multi, selectedIds = [], onClose, onPick, onDone }: Props) {
+  useEffect(() => {
+    if (!open) return
+    const prev = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+    return () => { document.body.style.overflow = prev }
+  }, [open])
+
   if (!open) return null
   return (
     <div className="fixed inset-0 z-[80]">
-      <div className="absolute inset-0 bg-black/45 backdrop-blur-[2px]" onClick={onClose} />
-      <div className="absolute bottom-0 left-0 right-0 rounded-t-[28px] max-h-[88vh] flex flex-col bg-white dark:bg-[#0D1610] shadow-[0_-8px_40px_rgba(0,0,0,0.18)] animate-[slideUp_0.28s_ease-out]" onClick={e => e.stopPropagation()}>
+      <div className="absolute inset-0 bg-black/45 backdrop-blur-[2px] touch-none" onClick={onClose} />
+      <div className="absolute bottom-0 left-0 right-0 rounded-t-[28px] h-[85dvh] flex flex-col bg-white dark:bg-[#0D1610] shadow-[0_-8px_40px_rgba(0,0,0,0.18)] animate-[slideUp_0.28s_ease-out]" onClick={e => e.stopPropagation()}>
         <div className="flex justify-center pt-3 pb-1 shrink-0"><div className="w-10 h-1 rounded-full bg-gray-200 dark:bg-[#AAFF00]/20" /></div>
         <div className="flex items-center justify-between px-5 pb-3 shrink-0">
           <div className="text-[15px] font-extrabold text-paksoc-deep dark:text-[#D4FAE3]">{title}</div>
           <button onClick={onClose} className="w-8 h-8 rounded-full border border-gray-200 dark:border-[#AAFF00]/20 flex items-center justify-center text-lg leading-none cursor-pointer text-gray-400 bg-white dark:bg-[#0D1610]">×</button>
         </div>
-        <div className="flex-1 overflow-y-auto px-4 pb-4 min-h-0">
+        <div className="flex-1 overflow-y-auto overscroll-contain px-4 pb-4 min-h-0">
           {getMemberSections(members).map(section => (
             <div key={section.key} className="mb-3">
               <div className="flex items-center gap-2 px-1 pt-2 pb-1.5">

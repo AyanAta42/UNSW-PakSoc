@@ -15,6 +15,7 @@ const CLOSE_DURATION_MS = 220
 export function MobileEventSheet({ event, now, onClose }: Props) {
   const upcoming  = new Date(event.time) > now
   const btns      = getEventButtons(event.buttons)
+  const sheetRef  = useRef<HTMLDivElement>(null)
   const scrollRef = useRef<HTMLDivElement>(null)
   const startYRef = useRef<number | null>(null)
   const closeTimerRef = useRef<ReturnType<typeof setTimeout>>()
@@ -23,6 +24,20 @@ export function MobileEventSheet({ event, now, onClose }: Props) {
   const [closing, setClosing] = useState(false)
 
   useEffect(() => () => clearTimeout(closeTimerRef.current), [])
+
+  // React registers touch listeners as passive, so preventDefault inside the
+  // synthetic onTouchMove is ignored and the drag also pans the page behind the
+  // sheet. A native non-passive listener actually blocks that.
+  useEffect(() => {
+    const el = sheetRef.current
+    if (!el) return
+    const blockPan = (e: TouchEvent) => {
+      if (startYRef.current === null) return
+      if (e.touches[0].clientY - startYRef.current > 0) e.preventDefault()
+    }
+    el.addEventListener('touchmove', blockPan, { passive: false })
+    return () => el.removeEventListener('touchmove', blockPan)
+  }, [])
 
   function closeWithAnimation() {
     if (closing) return
@@ -40,7 +55,6 @@ export function MobileEventSheet({ event, now, onClose }: Props) {
     if (startYRef.current === null || closing) return
     const delta = e.touches[0].clientY - startYRef.current
     if (delta <= 0) return
-    e.preventDefault()
     setDragY(delta)
   }
 
@@ -59,11 +73,12 @@ export function MobileEventSheet({ event, now, onClose }: Props) {
   return (
     <div className="fixed inset-0 z-[60]">
       <div
-        className="absolute inset-0 bg-black/55 transition-opacity duration-[220ms]"
+        className="absolute inset-0 bg-black/55 transition-opacity duration-[220ms] touch-none"
         style={{ opacity: closing ? 0 : Math.max(0, 1 - dragY / 500) }}
         onClick={closeWithAnimation}
       />
       <div
+        ref={sheetRef}
         style={{
           background:  PALETTE.modal,
           boxShadow:   '0 -8px 60px rgba(0,0,0,0.6)',
@@ -73,7 +88,7 @@ export function MobileEventSheet({ event, now, onClose }: Props) {
           transition: dragging ? 'none' : `transform ${CLOSE_DURATION_MS}ms cubic-bezier(0.4, 0, 1, 1)`,
           willChange: 'transform',
         }}
-        className="absolute bottom-0 left-0 right-0 max-h-[88vh] flex flex-col animate-[slideUp_0.22s_ease-out]"
+        className="absolute bottom-0 left-0 right-0 h-[85dvh] flex flex-col animate-[slideUp_0.22s_ease-out]"
         onClick={e => e.stopPropagation()}
         onTouchStart={onTouchStart}
         onTouchMove={onTouchMove}
@@ -91,7 +106,7 @@ export function MobileEventSheet({ event, now, onClose }: Props) {
             className="w-8 h-8 flex items-center justify-center text-lg leading-none cursor-pointer hover:border-white/30 transition-colors">×</button>
         </div>
 
-        <div ref={scrollRef} className="flex-1 min-h-0 overflow-y-auto px-5 pb-4 flex flex-col gap-5">
+        <div ref={scrollRef} className="flex-1 min-h-0 overflow-y-auto overscroll-contain px-5 pb-4 flex flex-col gap-5">
           {/* Details — buttons hidden here, pinned in footer below */}
           <EventDetailContent event={event} now={now} hideButtons />
 

@@ -75,7 +75,6 @@ export function HeroBanner({ banner, loading }: Props) {
           <div className="motion-hero-spotlight" />
           <div className="hero-moon-wrap">
             <div className="hero-moon" />
-            <div className="hero-moon-star" />
           </div>
         </div>
 

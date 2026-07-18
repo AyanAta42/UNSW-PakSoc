@@ -14,9 +14,9 @@ export function EventDetailModal({ event, now, onClose }: Props) {
 
   return (
     <div className="fixed inset-0 z-[70] flex items-end sm:items-center justify-center p-0 sm:p-6">
-      <div className="motion-backdrop absolute inset-0 bg-black/55" onClick={onClose} />
+      <div className="motion-backdrop absolute inset-0 bg-black/55 touch-none" onClick={onClose} />
       <div style={{ background: PALETTE.modal, boxShadow: PALETTE.shadowLg, borderRadius: 24, border: `1px solid ${PALETTE.border}` }}
-        className="motion-modal relative w-full sm:max-w-lg rounded-t-[24px] sm:rounded-[24px] max-h-[88vh] flex flex-col"
+        className="motion-modal relative w-full sm:max-w-lg rounded-t-[24px] sm:rounded-[24px] h-[85dvh] sm:h-auto sm:max-h-[88vh] flex flex-col"
         onClick={e => e.stopPropagation()}>
 
         <div className="flex items-center justify-between px-6 py-4 shrink-0"
@@ -27,7 +27,7 @@ export function EventDetailModal({ event, now, onClose }: Props) {
             className="w-8 h-8 flex items-center justify-center text-lg leading-none cursor-pointer hover:border-white/30 transition-colors">×</button>
         </div>
 
-        <div className="overflow-y-auto px-6 py-5 flex flex-col gap-4">
+        <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain px-6 py-5 flex flex-col gap-4">
           <EventDetailContent event={event} now={now} />
           <div>
             <div style={{ color: PALETTE.muted }} className="text-[10px] font-bold uppercase tracking-widest mb-2">Location</div>

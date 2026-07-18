@@ -14,26 +14,14 @@ interface Particle {
   fadeSpeed: number
 }
 
-interface Star {
-  x: number
-  y: number
-  arm: number
-  baseOpacity: number
-  twinklePhase: number
-  twinkleSpeed: number
-}
-
 /** Fewer particles on phones / high-DPR screens keeps the loop cheap. */
 const HI_DPR = typeof window !== 'undefined' && (window.devicePixelRatio || 1) > 1.5
 const LITE = typeof window !== 'undefined'
   && window.matchMedia('(max-width: 1023px), (pointer: coarse)').matches
 const DUST_COUNT = LITE ? 10 : HI_DPR ? 16 : 20
-const STAR_COUNT = LITE ? 12 : HI_DPR ? 12 : 16
 
 /**
- * Single-canvas dust motes + pinned twinkling stars (x/y/opacity only).
- * Stars are two crossed fillRects — cheaper than arc paths, and the
- * overlapping centre pixel composites brighter for free.
+ * Single-canvas floating dust motes (x/y/opacity only).
  * No canvas shadows — those were a per-frame paint tax. Pauses when hidden.
  */
 export function DustCanvas() {
@@ -51,19 +39,6 @@ export function DustCanvas() {
     let raf = 0
     let last = performance.now()
 
-    function spawnStar(): Star {
-      return {
-        x: Math.random() * width,
-        y: Math.random() * height,
-        arm: 1.4 + Math.random() * 2.2,
-        baseOpacity: 0.25 + Math.random() * 0.5,
-        twinklePhase: Math.random() * Math.PI * 2,
-        twinkleSpeed: 0.0006 + Math.random() * 0.0014,
-      }
-    }
-
-    const stars: Star[] = Array.from({ length: STAR_COUNT }, spawnStar)
-
     function resize() {
       width = window.innerWidth
       height = window.innerHeight
@@ -73,8 +48,6 @@ export function DustCanvas() {
       canvas!.style.width = `${width}px`
       canvas!.style.height = `${height}px`
       ctx!.setTransform(dpr, 0, 0, dpr, 0, 0)
-      // Re-scatter so stars never sit stranded outside the new viewport
-      for (let i = 0; i < stars.length; i++) stars[i] = spawnStar()
     }
 
     function spawn(fromBottom: boolean): Particle {
@@ -101,16 +74,6 @@ export function DustCanvas() {
       last = now
 
       ctx!.clearRect(0, 0, width, height)
-
-      for (const s of stars) {
-        s.twinklePhase += s.twinkleSpeed * dt
-        const tw = 0.5 + 0.5 * Math.sin(s.twinklePhase)
-        // Squared twinkle: long dim rests with brief bright sparkles
-        const opacity = s.baseOpacity * (0.18 + 0.82 * tw * tw)
-        ctx!.fillStyle = `rgba(214, 242, 250, ${opacity.toFixed(3)})`
-        ctx!.fillRect(s.x - s.arm, s.y - 0.5, s.arm * 2, 1)
-        ctx!.fillRect(s.x - 0.5, s.y - s.arm, 1, s.arm * 2)
-      }
 
       for (const p of particles) {
         p.y -= p.vy * dt * 0.06

@@ -3,9 +3,8 @@ import { useAmbientPause } from '@/shared/motion'
 import { prefersReducedMotion } from '@/shared/motion'
 
 const DustCanvas = lazy(() => import('./DustCanvas').then(m => ({ default: m.DustCanvas })))
-const MouseSpotlight = lazy(() => import('./MouseSpotlight').then(m => ({ default: m.MouseSpotlight })))
 
-/** Phones skip the grain tile and cursor spotlight; stars/dust run everywhere. */
+/** Phones skip the grain tile; dust runs everywhere. */
 function isLiteDevice(): boolean {
   return typeof window !== 'undefined'
     && window.matchMedia('(max-width: 1023px), (pointer: coarse)').matches
@@ -13,10 +12,10 @@ function isLiteDevice(): boolean {
 
 /**
  * Ambient, always-on background motion — drifting radial gradients, a giant
- * aurora + swaying ribbon, a faint film-grain layer, floating dust/stars, and
- * a cursor spotlight. CSS layers render immediately (they fade in over the
- * static shell tint); canvas effects mount after idle so first paint stays
- * fast, then fade in via CSS. Pauses via `ambient-paused` when hidden.
+ * aurora + swaying ribbon, a faint film-grain layer, and floating dust motes.
+ * CSS layers render immediately (they fade in over the static shell tint);
+ * canvas effects mount after idle so first paint stays fast, then fade in via
+ * CSS. Pauses via `ambient-paused` when the tab is hidden.
  */
 export function AmbientBackground() {
   const [enhance, setEnhance] = useState(false)
@@ -55,7 +54,6 @@ export function AmbientBackground() {
       </div>
       {enhance && (
         <Suspense fallback={null}>
-          {!isLiteDevice() && <MouseSpotlight />}
           <DustCanvas />
         </Suspense>
       )}
