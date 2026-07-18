@@ -2,8 +2,7 @@ import { useState, type FormEvent } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { signInWithEmail }  from '@/auth/services/signInWithEmail'
 import { signUpWithEmail }  from '@/auth/services/signUpWithEmail'
-import { signInWithGoogle } from '@/auth/services/signInWithGoogle'
-import { GoogleSignInButton } from '@/auth/components/GoogleSignInButton'
+import { GoogleIdentityButton } from '@/auth/components/GoogleIdentityButton'
 import { EmailAuthForm }      from '@/auth/components/EmailAuthForm'
 import { PALETTE, ACCENT }   from '@/config/theme'
 
@@ -27,12 +26,6 @@ export default function LoginPage() {
     } finally { setBusy(false) }
   }
 
-  async function handleGoogle() {
-    setError('')
-    try { await signInWithGoogle() }
-    catch (err: unknown) { setError(err instanceof Error ? err.message : 'Google sign-in failed.') }
-  }
-
   return (
     <div style={{ background: PALETTE.page, minHeight: '100vh', fontFamily: 'system-ui,sans-serif' }} className="flex flex-col items-center justify-center px-4">
       <div className="flex items-center gap-3 mb-8">
@@ -45,7 +38,7 @@ export default function LoginPage() {
       <div style={{ background: PALETTE.card, border: `1px solid ${PALETTE.border}`, boxShadow: '0 4px 24px rgba(0,0,0,0.08)' }} className="rounded-2xl p-8 w-full max-w-sm">
         <h2 style={{ color: PALETTE.dark }} className="text-xl font-extrabold mb-1">{mode === 'signin' ? 'Welcome back' : 'Create account'}</h2>
         <p style={{ color: PALETTE.muted }} className="text-sm mb-6">{mode === 'signin' ? 'Sign in to manage PakSoc.' : 'Join the PakSoc team.'}</p>
-        <GoogleSignInButton onClick={handleGoogle} />
+        <GoogleIdentityButton onError={setError} />
         <div className="flex items-center gap-3 mb-4">
           <div style={{ background: PALETTE.border }} className="flex-1 h-px" />
           <span style={{ color: PALETTE.muted }} className="text-xs">or</span>
