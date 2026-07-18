@@ -13,6 +13,7 @@ import { deleteTask }      from '@/tasks/services/deleteTask'
 import { unassignMember }  from '@/tasks/services/unassignMember'
 import { useDragAssign }   from '@/tasks/hooks/useDragAssign'
 import type { DragAssignState } from '@/tasks/hooks/useDragAssign'
+import { useRealtimeTable } from '@/core/supabase/useRealtimeTable'
 import { DEFAULT_TASK_CATEGORIES } from '@/tasks/types/Task'
 
 export interface TaskBoardState extends DragAssignState {
@@ -56,6 +57,11 @@ export function useTaskBoard(eventId: string): TaskBoardState {
       .catch(console.error)
       .finally(() => setLoading(false))
   }, [eventId])
+
+  // Live updates from other subcom members editing the same board
+  useRealtimeTable(['tasks', 'subtasks', 'task_assignments'], () => {
+    fetchTasks(eventId).then(setTasks).catch(console.error)
+  }, !loading)
 
   const drag = useDragAssign(members, tasks, setTasks, preAssigned, setPreAssigned)
 

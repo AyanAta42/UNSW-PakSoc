@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { ACCENT, PALETTE } from '@/config/theme'
 import { usePermissions } from '@/roles/hooks/usePermissions'
+import { useRealtimeTable } from '@/core/supabase/useRealtimeTable'
 import { fetchSocialPosts, refreshLatestSocialPost, IG_USERNAME, type SocialPost } from '../services/socialPosts'
 
 const PLACEHOLDERS = [
@@ -49,6 +50,11 @@ export function SocialWall() {
       .catch(() => {})
     return () => { alive = false }
   }, [])
+
+  // Live updates: when an exec refetches a reel, every open client sees it
+  useRealtimeTable('social_posts', () => {
+    fetchSocialPosts().then(setPosts).catch(() => {})
+  })
 
   async function handleRefetch() {
     setRefreshing(true)

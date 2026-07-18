@@ -3,7 +3,9 @@ import type { DbEvent } from '@/events/types/Event'
 import {
   getCachedPublicEvents,
   loadPublicEvents,
+  refreshPublicEvents,
 } from '@/events/services/publicEventsBootstrap'
+import { useRealtimeTable } from '@/core/supabase/useRealtimeTable'
 
 interface PublicEventsCtx {
   events: DbEvent[]
@@ -40,6 +42,11 @@ export function PublicEventsProvider({ children }: { children: React.ReactNode }
       })
     return () => { alive = false }
   }, [])
+
+  // Live updates: publish / unpublish / edit / delete anywhere refreshes every client
+  useRealtimeTable('events', () => {
+    refreshPublicEvents().then(setEvents).catch(console.error)
+  }, ready)
 
   const value = useMemo(() => ({ events, loading, ready }), [events, loading, ready])
 

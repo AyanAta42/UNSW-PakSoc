@@ -95,6 +95,12 @@ export function prefetchPublicEvents(): Promise<DbEvent[]> {
   return inflight
 }
 
+/** Realtime: force-refetch public events, bypassing the freshness window. */
+export async function refreshPublicEvents(): Promise<DbEvent[]> {
+  const events = normalizePublicEvents(await fetchPublicEvents())
+  return commitSession(events)
+}
+
 /**
  * Load events once for the SPA session. Reuses memory/cache; only hits network
  * if we have nothing fresh yet.

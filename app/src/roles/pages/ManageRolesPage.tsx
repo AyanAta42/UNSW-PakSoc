@@ -4,6 +4,7 @@ import { fetchMembers }           from '@/members/services/fetchMembers'
 import { updateMemberRole }       from '@/members/services/updateMemberRole'
 import { updateMemberCommittee }  from '@/members/services/updateMemberCommittee'
 import { MemberRoleRow }          from '@/roles/components/MemberRoleRow'
+import { useRealtimeTable }       from '@/core/supabase/useRealtimeTable'
 import { ROLE_LABEL, ROLE_COLOR, ALL_ROLES } from '@/roles/config/roleLabels'
 import type { Member, MemberRole, Committee } from '@/members/types/Member'
 
@@ -18,6 +19,9 @@ export default function ManageRolesPage() {
   const [search, setSearch]   = useState('')
 
   useEffect(() => { fetchMembers().then(setMembers).catch(console.error).finally(() => setLoading(false)) }, [])
+
+  // Live updates: role/committee changes and new sign-ups appear without refresh
+  useRealtimeTable('members', () => { fetchMembers().then(setMembers).catch(console.error) }, !loading)
 
   async function handleRoleChange(member: Member, role: MemberRole) {
     setSaving(member.id)

@@ -6,6 +6,7 @@ import { deleteEvent }       from '@/events/services/deleteEvent'
 import { AdminEventCard }    from '@/events/components/AdminEventCard'
 import { AddEditEventModal } from '@/events/components/AddEditEventModal'
 import { usePermissions }    from '@/roles/hooks/usePermissions'
+import { useRealtimeTable }  from '@/core/supabase/useRealtimeTable'
 import type { DbEvent }      from '@/events/types/Event'
 import { ACCENT, ACCENT_TEXT, PALETTE } from '@/config/theme'
 
@@ -39,6 +40,9 @@ export default function EventsManagerPage() {
   const [editingEv, setEditingEv] = useState<DbEvent | null>(null)
 
   useEffect(() => { fetchAllEvents().then(setEvents).catch(console.error).finally(() => setLoading(false)) }, [])
+
+  // Live updates from other execs editing/publishing events
+  useRealtimeTable('events', () => { fetchAllEvents().then(setEvents).catch(console.error) }, !loading)
 
   const now    = new Date()
   const ended  = events.filter(e => new Date(e.time) <= now).sort((a, b) => +new Date(b.time) - +new Date(a.time))

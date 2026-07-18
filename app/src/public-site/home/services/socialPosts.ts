@@ -1,4 +1,8 @@
-import { supabase } from '@/core/supabase/client'
+// Lazy-loaded so the anonymous homepage keeps supabase-js off its critical path
+async function db() {
+  const { supabase } = await import('@/core/supabase/client')
+  return supabase
+}
 
 export interface SocialPost {
   id: string
@@ -11,10 +15,11 @@ export interface SocialPost {
   posted_at: string | null
 }
 
-export const IG_USERNAME = (import.meta.env.VITE_IG_USERNAME as string) || 'naxfa_24'
+export const IG_USERNAME = (import.meta.env.VITE_IG_USERNAME as string) || 'unswpaksoc'
 
 /** Everyone reads from Supabase — Instagram is only hit via refreshLatestSocialPost(). */
 export async function fetchSocialPosts(): Promise<SocialPost[]> {
+  const supabase = await db()
   const { data, error } = await supabase
     .from('social_posts')
     .select('id,username,media_type,caption,thumbnail_url,permalink,like_count,posted_at')
@@ -29,20 +34,27 @@ export async function refreshLatestSocialPost(): Promise<SocialPost> {
   const token = import.meta.env.VITE_IG_ACCESS_TOKEN as string | undefined
   const igUserId = import.meta.env.VITE_IG_USER_ID as string | undefined
   if (!token || !igUserId) throw new Error('Missing VITE_IG_ACCESS_TOKEN / VITE_IG_USER_ID in app/.env')
+  const supabase = await db()
 
-  const fields = 'id,caption,media_type,media_url,thumbnail_url,permalink,timestamp,like_count'
+  // Business Discovery: our own IG account (VITE_IG_USER_ID) reads the public
+  // media of the target professional account (VITE_IG_USERNAME)
+  const mediaFields = 'id,caption,media_type,media_url,thumbnail_url,permalink,timestamp,like_count'
+  const fields = `business_discovery.username(${IG_USERNAME}){media.limit(1){${mediaFields}}}`
   const res = await fetch(
-    `https://graph.facebook.com/v23.0/${igUserId}/media?fields=${fields}&limit=1&access_token=${token}`,
+    `https://graph.facebook.com/v23.0/${igUserId}?fields=${encodeURIComponent(fields)}&access_token=${token}`,
   )
   const json = await res.json()
   if (!res.ok) throw new Error(json?.error?.message ?? `Instagram fetch failed (${res.status})`)
 
-  const media = json?.data?.[0]
-  if (!media) throw new Error('No posts found on the Instagram account')
+  const media = json?.business_discovery?.media?.data?.[0]
+  if (!media) throw new Error(`No posts found for @${IG_USERNAME}`)
 
   // Instagram CDN URLs are signed and expire in days — mirror the image into
   // Supabase Storage and store that permanent URL instead
-  const cdnUrl = media.media_type === 'VIDEO' ? (media.thumbnail_url ?? media.media_url) : media.media_url
+  const cdnUrl = media.media_type === 'VIDEO'
+    ? (media.thumbnail_url ?? media.media_url)
+    : (media.media_url ?? media.thumbnail_url)
+  if (!cdnUrl) throw new Error('Media has no downloadable thumbnail')
   const imgRes = await fetch(cdnUrl)
   if (!imgRes.ok) throw new Error(`Thumbnail download failed (${imgRes.status})`)
   const blob = await imgRes.blob()
