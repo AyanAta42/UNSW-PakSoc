@@ -5,6 +5,7 @@ import { signUpWithEmail }  from '@/auth/services/signUpWithEmail'
 import { GoogleIdentityButton } from '@/auth/components/GoogleIdentityButton'
 import { EmailAuthForm }      from '@/auth/components/EmailAuthForm'
 import { PALETTE, ACCENT }   from '@/config/theme'
+import { toast }             from '@/shared/toast/toast'
 
 export default function LoginPage() {
   const navigate = useNavigate()
@@ -19,8 +20,8 @@ export default function LoginPage() {
     e.preventDefault()
     setError(''); setInfo(''); setBusy(true)
     try {
-      if (mode === 'signin') { await signInWithEmail(email, password); navigate('/') }
-      else                   { await signUpWithEmail(email, password); setInfo('Check your email for a confirmation link.') }
+      if (mode === 'signin') { await signInWithEmail(email, password); toast.success('Welcome back!'); navigate('/') }
+      else                   { await signUpWithEmail(email, password); setInfo('Check your email for a confirmation link.'); toast.success('Account created', 'Check your email to confirm.') }
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Something went wrong.')
     } finally { setBusy(false) }

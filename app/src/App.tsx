@@ -5,6 +5,7 @@ import { CurrentMemberProvider } from '@/roles/context/CurrentMemberContext'
 import { PublicEventsProvider } from '@/events/context/PublicEventsContext'
 import RoleRoute from '@/core/router/RoleRoute'
 import HomePage from '@/public-site/home/HomePage'
+import { ToastViewport } from '@/shared/toast/ToastViewport'
 
 const LoginPage = lazy(() => import('@/auth/pages/LoginPage'))
 const AuthCallbackPage = lazy(() => import('@/auth/pages/AuthCallbackPage'))
@@ -37,6 +38,7 @@ function App() {
           </PublicEventsProvider>
         </CurrentMemberProvider>
       </AuthProvider>
+      <ToastViewport />
     </BrowserRouter>
   )
 }

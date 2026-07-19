@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { GoogleSignInButton } from './GoogleSignInButton'
 import { signInWithGoogle } from '@/auth/services/signInWithGoogle'
+import { toast } from '@/shared/toast/toast'
 
 const CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID as string | undefined
 
@@ -65,6 +66,7 @@ export function GoogleIdentityButton({ onError }: Props) {
               const { supabase } = await import('@/core/supabase/client')
               const { error } = await supabase.auth.signInWithIdToken({ provider: 'google', token: resp.credential })
               if (error) throw error
+              toast.success('Welcome back!')
               navigate('/')
             } catch (e) {
               onError(e instanceof Error ? e.message : 'Google sign-in failed.')

@@ -3,6 +3,7 @@ import { ACCENT, PALETTE } from '@/config/theme'
 import { usePermissions } from '@/roles/hooks/usePermissions'
 import { useRealtimeTable } from '@/core/supabase/useRealtimeTable'
 import { fetchSocialPosts, refreshSocialPosts, IG_USERNAME, WALL_SIZE, type SocialPost } from '../services/socialPosts'
+import { toast, errorMessage } from '@/shared/toast/toast'
 
 const PLACEHOLDERS = [
   { id: 1, type: 'reel', likes: 412, caption: 'Highlights from our last event' },
@@ -19,15 +20,12 @@ const GRADS = [
   'linear-gradient(135deg,#0A1E30,#050C18)', 'linear-gradient(135deg,#1E0D1A,#0D060E)',
 ]
 
-function CardOverlay({ caption, likes }: { caption: string; likes: number }) {
-  // Line 1 spans full width; a zero-width float spacer pushes the likes label
-  // down so it floats right on line 2 and the caption wraps around it.
+function CardOverlay({ caption }: { caption: string }) {
   return (
     <div className="absolute bottom-0 left-0 right-0 px-2.5 pb-2.5 pt-8"
       style={{ background: 'linear-gradient(to top,rgba(0,0,0,0.85),transparent)' }}>
-      <p className="m-0 leading-snug overflow-hidden" style={{ fontSize: 10, color: PALETTE.dark, maxHeight: '2.75em' }}>
-        <span aria-hidden className="float-right" style={{ width: 0, height: '1.375em' }} />
-        <span className="float-right clear-right ml-1.5" style={{ color: PALETTE.muted, fontSize: 9, lineHeight: '13.75px' }}>{likes} likes</span>
+      <p className="m-0 leading-snug overflow-hidden"
+        style={{ fontSize: 10, color: PALETTE.dark, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }}>
         {caption}
       </p>
     </div>
@@ -75,7 +73,7 @@ function WallCard({ post }: { post: SocialPost }) {
         className="absolute inset-0 w-full h-full object-cover transition-opacity duration-500"
         style={{ opacity: imgLoaded ? 1 : 0 }} />
       {post.media_type === 'VIDEO' && <ReelBadge />}
-      <CardOverlay caption={post.caption} likes={post.like_count} />
+      <CardOverlay caption={post.caption} />
     </a>
   )
 }
@@ -131,8 +129,10 @@ export function SocialWall() {
     try {
       await refreshSocialPosts(count)
       setPosts(await fetchSocialPosts())
+      toast.success(count === 1 ? 'Latest post fetched' : 'Reels fetched')
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Refetch failed')
+      toast.error("Couldn't fetch reels", errorMessage(e, 'Please try again.'))
     } finally {
       setRefreshing(null)
     }
@@ -175,7 +175,7 @@ export function SocialWall() {
               style={{ background: GRADS[i], border: `1px solid ${PALETTE.border}`, borderRadius: 14, minWidth: 150, aspectRatio: '3/4' }}
               className="motion-social-card relative overflow-hidden cursor-pointer shrink-0">
               {p.type === 'reel' && <ReelBadge />}
-              <CardOverlay caption={p.caption} likes={p.likes} />
+              <CardOverlay caption={p.caption} />
             </div>
           ))}
       </div>

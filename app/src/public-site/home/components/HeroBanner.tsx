@@ -1,4 +1,4 @@
-import { lazy, Suspense, useEffect, useRef, useState } from 'react'
+import { lazy, Suspense, useEffect, useLayoutEffect, useRef, useState } from 'react'
 import type { DbEvent } from '@/events/types/Event'
 import { useCountdown }    from '@/shared/hooks/useCountdown'
 import { getEventButtons, getCtaVariant } from '@/events/utils/getEventButtons'
@@ -24,7 +24,26 @@ export function HeroBanner({ banner, loading }: Props) {
   const contentRef = useRef<HTMLDivElement>(null)
   const ctaRef = useRef<HTMLDivElement>(null)
   const layersRef = useRef<ParallaxLayer[]>([])
+  const titleRef = useRef<HTMLHeadingElement>(null)
   const [trailReady, setTrailReady] = useState(false)
+
+  // Shrink the headline font just enough that the full name fits on one line
+  useLayoutEffect(() => {
+    const el = titleRef.current
+    if (!el) return
+    const fit = () => {
+      el.style.fontSize = ''
+      if (el.scrollWidth > el.clientWidth) {
+        const base = parseFloat(getComputedStyle(el).fontSize)
+        const ratio = Math.max(el.clientWidth / el.scrollWidth, 0.35)
+        el.style.fontSize = `${base * ratio * 0.98}px`
+      }
+    }
+    fit()
+    document.fonts?.ready.then(fit)
+    window.addEventListener('resize', fit)
+    return () => window.removeEventListener('resize', fit)
+  }, [banner?.name, loading])
 
   layersRef.current = [
     { depth: BG_DEPTH, el: bgRef.current },
@@ -106,11 +125,12 @@ export function HeroBanner({ banner, loading }: Props) {
 
           {!loading && banner && (
             <div className="w-full shrink-0 motion-hero-details">
-              <h1 className="hero-title-text m-0 uppercase line-clamp-2 text-[28px] leading-[1.05] md:text-[46px] md:leading-[1.02] pr-1">
+              <h1 ref={titleRef}
+                className="hero-title-text m-0 whitespace-nowrap max-w-[87%] md:max-w-[560px] text-[34px] leading-[1.2] md:text-[54px] md:leading-[1.15] pr-1">
                 {banner.name}
               </h1>
               <div className="flex items-center gap-3 md:gap-4 mt-3.5 md:mt-4 w-fit">
-                <span className="hero-title-in text-xl md:text-3xl shrink-0">in</span>
+                <span className="hero-title-in text-2xl md:text-4xl shrink-0">in</span>
                 <div className="flex gap-2.5 w-fit">
                   {(['days','hrs','mins','secs'] as const).map((k, i) => {
                     const val = [cd.days, cd.hrs, cd.mins, cd.secs][i]

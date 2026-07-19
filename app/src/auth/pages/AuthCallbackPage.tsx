@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '@/core/supabase/client'
+import { toast } from '@/shared/toast/toast'
 
 /** Handles the OAuth return from Google and completes the Supabase session exchange. */
 export default function AuthCallbackPage() {
@@ -30,6 +31,7 @@ export default function AuthCallbackPage() {
       }
 
       const { data: { session } } = await supabase.auth.getSession()
+      if (session) toast.success('Welcome back!')
       navigate(session ? '/' : '/login', { replace: true })
     }
 

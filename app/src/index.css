@@ -208,13 +208,14 @@ body {
 }
 
 /* ─── Hero ─────────────────────────────────────────────────────────────────── */
-/* Big display headline — Clash Display with a white→mint gradient fill */
+/* Big display headline — smooth thin serif italic with a white→mint gradient fill */
 .hero-title-text {
-  font-family: 'Clash Display', 'Satoshi', sans-serif;
-  font-weight: 600;
-  letter-spacing: 0.005em;
+  font-family: 'Cormorant Garamond', Georgia, 'Times New Roman', serif;
+  font-style: italic;
+  font-weight: 500;
+  letter-spacing: 0.01em;
   color: #f8fafc;
-  text-wrap: balance;
+  white-space: nowrap;
 }
 
 @supports ((-webkit-background-clip: text) or (background-clip: text)) {
@@ -228,9 +229,9 @@ body {
 
 /* The little editorial "in" between the headline and the countdown */
 .hero-title-in {
-  font-family: Georgia, 'Times New Roman', serif;
+  font-family: 'Cormorant Garamond', Georgia, 'Times New Roman', serif;
   font-style: italic;
-  font-weight: 400;
+  font-weight: 500;
   color: #cbd5e1;
 }
 
@@ -610,6 +611,37 @@ body {
 
 .motion-backdrop {
   animation: fadeIn var(--motion-fast) var(--motion-ease) both;
+}
+
+/* ─── Toasts ───────────────────────────────────────────────────────────────── */
+@keyframes toastIn {
+  from { opacity: 0; transform: translateY(-14px) scale(0.96); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes toastOut {
+  from { opacity: 1; transform: translateY(0) scale(1); }
+  to   { opacity: 0; transform: translateY(-8px) scale(0.97); }
+}
+
+@keyframes toastProgress {
+  from { transform: scaleX(1); }
+  to   { transform: scaleX(0); }
+}
+
+.motion-toast-in {
+  animation: toastIn var(--motion-base) var(--motion-ease) both;
+}
+
+.motion-toast-out {
+  animation: toastOut var(--motion-fast) var(--motion-ease-in) both;
+}
+
+.motion-toast-progress {
+  transform-origin: left;
+  animation-name: toastProgress;
+  animation-timing-function: linear;
+  animation-fill-mode: forwards;
 }
 
 /* ─── Ambient background ───────────────────────────────────────────────────── */

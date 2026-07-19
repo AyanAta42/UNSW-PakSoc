@@ -10,6 +10,7 @@ import { useRealtimeTable }  from '@/core/supabase/useRealtimeTable'
 import { applyEventChange }  from '@/events/utils/applyEventChange'
 import type { DbEvent }      from '@/events/types/Event'
 import { ACCENT, ACCENT_TEXT, PALETTE } from '@/config/theme'
+import { toast, errorMessage } from '@/shared/toast/toast'
 
 function EventSection({ title, color, events, canEdit, onAnnounce, onUnpublish, onEdit, onDelete }: {
   title: string; color: string; events: DbEvent[]; canEdit: boolean
@@ -56,9 +57,18 @@ export default function EventsManagerPage() {
   const live   = active.filter(e => e.public)
   const drafts = active.filter(e => !e.public)
 
-  const announce  = async (id: string) => { await setEventPublic(id, true);  setEvents(p => p.map(e => e.id === id ? { ...e, public: true  } : e)) }
-  const unpublish = async (id: string) => { await setEventPublic(id, false); setEvents(p => p.map(e => e.id === id ? { ...e, public: false } : e)) }
-  const handleDelete = async (id: string) => { await deleteEvent(id); setEvents(p => p.filter(e => e.id !== id)) }
+  const announce  = async (id: string) => {
+    try { await setEventPublic(id, true); setEvents(p => p.map(e => e.id === id ? { ...e, public: true } : e)); toast.success('Event announced') }
+    catch (e) { toast.error("Couldn't announce event", errorMessage(e, 'Please try again.')) }
+  }
+  const unpublish = async (id: string) => {
+    try { await setEventPublic(id, false); setEvents(p => p.map(e => e.id === id ? { ...e, public: false } : e)); toast.info('Event unannounced') }
+    catch (e) { toast.error("Couldn't unannounce event", errorMessage(e, 'Please try again.')) }
+  }
+  const handleDelete = async (id: string) => {
+    try { await deleteEvent(id); setEvents(p => p.filter(e => e.id !== id)); toast.success('Event deleted') }
+    catch (e) { toast.error("Couldn't delete event", errorMessage(e, 'Please try again.')) }
+  }
 
   const sectionProps = { canEdit: can.editEvents, onAnnounce: announce, onUnpublish: unpublish, onEdit: setEditingEv, onDelete: handleDelete }
 
@@ -109,8 +119,8 @@ export default function EventsManagerPage() {
         </>}
       </div>
 
-      {showAdd   && <AddEditEventModal onClose={() => setShowAdd(false)} onCreated={ev => { setEvents(p => [...p, ev]); setShowAdd(false) }} />}
-      {editingEv && <AddEditEventModal event={editingEv} onClose={() => setEditingEv(null)} onUpdated={updated => { setEvents(p => p.map(e => e.id === updated.id ? updated : e)); setEditingEv(null) }} />}
+      {showAdd   && <AddEditEventModal onClose={() => setShowAdd(false)} onCreated={ev => { setEvents(p => [...p, ev]); setShowAdd(false); toast.success('Event created') }} />}
+      {editingEv && <AddEditEventModal event={editingEv} onClose={() => setEditingEv(null)} onUpdated={updated => { setEvents(p => p.map(e => e.id === updated.id ? updated : e)); setEditingEv(null); toast.success('Event updated') }} />}
     </div>
   )
 }
