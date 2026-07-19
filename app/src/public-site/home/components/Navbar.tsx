@@ -73,7 +73,7 @@ export function Navbar({ user, avatarUrl, avatarBroken, initial, onAvatarError, 
                   setMenuOpen(false)
                   void import('@/auth/services/signOut')
                     .then(m => m.signOut())
-                    .then(() => { toast.success('Logged out'); navigate('/login') })
+                    .then(() => { toast.success('Logged out'); navigate('/') })
                     .catch(() => toast.error("Couldn't log out", 'Please try again.'))
                 }}
                 onClose={() => setMenuOpen(false)} />}

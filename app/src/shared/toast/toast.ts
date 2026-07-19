@@ -17,7 +17,7 @@ function emit() {
   for (const l of listeners) l(toasts)
 }
 
-function push(variant: ToastVariant, title: string, description?: string, duration = 2200): string {
+function push(variant: ToastVariant, title: string, description?: string, duration = 3000): string {
   const id = `t_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`
   // Cap the stack so a burst of actions (e.g. batch deletes) can't wall the screen
   toasts = [...toasts.slice(-2), { id, variant, title, description, duration }]
@@ -32,9 +32,9 @@ function dismiss(id: string) {
 }
 
 export const toast = {
-  success: (title: string, description?: string) => push('success', title, description, 2200),
-  error:   (title: string, description?: string) => push('error', title, description, 3200),
-  info:    (title: string, description?: string) => push('info', title, description, 2200),
+  success: (title: string, description?: string) => push('success', title, description, 3000),
+  error:   (title: string, description?: string) => push('error', title, description, 4000),
+  info:    (title: string, description?: string) => push('info', title, description, 3000),
   dismiss,
 }
 
