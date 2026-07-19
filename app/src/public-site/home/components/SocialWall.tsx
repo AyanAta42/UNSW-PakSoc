@@ -21,10 +21,10 @@ const GRADS = [
 
 function CardOverlay({ caption, likes }: { caption: string; likes: number }) {
   return (
-    <div className="absolute bottom-0 left-0 right-0 px-2.5 pb-2.5 pt-6"
+    <div className="absolute bottom-0 left-0 right-0 flex items-baseline gap-1.5 px-2.5 pb-2.5 pt-6"
       style={{ background: 'linear-gradient(to top,rgba(0,0,0,0.85),transparent)' }}>
-      <p className="m-0 leading-snug" style={{ fontSize: 10, color: PALETTE.dark }}>{caption}</p>
-      <span style={{ color: PALETTE.muted, fontSize: 9 }}>{likes} likes</span>
+      <p className="m-0 flex-1 truncate leading-snug" style={{ fontSize: 10, color: PALETTE.dark }}>{caption}</p>
+      <span className="shrink-0" style={{ color: PALETTE.muted, fontSize: 9 }}>{likes} likes</span>
     </div>
   )
 }
@@ -95,7 +95,7 @@ export function SocialWall() {
         {posts.length > 0
           ? posts.map(p => (
             <a key={p.id} href={p.permalink} target="_blank" rel="noopener noreferrer"
-              style={{ border: `1px solid ${PALETTE.border}`, borderRadius: 14, minWidth: 140, aspectRatio: '4/5', background: '#0A0A0A' }}
+              style={{ border: `1px solid ${PALETTE.border}`, borderRadius: 14, minWidth: 150, aspectRatio: '3/4', background: '#0A0A0A' }}
               className="motion-social-card relative overflow-hidden cursor-pointer shrink-0 no-underline">
               <img src={p.thumbnail_url} alt={p.caption || 'Instagram post'} loading="lazy"
                 className="absolute inset-0 w-full h-full object-cover" />
@@ -105,7 +105,7 @@ export function SocialWall() {
           ))
           : PLACEHOLDERS.map((p, i) => (
             <div key={p.id}
-              style={{ background: GRADS[i], border: `1px solid ${PALETTE.border}`, borderRadius: 14, minWidth: 140, aspectRatio: '4/5' }}
+              style={{ background: GRADS[i], border: `1px solid ${PALETTE.border}`, borderRadius: 14, minWidth: 150, aspectRatio: '3/4' }}
               className="motion-social-card relative overflow-hidden cursor-pointer shrink-0">
               {p.type === 'reel' && <ReelBadge />}
               <CardOverlay caption={p.caption} likes={p.likes} />

@@ -29,13 +29,13 @@ export default function LoginPage() {
   return (
     <div style={{ background: PALETTE.page, minHeight: '100vh', fontFamily: 'system-ui,sans-serif' }} className="flex flex-col items-center justify-center px-4">
       <div className="flex items-center gap-3 mb-8">
-        <img src="/logo.png" alt="PakSoc" className="w-11 h-11 rounded-full object-cover" />
+        <img src="/logo.webp" alt="PakSoc" className="w-11 h-11 rounded-full object-cover" />
         <div>
           <div style={{ color: PALETTE.dark }} className="font-extrabold text-lg leading-tight">PakSoc UNSW</div>
           <div style={{ color: ACCENT, fontSize: 10 }} className="tracking-widest uppercase font-bold">Pakistani Society</div>
         </div>
       </div>
-      <div style={{ background: PALETTE.card, border: `1px solid ${PALETTE.border}`, boxShadow: '0 4px 24px rgba(0,0,0,0.08)' }} className="rounded-2xl p-8 w-full max-w-sm">
+      <div style={{ background: PALETTE.card, border: `1px solid ${PALETTE.border}`, borderRadius: PALETTE.radiusCard, boxShadow: PALETTE.shadowMd }} className="p-8 w-full max-w-sm">
         <h2 style={{ color: PALETTE.dark }} className="text-xl font-extrabold mb-1">{mode === 'signin' ? 'Welcome back' : 'Create account'}</h2>
         <p style={{ color: PALETTE.muted }} className="text-sm mb-6">{mode === 'signin' ? 'Sign in to manage PakSoc.' : 'Join the PakSoc team.'}</p>
         <GoogleIdentityButton onError={setError} />
@@ -52,7 +52,7 @@ export default function LoginPage() {
           </button>
         </p>
       </div>
-      <p style={{ color: '#9CA3AF' }} className="text-xs mt-6">&copy; {new Date().getFullYear()} PakSoc UNSW</p>
+      <p style={{ color: PALETTE.disabled }} className="text-xs mt-6">&copy; {new Date().getFullYear()} PakSoc UNSW</p>
     </div>
   )
 }

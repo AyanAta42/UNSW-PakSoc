@@ -8,7 +8,7 @@ interface Props {
 
 /** Coloured pill showing an assigned member's name with a remove button. */
 export function AssignedChip({ member, onRemove }: Props) {
-  const color = (member.committee ? COMM_CFG[member.committee]?.color : undefined) ?? '#1A6B3A'
+  const color = (member.committee ? COMM_CFG[member.committee]?.color : undefined) ?? '#4ADE80'
   return (
     <span
       className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-semibold"

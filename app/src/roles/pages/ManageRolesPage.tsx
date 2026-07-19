@@ -7,8 +7,8 @@ import { MemberRoleRow }          from '@/roles/components/MemberRoleRow'
 import { useRealtimeTable }       from '@/core/supabase/useRealtimeTable'
 import { ROLE_LABEL, ROLE_COLOR, ALL_ROLES } from '@/roles/config/roleLabels'
 import type { Member, MemberRole, Committee } from '@/members/types/Member'
+import { PALETTE } from '@/config/theme'
 
-const C = { page: '#F9FAFB', card: '#FFFFFF', border: '#E5E7EB', muted: '#6B7280', dark: '#111827' }
 const NEEDS_COMMITTEE: MemberRole[] = ['subcom', 'executive']
 
 export default function ManageRolesPage() {
@@ -48,18 +48,20 @@ export default function ManageRolesPage() {
   }, {})
 
   return (
-    <div style={{ background: C.page, minHeight: '100vh', fontFamily: 'system-ui,sans-serif' }}>
-      <nav style={{ background: 'rgba(255,255,255,0.95)', borderBottom: `1px solid ${C.border}` }} className="sticky top-0 z-50 min-h-[3.5rem] pt-[env(safe-area-inset-top)] px-6 flex items-center gap-3">
-        <button onClick={() => navigate('/')} style={{ color: C.muted }} className="bg-transparent border-none cursor-pointer text-sm hover:opacity-70 p-0 mr-2">← Back</button>
-        <img src="/logo.png" alt="PakSoc" className="w-7 h-7 rounded-full object-cover" />
-        <span style={{ color: C.dark }} className="font-extrabold text-sm">Manage Roles</span>
+    <div style={{ background: PALETTE.page, minHeight: '100vh', fontFamily: 'system-ui, sans-serif' }}>
+      <nav style={{ background: PALETTE.navbarGlass, backdropFilter: 'blur(16px)', borderBottom: `1px solid ${PALETTE.border}` }}
+        className="sticky top-0 z-50 min-h-[3.5rem] pt-[env(safe-area-inset-top)] px-6 flex items-center gap-3">
+        <button onClick={() => navigate('/')} style={{ color: PALETTE.muted, background: 'transparent' }}
+          className="text-sm font-semibold border-none cursor-pointer hover:text-green-400 transition-colors p-0">← Home</button>
+        <div className="w-px h-4" style={{ background: PALETTE.border }} />
+        <span style={{ color: PALETTE.dark }} className="font-extrabold text-[15px]">Manage Roles</span>
       </nav>
       <div className="max-w-2xl mx-auto px-4 py-8">
         <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search by name…"
-          style={{ border: `1px solid ${C.border}`, color: C.dark, background: C.card }}
-          className="w-full rounded-xl px-4 py-2.5 text-sm mb-6 outline-none focus:ring-2 focus:ring-green-200" />
-        {loading && [1,2,3,4].map(i => <div key={i} className="h-14 rounded-xl animate-pulse bg-gray-100 mb-3" />)}
-        {!loading && members.length === 0 && <div style={{ color: C.muted }} className="text-sm text-center py-16">No members yet. Users appear here after they log in.</div>}
+          style={{ border: `1px solid ${PALETTE.border}`, color: PALETTE.dark, background: PALETTE.input, borderRadius: PALETTE.radiusInput }}
+          className="w-full px-4 py-2.5 text-sm mb-6 outline-none focus:ring-2 focus:ring-green-500/30" />
+        {loading && [1,2,3,4].map(i => <div key={i} className="motion-skeleton h-14 mb-3" style={{ borderRadius: PALETTE.radiusInput, border: `1px solid ${PALETTE.border}` }} />)}
+        {!loading && members.length === 0 && <div style={{ color: PALETTE.muted }} className="text-sm text-center py-16">No members yet. Users appear here after they log in.</div>}
         {!loading && Object.entries(grouped).map(([role, ms]) => (
           <div key={role} className="mb-6">
             <div className="flex items-center gap-2 mb-2">
@@ -67,11 +69,11 @@ export default function ManageRolesPage() {
                 style={{ background: ROLE_COLOR[role as MemberRole].bg, color: ROLE_COLOR[role as MemberRole].text }}>
                 {ROLE_LABEL[role as MemberRole]}
               </span>
-              <span style={{ color: C.muted }} className="text-xs">{ms.length}</span>
+              <span style={{ color: PALETTE.muted }} className="text-xs">{ms.length}</span>
             </div>
-            <div style={{ background: C.card, border: `1px solid ${C.border}` }} className="rounded-2xl overflow-hidden">
+            <div style={{ background: PALETTE.card, border: `1px solid ${PALETTE.border}`, borderRadius: PALETTE.radiusCard, boxShadow: PALETTE.shadowSm }} className="overflow-hidden">
               {ms.map((member, i) => (
-                <div key={member.id} style={{ borderTop: i > 0 ? `1px solid ${C.border}` : 'none' }}>
+                <div key={member.id} style={{ borderTop: i > 0 ? `1px solid ${PALETTE.border}` : 'none' }}>
                   <MemberRoleRow member={member} saving={saving === member.id} onRole={handleRoleChange} onComm={handleCommitteeChange} />
                 </div>
               ))}

@@ -28,7 +28,7 @@ export function MemberDragCard({ m, color, mobile, selected, dragging, onDragSta
         style={base}>
         <div className="w-8 h-8 rounded-full flex items-center justify-center text-[10px] font-extrabold shrink-0 text-white" style={{ background: color }}>{initials(m.name)}</div>
         <div className="flex-1 min-w-0">
-          <div className="text-sm font-semibold text-[#111827] truncate">{m.name}</div>
+          <div className="text-sm font-semibold text-[#F8FAFC] truncate">{m.name}</div>
           <span className="text-[9px] font-bold px-1.5 py-0.5 rounded" style={{ background: `${color}18`, color }}>{m.role.replace('_', ' ')}</span>
         </div>
         {selected && <span style={{ color }} className="text-xs font-bold shrink-0">✓</span>}
@@ -43,11 +43,11 @@ export function MemberDragCard({ m, color, mobile, selected, dragging, onDragSta
       style={base}>
       <div className="w-7 h-7 rounded-full flex items-center justify-center text-[10px] font-extrabold shrink-0 text-white" style={{ background: color }}>{initials(m.name)}</div>
       <div className="flex-1 min-w-0">
-        <div className="text-xs font-semibold text-[#111827] truncate">{m.name}</div>
+        <div className="text-xs font-semibold text-[#F8FAFC] truncate">{m.name}</div>
         <span className="text-[9px] font-bold px-1.5 py-0.5 rounded" style={{ background: `${color}18`, color }}>{m.role.replace('_', ' ')}</span>
       </div>
       {selected ? <span style={{ color }} className="text-xs font-bold shrink-0">✓</span>
-                : <span className="text-gray-300 text-sm shrink-0">⠿</span>}
+                : <span className="text-[#475569] text-sm shrink-0">⠿</span>}
     </div>
   )
 }

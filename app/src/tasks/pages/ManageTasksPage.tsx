@@ -44,7 +44,7 @@ export default function ManageTasksPage() {
   return (
     <>
       {/* Desktop */}
-      <div className="hidden lg:flex h-screen overflow-hidden font-sans bg-[#F4F6F2]">
+      <div className="hidden lg:flex h-screen overflow-hidden font-sans bg-[#030408]">
         <RosterPanel
           members={board.members} loading={board.loading}
           draggingMemberId={board.draggingMemberId} selectedMemberId={board.selectedMemberId}
@@ -63,21 +63,21 @@ export default function ManageTasksPage() {
       </div>
 
       {/* Mobile */}
-      <div className="flex lg:hidden flex-col h-[100dvh] overflow-hidden font-sans bg-[#F4F6F2]">
-        <header className="shrink-0 px-4 py-3 bg-white border-b border-gray-200 flex items-center gap-2.5">
+      <div className="flex lg:hidden flex-col h-[100dvh] overflow-hidden font-sans bg-[#030408]">
+        <header className="shrink-0 px-4 py-3 bg-[#0B0E0C] border-b border-[#1D231F] flex items-center gap-2.5">
           <button onClick={() => window.location.href = '/'} aria-label="Go to home"
-            className="w-9 h-9 rounded-full overflow-hidden border-2 border-gray-100 cursor-pointer shrink-0 p-0 bg-transparent shadow-sm active:scale-95 transition-all">
-            <img src="/logo.png" alt="PakSoc" className="w-full h-full object-cover" />
+            className="w-9 h-9 rounded-full overflow-hidden border-2 border-[#1D231F] cursor-pointer shrink-0 p-0 bg-transparent active:scale-95 transition-all">
+            <img src="/logo.webp" alt="PakSoc" className="w-full h-full object-cover" />
           </button>
           <button onClick={() => navigate('/events')} aria-label="Back to events"
-            className="w-8 h-8 rounded-full bg-gray-100 border border-gray-200 flex items-center justify-center text-gray-500 cursor-pointer active:bg-gray-200 transition-colors shrink-0 text-sm font-bold">
+            className="w-8 h-8 rounded-full bg-white/[0.06] border border-[#1D231F] flex items-center justify-center text-[#94A3B8] cursor-pointer active:bg-white/10 transition-colors shrink-0 text-sm font-bold">
             ←
           </button>
           <div className="flex-1 min-w-0">
-            <h1 className="m-0 text-base font-extrabold text-[#111827] truncate">Manage Tasks</h1>
-            <p className="m-0 text-[10px] text-gray-400">{board.tasks.length} tasks</p>
+            <h1 className="m-0 text-base font-extrabold text-[#F8FAFC] truncate">Manage Tasks</h1>
+            <p className="m-0 text-[10px] text-[#64748B]">{board.tasks.length} tasks</p>
           </div>
-          <button onClick={() => setAddOpen(true)} style={{ background: '#22C55E', color: '#fff' }} className="shrink-0 w-9 h-9 rounded-full border-none cursor-pointer font-bold text-xl leading-none shadow-sm active:scale-95 transition-transform">+</button>
+          <button onClick={() => setAddOpen(true)} style={{ background: '#22C55E', color: '#fff', boxShadow: '0 0 20px rgba(34,197,94,0.3)' }} className="shrink-0 w-9 h-9 rounded-full border-none cursor-pointer font-bold text-xl leading-none active:scale-95 transition-transform">+</button>
         </header>
         <TaskListPanel {...sharedPanelProps} mobile onAssignClick={id => { setAssignTaskId(id); setPickerMode('task') }} />
         <NewTaskModal open={addOpen} onClose={() => setAddOpen(false)}

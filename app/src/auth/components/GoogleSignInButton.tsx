@@ -17,8 +17,8 @@ export function GoogleSignInButton({ onClick }: Props) {
   return (
     <button
       onClick={onClick}
-      style={{ border: `1px solid ${PALETTE.border}`, color: PALETTE.dark, background: PALETTE.card }}
-      className="w-full flex items-center justify-center gap-2.5 rounded-xl py-2.5 font-semibold text-sm cursor-pointer hover:bg-gray-50 transition-colors mb-4"
+      style={{ border: `1px solid ${PALETTE.border}`, color: PALETTE.dark, background: PALETTE.cardAlt, borderRadius: PALETTE.radiusBtn }}
+      className="w-full flex items-center justify-center gap-2.5 py-2.5 font-semibold text-sm cursor-pointer hover:bg-white/5 transition-colors mb-4"
     >
       <GoogleIcon />
       Continue with Google

@@ -95,13 +95,13 @@ export function AddEditEventModal({ onClose, onCreated, onUpdated, event }: Prop
         <div className="p-6 flex flex-col gap-5 overflow-y-auto">
           {/* Name */}
           <div><label className={lbl}>Event Name</label>
-            <input value={name} onChange={e => setName(e.target.value)} placeholder="e.g. Eid Gala 2026" style={inp} className="w-full px-3.5 py-2.5 rounded-xl text-sm outline-none focus:ring-2 focus:ring-green-200" /></div>
+            <input value={name} onChange={e => setName(e.target.value)} placeholder="e.g. Eid Gala 2026" style={inp} className="w-full px-3.5 py-2.5 rounded-xl text-sm outline-none focus:ring-2 focus:ring-green-500/30" /></div>
 
           {/* Location */}
           <div>
             <label className={lbl}>Location</label>
             <div className="flex gap-2 items-center">
-              <input value={location} onChange={e => setLocation(e.target.value)} placeholder="e.g. Roundhouse, UNSW" style={inp} className="flex-1 px-3.5 py-2.5 rounded-xl text-sm outline-none focus:ring-2 focus:ring-green-200" />
+              <input value={location} onChange={e => setLocation(e.target.value)} placeholder="e.g. Roundhouse, UNSW" style={inp} className="flex-1 px-3.5 py-2.5 rounded-xl text-sm outline-none focus:ring-2 focus:ring-green-500/30" />
               <button type="button" onClick={() => location.trim() && setMapPreview(true)} disabled={!location.trim()}
                 style={{ borderColor: PALETTE.border, color: location.trim() ? PALETTE.secondary : PALETTE.disabled, background: PALETTE.cardAlt, borderRadius: 12 }}
                 className="shrink-0 px-3 py-2.5 text-xs font-semibold border cursor-pointer hover:bg-white/5 transition-colors disabled:cursor-not-allowed whitespace-nowrap">
@@ -113,7 +113,7 @@ export function AddEditEventModal({ onClose, onCreated, onUpdated, event }: Prop
           {/* Date & times */}
           <div><label className={lbl}>Date</label>
             <input type="date" value={eventDate} onChange={e => setEventDate(e.target.value)}
-              style={inp} className="w-full px-3.5 py-2.5 rounded-xl text-sm outline-none focus:ring-2 focus:ring-green-200" /></div>
+              style={inp} className="w-full px-3.5 py-2.5 rounded-xl text-sm outline-none focus:ring-2 focus:ring-green-500/30" /></div>
           <div className="grid grid-cols-2 gap-3">
             <TimeSelect12h label="Start Time"
               hour={startHour} minute={startMinute} period={startPeriod}
@@ -127,8 +127,8 @@ export function AddEditEventModal({ onClose, onCreated, onUpdated, event }: Prop
           <div><label className={lbl}>Ticket Price (AUD)</label>
             <div className="relative"><span style={{ color: PALETTE.muted }} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-sm font-semibold">$</span>
               <input type="number" min="0" step="0.01" value={price} onChange={e => setPrice(e.target.value)} placeholder="0.00"
-                style={{ ...inp, paddingLeft: '1.75rem' }} className="w-full px-3.5 py-2.5 rounded-xl text-sm outline-none focus:ring-2 focus:ring-green-200" /></div>
-            <p style={{ color: '#9CA3AF' }} className="text-[10px] mt-1">Set to 0 for a free event</p></div>
+                style={{ ...inp, paddingLeft: '1.75rem' }} className="w-full px-3.5 py-2.5 rounded-xl text-sm outline-none focus:ring-2 focus:ring-green-500/30" /></div>
+            <p style={{ color: PALETTE.disabled }} className="text-[10px] mt-1">Set to 0 for a free event</p></div>
 
           {/* CTA Buttons */}
           <div><label className={lbl}>Action Buttons</label>

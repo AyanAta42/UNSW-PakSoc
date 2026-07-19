@@ -1,4 +1,5 @@
 import { useRef, type DragEvent } from 'react'
+import { PALETTE } from '@/config/theme'
 
 interface Props {
   preview:   string
@@ -31,13 +32,13 @@ export function ImageUploadZone({ preview, dragOver, onFile, onClear, onDragOver
     <>
       <div onDragOver={e => { e.preventDefault(); onDragOver(true) }} onDragLeave={() => onDragOver(false)} onDrop={onDrop}
         onClick={() => fileRef.current?.click()}
-        style={{ border: `2px dashed ${dragOver ? '#22C55E' : '#E5E7EB'}`, background: dragOver ? 'rgba(34,197,94,0.05)' : '#FAFAFA' }}
+        style={{ border: `2px dashed ${dragOver ? '#22C55E' : PALETTE.border}`, background: dragOver ? 'rgba(34,197,94,0.06)' : PALETTE.cardAlt }}
         className="rounded-xl h-28 flex flex-col items-center justify-center gap-1.5 cursor-pointer transition-colors">
-        <svg width="24" height="24" fill="none" stroke="#6B7280" strokeWidth="1.5" viewBox="0 0 24 24">
+        <svg width="24" height="24" fill="none" stroke={PALETTE.muted} strokeWidth="1.5" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5m-13.5-9L12 3m0 0 4.5 4.5M12 3v13.5" />
         </svg>
-        <span style={{ color: '#6B7280' }} className="text-xs font-medium">Drag & drop or click to upload</span>
-        <span style={{ color: '#9CA3AF' }} className="text-[10px]">PNG, JPG, WEBP</span>
+        <span style={{ color: PALETTE.muted }} className="text-xs font-medium">Drag & drop or click to upload</span>
+        <span style={{ color: PALETTE.disabled }} className="text-[10px]">PNG, JPG, WEBP</span>
       </div>
       <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={e => { const f = e.target.files?.[0]; if (f) onFile(f) }} />
     </>

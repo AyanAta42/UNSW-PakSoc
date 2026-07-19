@@ -34,15 +34,15 @@ export function NewTaskModal({ open, onClose, title, setTitle, cat, setCat, allC
 
   return (
     <div className="fixed inset-0 z-[70] lg:hidden">
-      <div className="absolute inset-0 bg-black/45 backdrop-blur-[2px] touch-none" onClick={onClose} />
-      <div className="absolute bottom-0 left-0 right-0 rounded-t-[28px] h-[85dvh] flex flex-col bg-white shadow-[0_-8px_40px_rgba(0,0,0,0.18)] animate-[slideUp_0.28s_ease-out]" onClick={e => e.stopPropagation()}>
-        <div className="flex justify-center pt-3 pb-1 shrink-0"><div className="w-10 h-1 rounded-full bg-gray-200" /></div>
+      <div className="absolute inset-0 bg-black/55 backdrop-blur-[2px] touch-none" onClick={onClose} />
+      <div className="absolute bottom-0 left-0 right-0 rounded-t-[28px] h-[85dvh] flex flex-col bg-[#0D110E] border-t border-[#1D231F] shadow-[0_-8px_60px_rgba(0,0,0,0.6)] animate-[slideUp_0.28s_ease-out]" onClick={e => e.stopPropagation()}>
+        <div className="flex justify-center pt-3 pb-1 shrink-0"><div className="w-10 h-1 rounded-full bg-[#1D231F]" /></div>
         <div className="flex items-center justify-between px-5 pb-3 shrink-0">
           <div>
-            <div className="text-[15px] font-extrabold text-[#111827]">New Task</div>
-            <div className="text-xs text-gray-400 mt-0.5">Fill in details below</div>
+            <div className="text-[15px] font-extrabold text-[#F8FAFC]">New Task</div>
+            <div className="text-xs text-[#64748B] mt-0.5">Fill in details below</div>
           </div>
-          <button onClick={onClose} className="w-8 h-8 rounded-full border border-gray-200 bg-white flex items-center justify-center text-lg leading-none cursor-pointer text-gray-400 hover:bg-gray-50 transition-colors">×</button>
+          <button onClick={onClose} className="w-8 h-8 rounded-full border border-[#1D231F] bg-[#080B09] flex items-center justify-center text-lg leading-none cursor-pointer text-[#94A3B8] hover:bg-white/5 transition-colors">×</button>
         </div>
         <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain px-5 pb-8">
           <NewTaskForm title={title} setTitle={setTitle} cat={cat} setCat={setCat} allCategories={allCategories}

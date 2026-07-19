@@ -13,7 +13,7 @@ export default {
         },
       },
       fontFamily: {
-        sans: ["'Segoe UI'", 'Roboto', 'sans-serif'],
+        sans: ['Inter', 'system-ui', "'Segoe UI'", 'Roboto', 'sans-serif'],
       },
     },
   },

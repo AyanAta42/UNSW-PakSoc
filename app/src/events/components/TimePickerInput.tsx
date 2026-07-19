@@ -1,10 +1,11 @@
 /** Date + 12-hour start/end time selects (no scroll-wheel issues). */
+import { PALETTE } from '@/config/theme'
 
 const HOURS12 = Array.from({ length: 12 }, (_, i) => i + 1)
 const MINUTES = Array.from({ length: 12 }, (_, i) => i * 5)
 
-const inp = { border: '1px solid #E5E7EB', color: '#111827', background: '#FAFAFA' }
-const sel = 'px-2.5 py-2.5 rounded-xl text-sm outline-none focus:ring-2 focus:ring-green-200 cursor-pointer'
+const inp = { border: `1px solid ${PALETTE.border}`, color: PALETTE.dark, background: PALETTE.input, borderRadius: PALETTE.radiusInput }
+const sel = 'px-2.5 py-2.5 text-sm outline-none focus:ring-2 focus:ring-green-500/30 cursor-pointer'
 
 export type Period = 'AM' | 'PM'
 
@@ -21,12 +22,12 @@ interface TimeSelectProps {
 export function TimeSelect12h({ label, hour, minute, period, onHour, onMinute, onPeriod }: TimeSelectProps) {
   return (
     <div>
-      <label style={{ color: '#6B7280' }} className="block text-[11px] font-bold uppercase tracking-wider mb-1.5">{label}</label>
+      <label style={{ color: PALETTE.muted }} className="block text-[11px] font-bold uppercase tracking-wider mb-1.5">{label}</label>
       <div className="flex gap-1 items-center">
         <select value={hour} onChange={e => onHour(Number(e.target.value))} style={inp} className={sel}>
           {HOURS12.map(h => <option key={h} value={h}>{h}</option>)}
         </select>
-        <span style={{ color: '#6B7280' }} className="font-bold text-sm select-none">:</span>
+        <span style={{ color: PALETTE.muted }} className="font-bold text-sm select-none">:</span>
         <select value={minute} onChange={e => onMinute(Number(e.target.value))} style={inp} className={sel}>
           {MINUTES.map(m => <option key={m} value={m}>{String(m).padStart(2, '0')}</option>)}
         </select>
