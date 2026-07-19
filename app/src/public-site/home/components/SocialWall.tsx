@@ -21,9 +21,9 @@ const GRADS = [
 
 function CardOverlay({ caption, likes }: { caption: string; likes: number }) {
   return (
-    <div className="absolute bottom-0 left-0 right-0 flex items-baseline gap-1.5 px-2.5 pb-2.5 pt-6"
+    <div className="absolute bottom-0 left-0 right-0 flex items-end gap-1.5 px-2.5 pb-2.5 pt-8"
       style={{ background: 'linear-gradient(to top,rgba(0,0,0,0.85),transparent)' }}>
-      <p className="m-0 flex-1 truncate leading-snug" style={{ fontSize: 10, color: PALETTE.dark }}>{caption}</p>
+      <p className="m-0 flex-1 line-clamp-2 leading-snug" style={{ fontSize: 10, color: PALETTE.dark }}>{caption}</p>
       <span className="shrink-0" style={{ color: PALETTE.muted, fontSize: 9 }}>{likes} likes</span>
     </div>
   )
@@ -36,9 +36,35 @@ function ReelBadge() {
   )
 }
 
+function CardSkeleton() {
+  return (
+    <div className="motion-skeleton shrink-0" aria-hidden
+      style={{ border: `1px solid ${PALETTE.border}`, borderRadius: 14, minWidth: 150, aspectRatio: '3/4' }} />
+  )
+}
+
+function WallCard({ post }: { post: SocialPost }) {
+  const [imgLoaded, setImgLoaded] = useState(false)
+  return (
+    <a href={post.permalink} target="_blank" rel="noopener noreferrer"
+      style={{ border: `1px solid ${PALETTE.border}`, borderRadius: 14, minWidth: 150, aspectRatio: '3/4', background: '#0A0A0A' }}
+      className="motion-social-card relative overflow-hidden cursor-pointer shrink-0 no-underline">
+      {!imgLoaded && <div className="motion-skeleton" aria-hidden style={{ position: 'absolute', inset: 0 }} />}
+      <img src={post.thumbnail_url} alt={post.caption || 'Instagram post'} loading="lazy"
+        ref={el => { if (el?.complete && el.naturalWidth > 0) setImgLoaded(true) }}
+        onLoad={() => setImgLoaded(true)}
+        className="absolute inset-0 w-full h-full object-cover transition-opacity duration-500"
+        style={{ opacity: imgLoaded ? 1 : 0 }} />
+      {post.media_type === 'VIDEO' && <ReelBadge />}
+      <CardOverlay caption={post.caption} likes={post.like_count} />
+    </a>
+  )
+}
+
 export function SocialWall() {
   const { isAtLeast } = usePermissions()
   const [posts, setPosts] = useState<SocialPost[]>([])
+  const [loading, setLoading] = useState(true)
   const [refreshing, setRefreshing] = useState<number | null>(null)
   const [error, setError] = useState<string | null>(null)
 
@@ -48,6 +74,7 @@ export function SocialWall() {
     fetchSocialPosts()
       .then(rows => { if (alive) setPosts(rows) })
       .catch(() => {})
+      .finally(() => { if (alive) setLoading(false) })
     return () => { alive = false }
   }, [])
 
@@ -91,18 +118,12 @@ export function SocialWall() {
       </div>
       {error && <p className="text-xs -mt-2 mb-3" style={{ color: '#EF4444' }}>{error}</p>}
 
-      <div className="allow-pan-x flex gap-3 overflow-x-auto pb-1 scrollbar-none" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
-        {posts.length > 0
-          ? posts.map(p => (
-            <a key={p.id} href={p.permalink} target="_blank" rel="noopener noreferrer"
-              style={{ border: `1px solid ${PALETTE.border}`, borderRadius: 14, minWidth: 150, aspectRatio: '3/4', background: '#0A0A0A' }}
-              className="motion-social-card relative overflow-hidden cursor-pointer shrink-0 no-underline">
-              <img src={p.thumbnail_url} alt={p.caption || 'Instagram post'} loading="lazy"
-                className="absolute inset-0 w-full h-full object-cover" />
-              {p.media_type === 'VIDEO' && <ReelBadge />}
-              <CardOverlay caption={p.caption} likes={p.like_count} />
-            </a>
-          ))
+      {/* pt/px + negative margins give hover-scaled cards headroom inside the scrollport */}
+      <div className="allow-pan-x flex gap-3 overflow-x-auto scrollbar-none pt-2 -mt-2 pb-2 -mb-1 px-2 -mx-2" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
+        {loading
+          ? Array.from({ length: 6 }, (_, i) => <CardSkeleton key={i} />)
+          : posts.length > 0
+          ? posts.map(p => <WallCard key={p.id} post={p} />)
           : PLACEHOLDERS.map((p, i) => (
             <div key={p.id}
               style={{ background: GRADS[i], border: `1px solid ${PALETTE.border}`, borderRadius: 14, minWidth: 150, aspectRatio: '3/4' }}

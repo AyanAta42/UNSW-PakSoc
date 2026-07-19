@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 
 const iframeCache = new Map<string, HTMLIFrameElement>()
 
@@ -38,6 +38,8 @@ function reloadIframeSrc(iframe: HTMLIFrameElement, src: string) {
 /** Reuses the same iframe DOM node across route changes so Google Maps doesn't reload. */
 export function CachedMapEmbed({ src, cacheId, title = 'Event location map', className, style }: Props) {
   const containerRef = useRef<HTMLDivElement>(null)
+  const [loaded, setLoaded] = useState(false)
+  const [overlayGone, setOverlayGone] = useState(false)
 
   useEffect(() => {
     const container = containerRef.current
@@ -49,10 +51,29 @@ export function CachedMapEmbed({ src, cacheId, title = 'Event location map', cla
     if (reattached) container.appendChild(iframe)
     const srcChanged = setIframeSrc(iframe, src)
     if (reattached && hadLoaded && !srcChanged) reloadIframeSrc(iframe, src)
-    return () => { if (iframe.parentElement === container) container.removeChild(iframe) }
+
+    if (srcChanged || (reattached && hadLoaded)) iframe.removeAttribute('data-loaded')
+    const alreadyLoaded = iframe.getAttribute('data-loaded') === src
+    setLoaded(alreadyLoaded)
+    setOverlayGone(alreadyLoaded)
+    const onLoad = () => { iframe.setAttribute('data-loaded', src); setLoaded(true) }
+    iframe.addEventListener('load', onLoad)
+    return () => {
+      iframe.removeEventListener('load', onLoad)
+      if (iframe.parentElement === container) container.removeChild(iframe)
+    }
   }, [src, cacheId, title])
 
-  return <div ref={containerRef} className={className} style={style} />
+  return (
+    <div className={className} style={{ position: 'relative', ...style }}>
+      <div ref={containerRef} className="w-full h-full" />
+      {!overlayGone && (
+        <div className="motion-skeleton" aria-hidden
+          onTransitionEnd={() => setOverlayGone(true)}
+          style={{ position: 'absolute', inset: 0, opacity: loaded ? 0 : 1, transition: 'opacity 450ms ease', pointerEvents: 'none' }} />
+      )}
+    </div>
+  )
 }
 
 /** Builds a Google Maps embed URL for a given location string. */

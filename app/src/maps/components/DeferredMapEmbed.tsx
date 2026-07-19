@@ -42,17 +42,7 @@ export function DeferredMapEmbed({ src, cacheId, title, className, style, delayM
   }, [delayMs])
 
   if (!ready) {
-    return (
-      <div
-        className={className}
-        style={{
-          ...style,
-          background: 'linear-gradient(135deg, #0A0A0A 25%, #121812 50%, #0A0A0A 75%)',
-          backgroundSize: '200% 100%',
-        }}
-        aria-hidden
-      />
-    )
+    return <div className={['motion-skeleton', className].filter(Boolean).join(' ')} style={style} aria-hidden />
   }
 
   return <CachedMapEmbed src={src} cacheId={cacheId} title={title} className={className} style={style} />

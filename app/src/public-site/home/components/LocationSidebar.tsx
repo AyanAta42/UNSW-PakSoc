@@ -7,34 +7,47 @@ import { ACCENT, PALETTE } from '@/config/theme'
 
 interface Props { mapEvent: DbEvent | null; featured: DbEvent | null; now: Date }
 
-const STICKY_TOP = 72
-const BOTTOM_GAP = 20
-
 export function LocationSidebar({ mapEvent, featured, now }: Props) {
   const desktopMapSrc = mapEvent ? mapEmbedSrc(mapEvent.location) : null
   const ref = useRef<HTMLDivElement>(null)
 
-  // When the sidebar is taller than the viewport, shift the sticky anchor up so
-  // it pins by its bottom edge — the timeline ends level with the story wall.
+  // The sidebar and the events + social wall column differ in height, so
+  // scroll the sidebar at a different rate: the height gap is fed back in
+  // proportionally to page scroll, so its bottom lands level with the social
+  // wall's bottom exactly when the wall's bottom reaches the viewport.
   useEffect(() => {
     const el = ref.current
-    if (!el) return
-    const update = () => {
-      const overflow = el.offsetHeight + STICKY_TOP + BOTTOM_GAP - window.innerHeight
-      el.style.top = `${overflow > 0 ? STICKY_TOP - overflow : STICKY_TOP}px`
+    const parent = el?.parentElement
+    const left = parent?.previousElementSibling as HTMLElement | null
+    if (!el || !parent || !left) return
+    let raf = 0
+    const apply = () => {
+      raf = 0
+      const slack = left.offsetHeight - el.offsetHeight
+      const leftTop = left.getBoundingClientRect().top + window.scrollY
+      const end = leftTop + left.offsetHeight - window.innerHeight
+      if (slack === 0 || end <= 0) { el.style.transform = ''; return }
+      const progress = Math.min(1, Math.max(0, window.scrollY / end))
+      el.style.transform = `translate3d(0, ${(progress * slack).toFixed(1)}px, 0)`
     }
-    update()
-    const ro = new ResizeObserver(update)
+    const schedule = () => { if (!raf) raf = requestAnimationFrame(apply) }
+    apply()
+    const ro = new ResizeObserver(schedule)
     ro.observe(el)
-    window.addEventListener('resize', update)
+    ro.observe(left)
+    window.addEventListener('scroll', schedule, { passive: true })
+    window.addEventListener('resize', schedule)
     return () => {
+      if (raf) cancelAnimationFrame(raf)
       ro.disconnect()
-      window.removeEventListener('resize', update)
+      window.removeEventListener('scroll', schedule)
+      window.removeEventListener('resize', schedule)
+      el.style.transform = ''
     }
   }, [])
 
   return (
-    <div ref={ref} className="hidden lg:flex flex-col gap-4 flex-[3] sticky top-[72px]">
+    <div ref={ref} className="hidden lg:flex flex-col gap-4 flex-[3] will-change-transform">
       <div className="motion-glow">
       <div style={{ background: PALETTE.card, border: `1px solid ${PALETTE.border}`, borderRadius: 18, boxShadow: PALETTE.shadowMd }}
         className="overflow-hidden flex flex-col">
