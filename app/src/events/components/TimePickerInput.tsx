@@ -1,74 +1,70 @@
-/** Date + 12-hour start/end time selects (no scroll-wheel issues). */
+/** Date + native time fields — phones get the platform scroll-wheel picker. */
 import { PALETTE } from '@/config/theme'
 
-const HOURS12 = Array.from({ length: 12 }, (_, i) => i + 1)
-const MINUTES = Array.from({ length: 12 }, (_, i) => i * 5)
-
-const inp = { border: `1px solid ${PALETTE.border}`, color: PALETTE.dark, background: PALETTE.input, borderRadius: PALETTE.radiusInput }
-const sel = 'px-2.5 py-2.5 text-sm outline-none focus:ring-2 focus:ring-green-500/30 cursor-pointer'
-
-export type Period = 'AM' | 'PM'
-
-interface TimeSelectProps {
-  label:     string
-  hour:      number
-  minute:    number
-  period:    Period
-  onHour:    (v: number) => void
-  onMinute:  (v: number) => void
-  onPeriod:  (v: Period) => void
-}
-
-export function TimeSelect12h({ label, hour, minute, period, onHour, onMinute, onPeriod }: TimeSelectProps) {
-  return (
-    <div>
-      <label style={{ color: PALETTE.muted }} className="block text-[11px] font-bold uppercase tracking-wider mb-1.5">{label}</label>
-      <div className="flex gap-1 items-center">
-        <select value={hour} onChange={e => onHour(Number(e.target.value))} style={inp} className={sel}>
-          {HOURS12.map(h => <option key={h} value={h}>{h}</option>)}
-        </select>
-        <span style={{ color: PALETTE.muted }} className="font-bold text-sm select-none">:</span>
-        <select value={minute} onChange={e => onMinute(Number(e.target.value))} style={inp} className={sel}>
-          {MINUTES.map(m => <option key={m} value={m}>{String(m).padStart(2, '0')}</option>)}
-        </select>
-        <select value={period} onChange={e => onPeriod(e.target.value as Period)} style={inp} className={sel}>
-          <option value="AM">AM</option>
-          <option value="PM">PM</option>
-        </select>
-      </div>
-    </div>
-  )
-}
-
-function to24(hour: number, period: Period): number {
-  if (period === 'AM') return hour === 12 ? 0 : hour
-  return hour === 12 ? 12 : hour + 12
-}
-
-function from24(h24: number, minute: number): { hour: number; minute: number; period: Period } {
-  return { hour: h24 % 12 || 12, minute, period: h24 >= 12 ? 'PM' : 'AM' }
-}
+const pad = (n: number) => String(n).padStart(2, '0')
 
 export function parseIsoDate(iso: string | undefined): string {
   if (!iso) return ''
   return new Date(iso).toLocaleDateString('en-CA')
 }
 
-export function parseTime12(iso: string | undefined, fallback = { hour: 5, minute: 0, period: 'PM' as Period }) {
+/** Local wall-clock "HH:mm" (24h) from an ISO string. */
+export function parseTimeHM(iso: string | undefined, fallback = '17:00'): string {
   if (!iso) return fallback
   const d = new Date(iso)
-  const raw = d.getMinutes()
-  const minute = Math.round(raw / 5) * 5 % 60
-  return from24(d.getHours(), minute)
+  return `${pad(d.getHours())}:${pad(d.getMinutes())}`
 }
 
-export function addHours12(t: { hour: number; minute: number; period: Period }, add: number) {
-  const h24 = (to24(t.hour, t.period) + add) % 24
-  return from24(h24, t.minute)
+export function addHoursHM(hm: string, add: number): string {
+  const [h, m] = hm.split(':').map(Number)
+  return `${pad((h + add) % 24)}:${pad(m)}`
 }
 
-export function buildIso(date: string, hour: number, minute: number, period: Period): string {
-  if (!date) return ''
-  const h24 = to24(hour, period)
-  return `${date}T${String(h24).padStart(2, '0')}:${String(minute).padStart(2, '0')}:00`
+/** "HH:mm" → "5:30 PM" for display. */
+export function formatHM(hm: string): string {
+  const [h, m] = hm.split(':').map(Number)
+  return `${h % 12 || 12}:${pad(m)} ${h >= 12 ? 'PM' : 'AM'}`
+}
+
+/**
+ * Local wall-clock date+time → UTC instant. The events.time column is
+ * timestamptz, so a naive string would be read as UTC and shift the
+ * displayed time by the user's offset — always send an explicit instant.
+ */
+export function buildIso(date: string, hm: string): string {
+  if (!date || !hm) return ''
+  const [y, mo, d] = date.split('-').map(Number)
+  const [h, m] = hm.split(':').map(Number)
+  return new Date(y, mo - 1, d, h, m).toISOString()
+}
+
+/** End instant; an end earlier than the start rolls over to the next day. */
+export function buildEndIso(date: string, startHM: string, endHM: string): string {
+  if (!date || !endHM) return ''
+  const [y, mo, d] = date.split('-').map(Number)
+  const [h, m] = endHM.split(':').map(Number)
+  const end = new Date(y, mo - 1, d, h, m)
+  if (startHM && endHM < startHM) end.setDate(end.getDate() + 1)
+  return end.toISOString()
+}
+
+interface TimeFieldProps {
+  label:    string
+  value:    string
+  onChange: (v: string) => void
+}
+
+export function TimeField({ label, value, onChange }: TimeFieldProps) {
+  return (
+    <div className="min-w-0">
+      <label style={{ color: PALETTE.muted }} className="block text-[11px] font-bold uppercase tracking-wider mb-1.5">{label}</label>
+      <input
+        type="time"
+        value={value}
+        onChange={e => e.target.value && onChange(e.target.value)}
+        style={{ border: `1px solid ${PALETTE.border}`, color: PALETTE.dark, background: PALETTE.input, borderRadius: PALETTE.radiusInput, colorScheme: 'dark' }}
+        className="w-full px-3 py-2.5 text-sm outline-none focus:ring-2 focus:ring-green-500/30 cursor-pointer"
+      />
+    </div>
+  )
 }

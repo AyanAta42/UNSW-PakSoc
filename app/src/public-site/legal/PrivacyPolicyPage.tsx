@@ -2,7 +2,7 @@ import { LegalPageLayout, LegalSection, LegalList, LegalParagraph } from './Lega
 
 export default function PrivacyPolicyPage() {
   return (
-    <LegalPageLayout title="Privacy Policy — UNSW PakSoc Manager" effectiveDate="July 10, 2026">
+    <LegalPageLayout title="Privacy Policy — PakSoc UNSW Web App" effectiveDate="July 10, 2026">
       <LegalSection title="1. Information We Collect">
         <LegalList items={[
           'When you sign in using Google Auth via Supabase, we collect your full name and email address.',

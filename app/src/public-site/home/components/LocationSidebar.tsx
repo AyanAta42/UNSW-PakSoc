@@ -4,6 +4,7 @@ import { DeferredMapEmbed } from '@/maps/components/DeferredMapEmbed'
 import { mapEmbedSrc } from '@/maps/components/CachedMapEmbed'
 import { EventDetailContent }          from './EventDetailContent'
 import { ACCENT, PALETTE } from '@/config/theme'
+import { PinIcon } from '@/shared/components/MetaIcons'
 
 interface Props { mapEvent: DbEvent | null; featured: DbEvent | null; now: Date }
 
@@ -66,7 +67,7 @@ export function LocationSidebar({ mapEvent, featured, now }: Props) {
           ? <div className="px-5 py-3.5">
               <div style={{ color: PALETTE.dark }} className="font-bold text-sm mb-1">{mapEvent.name}</div>
               <div style={{ color: PALETTE.muted }} className="text-xs flex items-center gap-1.5">
-                <span style={{ color: ACCENT }}>◎</span>{mapEvent.location}
+                <PinIcon color={ACCENT} />{mapEvent.location}
               </div>
             </div>
           : <div className="px-5 py-3.5">

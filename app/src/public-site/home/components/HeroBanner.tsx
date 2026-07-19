@@ -88,38 +88,47 @@ export function HeroBanner({ banner, loading }: Props) {
 
         {/* Layer 4: Content */}
         <div ref={contentRef} className="relative z-10 flex flex-col p-5 md:p-8 flex-1 min-h-[220px] md:min-h-0 motion-parallax-layer">
-          <h1 style={{ fontFamily: '"Satoshi", sans-serif', fontWeight: 900, color: '#F8FAFC' }}
-            className="text-2xl md:text-[40px] tracking-tight m-0 leading-none shrink-0 motion-hero-title">
-            Next <span style={{ color: ACCENT }}>Event</span>
-          </h1>
+          <div className="flex items-center gap-2.5 shrink-0 motion-hero-title">
+            <span aria-hidden className="h-px w-7"
+              style={{ background: `linear-gradient(90deg, ${ACCENT}, transparent)` }} />
+            <span style={{ fontFamily: '"Satoshi", sans-serif', color: ACCENT_GLOW, letterSpacing: '0.3em' }}
+              className="uppercase text-[10px] md:text-[11px] font-bold">
+              Next Event
+            </span>
+          </div>
 
-          <div className="flex-1 min-h-6 md:min-h-0" />
+          <div className="flex-1 min-h-5 md:min-h-0" />
 
           {(loading || !banner) && (
-            <div className="rounded-xl h-[80px] md:h-28 motion-skeleton shrink-0"
+            <div className="rounded-xl h-[110px] md:h-32 motion-skeleton shrink-0"
               style={{ border: `1px solid ${PALETTE.border}` }} />
           )}
 
           {!loading && banner && (
-            <div className="w-full md:w-fit shrink-0 motion-hero-details">
-              <div style={{ color: '#F8FAFC' }} className="text-[15px] md:text-lg font-extrabold mb-3.5 truncate">{banner.name}</div>
-              <div className="flex gap-2.5 w-fit">
-                {(['days','hrs','mins','secs'] as const).map((k, i) => {
-                  const val = [cd.days, cd.hrs, cd.mins, cd.secs][i]
-                  const digits = String(Math.max(0, val)).padStart(2, '0').slice(-2)
-                  return (
-                    <div key={k} className="text-center min-w-[54px] md:min-w-[66px] shrink-0 px-2.5 py-2 md:px-3.5 md:py-2.5"
-                      style={{ background: 'rgba(10,10,10,0.92)', border: `1px solid ${PALETTE.border}`, borderRadius: 14 }}>
-                      <div
-                        style={{ color: ACCENT_GLOW, lineHeight: 1, fontWeight: 900, fontVariantNumeric: 'tabular-nums' }}
-                        className="font-black tabular-nums text-2xl md:text-[30px]"
-                      >
-                        {digits}
+            <div className="w-full shrink-0 motion-hero-details">
+              <h1 className="hero-title-text m-0 uppercase line-clamp-2 text-[28px] leading-[1.05] md:text-[46px] md:leading-[1.02] pr-1">
+                {banner.name}
+              </h1>
+              <div className="flex items-center gap-3 md:gap-4 mt-3.5 md:mt-4 w-fit">
+                <span className="hero-title-in text-xl md:text-3xl shrink-0">in</span>
+                <div className="flex gap-2.5 w-fit">
+                  {(['days','hrs','mins','secs'] as const).map((k, i) => {
+                    const val = [cd.days, cd.hrs, cd.mins, cd.secs][i]
+                    const digits = String(Math.max(0, val)).padStart(2, '0').slice(-2)
+                    return (
+                      <div key={k} className="text-center min-w-[52px] md:min-w-[66px] shrink-0 px-2.5 py-2 md:px-3.5 md:py-2.5"
+                        style={{ background: 'rgba(10,10,10,0.92)', border: `1px solid ${PALETTE.border}`, borderRadius: 14 }}>
+                        <div
+                          style={{ fontFamily: '"Satoshi", sans-serif', color: ACCENT_GLOW, lineHeight: 1, fontWeight: 900, fontVariantNumeric: 'tabular-nums' }}
+                          className="font-black tabular-nums text-2xl md:text-[30px]"
+                        >
+                          {digits}
+                        </div>
+                        <div style={{ color: PALETTE.secondary, fontSize: 8 }} className="uppercase tracking-widest mt-1.5 font-bold md:text-[9px]">{k}</div>
                       </div>
-                      <div style={{ color: PALETTE.secondary, fontSize: 8 }} className="uppercase tracking-widest mt-1.5 font-bold md:text-[9px]">{k}</div>
-                    </div>
-                  )
-                })}
+                    )
+                  })}
+                </div>
               </div>
             </div>
           )}

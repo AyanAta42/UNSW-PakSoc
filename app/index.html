@@ -2,6 +2,7 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
+    <link rel="icon" type="image/png" sizes="96x96" href="/favicon-96.png" />
     <link rel="icon" type="image/png" sizes="512x512" href="/logo.png" />
     <link rel="apple-touch-icon" sizes="180x180" href="/logo.png" />
     <link rel="manifest" href="/manifest.webmanifest" />
@@ -11,7 +12,13 @@
     <meta name="apple-mobile-web-app-title" content="PakSoc" />
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-    <title>PakSoc UNSW</title>
+    <title>PakSoc UNSW Web App</title>
+    <meta name="description" content="The official UNSW Pakistani Society web app — see upcoming event details, locations and access links, plus all our social media in one place." />
+    <meta property="og:title" content="PakSoc UNSW Web App" />
+    <meta property="og:description" content="See upcoming PakSoc event details, locations and access links, plus all our social media in one place." />
+    <meta property="og:type" content="website" />
+    <meta property="og:image" content="/logo.png" />
+    <meta name="twitter:card" content="summary" />
 
     <!-- Instant dark shell before JS/CSS arrive -->
     <style>
@@ -21,6 +28,14 @@
 
     <!-- Events API starts HERE — before React, fonts, or any other asset -->
     <!-- EVENTS_BOOT -->
+
+    <!-- Fonts: Satoshi (body/UI) + Clash Display (hero headline) -->
+    <link rel="preconnect" href="https://api.fontshare.com" crossorigin />
+    <link rel="preconnect" href="https://cdn.fontshare.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://api.fontshare.com/v2/css?f[]=satoshi@500,700,900&f[]=clash-display@600,700&display=swap"
+    />
   </head>
   <body>
     <div id="root"></div>

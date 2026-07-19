@@ -7,6 +7,7 @@ import { AdminEventCard }    from '@/events/components/AdminEventCard'
 import { AddEditEventModal } from '@/events/components/AddEditEventModal'
 import { usePermissions }    from '@/roles/hooks/usePermissions'
 import { useRealtimeTable }  from '@/core/supabase/useRealtimeTable'
+import { applyEventChange }  from '@/events/utils/applyEventChange'
 import type { DbEvent }      from '@/events/types/Event'
 import { ACCENT, ACCENT_TEXT, PALETTE } from '@/config/theme'
 
@@ -41,8 +42,13 @@ export default function EventsManagerPage() {
 
   useEffect(() => { fetchAllEvents().then(setEvents).catch(console.error).finally(() => setLoading(false)) }, [])
 
-  // Live updates from other execs editing/publishing events
-  useRealtimeTable('events', () => { fetchAllEvents().then(setEvents).catch(console.error) }, !loading)
+  // Live updates from other execs: apply each change instantly, then reconcile
+  useRealtimeTable(
+    'events',
+    () => { fetchAllEvents().then(setEvents).catch(console.error) },
+    !loading,
+    change => setEvents(prev => applyEventChange(prev, change)),
+  )
 
   const now    = new Date()
   const ended  = events.filter(e => new Date(e.time) <= now).sort((a, b) => +new Date(b.time) - +new Date(a.time))

@@ -208,6 +208,32 @@ body {
 }
 
 /* ─── Hero ─────────────────────────────────────────────────────────────────── */
+/* Big display headline — Clash Display with a white→mint gradient fill */
+.hero-title-text {
+  font-family: 'Clash Display', 'Satoshi', sans-serif;
+  font-weight: 600;
+  letter-spacing: 0.005em;
+  color: #f8fafc;
+  text-wrap: balance;
+}
+
+@supports ((-webkit-background-clip: text) or (background-clip: text)) {
+  .hero-title-text {
+    background: linear-gradient(120deg, #f8fafc 40%, #bbf7d0 72%, #4ade80 105%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+}
+
+/* The little editorial "in" between the headline and the countdown */
+.hero-title-in {
+  font-family: Georgia, 'Times New Roman', serif;
+  font-style: italic;
+  font-weight: 400;
+  color: #cbd5e1;
+}
+
 .motion-hero-enter {
   animation: heroEnter var(--motion-enter) var(--motion-ease) both;
 }

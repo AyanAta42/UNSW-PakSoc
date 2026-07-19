@@ -6,6 +6,7 @@ import { EventDetailContent }          from './EventDetailContent'
 import { getEventButtons, getCtaVariant }             from '@/events/utils/getEventButtons'
 import { EventCtaButton }              from '@/events/components/EventCtaButton'
 import { ACCENT, PALETTE }             from '@/config/theme'
+import { PinIcon }                     from '@/shared/components/MetaIcons'
 
 interface Props { event: DbEvent; now: Date; onClose: () => void; mapCacheId?: string }
 
@@ -121,7 +122,7 @@ export function MobileEventSheet({ event, now, onClose, mapCacheId = 'home-map-s
               <DeferredMapEmbed cacheId={mapCacheId} src={mapEmbedSrc(event.location)} title="Event location map" className="w-full h-full" delayMs={280} />
             </div>
             <div style={{ color: PALETTE.muted }} className="text-xs mt-2 flex items-center gap-1.5">
-              <span style={{ color: ACCENT }}>◎</span>{event.location}
+              <PinIcon color={ACCENT} />{event.location}
             </div>
           </div>
         </div>

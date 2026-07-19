@@ -6,6 +6,7 @@ import {
   refreshPublicEvents,
 } from '@/events/services/publicEventsBootstrap'
 import { useRealtimeTable } from '@/core/supabase/useRealtimeTable'
+import { applyEventChange } from '@/events/utils/applyEventChange'
 
 interface PublicEventsCtx {
   events: DbEvent[]
@@ -43,10 +44,14 @@ export function PublicEventsProvider({ children }: { children: React.ReactNode }
     return () => { alive = false }
   }, [])
 
-  // Live updates: publish / unpublish / edit / delete anywhere refreshes every client
-  useRealtimeTable('events', () => {
-    refreshPublicEvents().then(setEvents).catch(console.error)
-  }, ready)
+  // Live sync: every admin action (create / edit / publish / unpublish / delete)
+  // lands instantly from the change payload; the debounced refetch reconciles after.
+  useRealtimeTable(
+    'events',
+    () => { refreshPublicEvents().then(setEvents).catch(console.error) },
+    ready,
+    change => setEvents(prev => applyEventChange(prev, change, true)),
+  )
 
   const value = useMemo(() => ({ events, loading, ready }), [events, loading, ready])
 

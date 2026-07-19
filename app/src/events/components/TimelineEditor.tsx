@@ -6,7 +6,7 @@ interface Props {
   onChange: (items: TimelineItem[]) => void
 }
 
-const inp = { border: `1px solid ${PALETTE.border}`, color: PALETTE.dark, background: PALETTE.input, borderRadius: PALETTE.radiusInput }
+const inp = { border: `1px solid ${PALETTE.border}`, color: PALETTE.dark, background: PALETTE.input, borderRadius: PALETTE.radiusInput, colorScheme: 'dark' } as const
 
 export function TimelineEditor({ items, onChange }: Props) {
   const update = (i: number, patch: Partial<TimelineItem>) =>
