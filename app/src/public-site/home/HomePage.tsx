@@ -213,7 +213,7 @@ export default function HomePage() {
       )}
       {editOpen && user && (
         <Suspense fallback={null}>
-          <EditProfileModal user={user} initial={initial ?? '?'} onClose={() => setEditOpen(false)} />
+          <EditProfileModal user={user} onClose={() => setEditOpen(false)} />
         </Suspense>
       )}
 

@@ -14,6 +14,7 @@ import { unassignMember }  from '@/tasks/services/unassignMember'
 import { useDragAssign }   from '@/tasks/hooks/useDragAssign'
 import type { DragAssignState } from '@/tasks/hooks/useDragAssign'
 import { useRealtimeTable } from '@/core/supabase/useRealtimeTable'
+import { logInteraction }  from '@/interactions/services/logInteraction'
 import { DEFAULT_TASK_CATEGORIES } from '@/tasks/types/Task'
 
 export interface TaskBoardState extends DragAssignState {
@@ -63,7 +64,7 @@ export function useTaskBoard(eventId: string): TaskBoardState {
     fetchTasks(eventId).then(setTasks).catch(console.error)
   }, !loading)
 
-  const drag = useDragAssign(members, tasks, setTasks, preAssigned, setPreAssigned)
+  const drag = useDragAssign(members, tasks, setTasks, preAssigned, setPreAssigned, eventId)
 
   const allCategories = [...DEFAULT_TASK_CATEGORIES, ...customCats.filter(c => !DEFAULT_TASK_CATEGORIES.includes(c))]
 
@@ -114,23 +115,36 @@ export function useTaskBoard(eventId: string): TaskBoardState {
     try {
       const realId = await createTask(eventId, optimistic.title, cat, optimistic.notes, subtitleList, memberIds)
       setTasks(p => p.map(t => t.id === tempId ? { ...t, id: realId } : t))
+      void logInteraction('task.created', 'task', realId, eventId, `created task "${optimistic.title}"`)
     } catch (e) { console.error(e); setTasks(p => p.filter(t => t.id !== tempId)) }
   }
 
   async function editTask(id: string, title: string, cat: string, notes: string, subtitles: string[]) {
     const newSubs = subtitles.map((t, i) => ({ id: `st_${i}`, title: t }))
     setTasks(p => p.map(t => t.id !== id ? t : { ...t, title, category: cat, notes, subtasks: newSubs }))
-    try { await updateTask(id, title, cat, notes, subtitles) } catch (e) { console.error(e) }
+    try {
+      await updateTask(id, title, cat, notes, subtitles)
+      void logInteraction('task.updated', 'task', id, eventId, `updated task "${title}"`)
+    } catch (e) { console.error(e) }
   }
 
   async function removeTask(id: string) {
+    const removedTitle = tasks.find(t => t.id === id)?.title ?? 'a task'
     setTasks(p => p.filter(t => t.id !== id))
-    try { await deleteTask(id) } catch (e) { console.error(e) }
+    try {
+      await deleteTask(id)
+      void logInteraction('task.deleted', 'task', id, eventId, `deleted task "${removedTitle}"`)
+    } catch (e) { console.error(e) }
   }
 
   async function removeAssigned(taskId: string, mId: string) {
+    const task = tasks.find(t => t.id === taskId)
+    const memberName = task?.assigned.find(a => a.id === mId)?.name ?? 'a member'
     setTasks(p => p.map(t => t.id === taskId ? { ...t, assigned: t.assigned.filter(a => a.id !== mId) } : t))
-    try { await unassignMember(taskId, mId) } catch (e) { console.error(e) }
+    try {
+      await unassignMember(taskId, mId)
+      void logInteraction('task.member_unassigned', 'task', taskId, eventId, `removed ${memberName} from "${task?.title ?? 'a task'}"`)
+    } catch (e) { console.error(e) }
   }
 
   return { members, tasks, loading, title, setTitle, cat, setCat, subtasks, setSubtasks, preAssigned, setPreAssigned, notes, setNotes, allCategories, selectedMemberId, selectMember, addCustomCategory, removeCustomCategory, addTask, editTask, removeTask, removeAssigned, ...drag }

@@ -7,6 +7,10 @@ import { AdminEventCard }    from '@/events/components/AdminEventCard'
 import { AddEditEventModal } from '@/events/components/AddEditEventModal'
 import { usePermissions }    from '@/roles/hooks/usePermissions'
 import { useRealtimeTable }  from '@/core/supabase/useRealtimeTable'
+import { logInteraction }        from '@/interactions/services/logInteraction'
+import { fetchEventInteractions } from '@/interactions/services/fetchEventInteractions'
+import { HistoryButton }     from '@/interactions/components/HistoryButton'
+import { HistoryPanel }      from '@/interactions/components/HistoryPanel'
 import type { DbEvent }      from '@/events/types/Event'
 import { ACCENT, ACCENT_TEXT, PALETTE } from '@/config/theme'
 
@@ -38,6 +42,7 @@ export default function EventsManagerPage() {
   const [loading, setLoading] = useState(true)
   const [showAdd, setShowAdd] = useState(false)
   const [editingEv, setEditingEv] = useState<DbEvent | null>(null)
+  const [showHistory, setShowHistory] = useState(false)
 
   useEffect(() => { fetchAllEvents().then(setEvents).catch(console.error).finally(() => setLoading(false)) }, [])
 
@@ -50,9 +55,24 @@ export default function EventsManagerPage() {
   const live   = active.filter(e => e.public)
   const drafts = active.filter(e => !e.public)
 
-  const announce  = async (id: string) => { await setEventPublic(id, true);  setEvents(p => p.map(e => e.id === id ? { ...e, public: true  } : e)) }
-  const unpublish = async (id: string) => { await setEventPublic(id, false); setEvents(p => p.map(e => e.id === id ? { ...e, public: false } : e)) }
-  const handleDelete = async (id: string) => { await deleteEvent(id); setEvents(p => p.filter(e => e.id !== id)) }
+  const announce = async (id: string) => {
+    const name = events.find(e => e.id === id)?.name ?? 'an event'
+    await setEventPublic(id, true)
+    setEvents(p => p.map(e => e.id === id ? { ...e, public: true } : e))
+    void logInteraction('event.published', 'event', id, id, `announced "${name}"`)
+  }
+  const unpublish = async (id: string) => {
+    const name = events.find(e => e.id === id)?.name ?? 'an event'
+    await setEventPublic(id, false)
+    setEvents(p => p.map(e => e.id === id ? { ...e, public: false } : e))
+    void logInteraction('event.unpublished', 'event', id, id, `unpublished "${name}"`)
+  }
+  const handleDelete = async (id: string) => {
+    const name = events.find(e => e.id === id)?.name ?? 'an event'
+    await deleteEvent(id)
+    setEvents(p => p.filter(e => e.id !== id))
+    void logInteraction('event.deleted', 'event', id, id, `deleted event "${name}"`)
+  }
 
   const sectionProps = { canEdit: can.editEvents, onAnnounce: announce, onUnpublish: unpublish, onEdit: setEditingEv, onDelete: handleDelete }
 
@@ -67,13 +87,16 @@ export default function EventsManagerPage() {
           <div className="w-px h-4" style={{ background: PALETTE.border }} />
           <span style={{ color: PALETTE.dark }} className="font-extrabold text-[15px]">Events Manager</span>
         </div>
-        {can.editEvents && (
-          <button onClick={() => setShowAdd(true)}
-            style={{ background: ACCENT, color: ACCENT_TEXT, borderRadius: 14, boxShadow: '0 0 20px rgba(34,197,94,0.3)' }}
-            className="px-5 py-1.5 font-bold text-sm cursor-pointer border-none hover:opacity-85 transition-opacity">
-            + New Event
-          </button>
-        )}
+        <div className="flex items-center gap-2">
+          <HistoryButton onClick={() => setShowHistory(true)} label="View event history" />
+          {can.editEvents && (
+            <button onClick={() => setShowAdd(true)}
+              style={{ background: ACCENT, color: ACCENT_TEXT, borderRadius: 14, boxShadow: '0 0 20px rgba(34,197,94,0.3)' }}
+              className="px-5 py-1.5 font-bold text-sm cursor-pointer border-none hover:opacity-85 transition-opacity">
+              + New Event
+            </button>
+          )}
+        </div>
       </nav>
 
       <div className="max-w-[1100px] mx-auto px-6 md:px-8 py-8">
@@ -105,6 +128,10 @@ export default function EventsManagerPage() {
 
       {showAdd   && <AddEditEventModal onClose={() => setShowAdd(false)} onCreated={ev => { setEvents(p => [...p, ev]); setShowAdd(false) }} />}
       {editingEv && <AddEditEventModal event={editingEv} onClose={() => setEditingEv(null)} onUpdated={updated => { setEvents(p => p.map(e => e.id === updated.id ? updated : e)); setEditingEv(null) }} />}
+      {showHistory && (
+        <HistoryPanel title="Event History" onClose={() => setShowHistory(false)}
+          fetcher={fetchEventInteractions} emptyMessage="No event activity yet." />
+      )}
     </div>
   )
 }

@@ -114,16 +114,18 @@ export function MobileEventSheet({ event, now, onClose, mapCacheId = 'home-map-s
             <p style={{ color: PALETTE.muted }} className="text-sm m-0 py-1 text-center">No schedule posted yet.</p>
           )}
 
-          {/* Map */}
-          <div>
-            <div style={{ color: PALETTE.muted }} className="text-[10px] font-bold uppercase tracking-widest mb-2.5">Location</div>
-            <div style={{ height: 200, borderRadius: 16, border: `1px solid ${PALETTE.border}`, overflow: 'hidden', background: PALETTE.card }}>
-              <DeferredMapEmbed cacheId={mapCacheId} src={mapEmbedSrc(event.location)} title="Event location map" className="w-full h-full" delayMs={280} />
+          {/* Map — only for upcoming events; no reason to show directions to one that's over */}
+          {upcoming && (
+            <div>
+              <div style={{ color: PALETTE.muted }} className="text-[10px] font-bold uppercase tracking-widest mb-2.5">Location</div>
+              <div style={{ height: 200, borderRadius: 16, border: `1px solid ${PALETTE.border}`, overflow: 'hidden', background: PALETTE.card }}>
+                <DeferredMapEmbed cacheId={mapCacheId} src={mapEmbedSrc(event.location)} title="Event location map" className="w-full h-full" delayMs={280} />
+              </div>
+              <div style={{ color: PALETTE.muted }} className="text-xs mt-2 flex items-center gap-1.5">
+                <span style={{ color: ACCENT }}>◎</span>{event.location}
+              </div>
             </div>
-            <div style={{ color: PALETTE.muted }} className="text-xs mt-2 flex items-center gap-1.5">
-              <span style={{ color: ACCENT }}>◎</span>{event.location}
-            </div>
-          </div>
+          )}
         </div>
 
         {/* Pinned CTA buttons — always visible */}

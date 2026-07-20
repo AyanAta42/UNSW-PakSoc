@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from 'react'
 import type { Member } from '@/members/types/Member'
 import type { Task } from '@/tasks/types/Task'
 import { assignMember } from '@/tasks/services/assignMember'
+import { logInteraction } from '@/interactions/services/logInteraction'
 
 function findDropTarget(x: number, y: number) {
   const el = document.elementFromPoint(x, y)
@@ -28,6 +29,7 @@ export function useDragAssign(
   members: Member[], tasks: Task[],
   setTasks: (fn: (prev: Task[]) => Task[]) => void,
   preAssigned: Member[], setPreAssigned: (fn: (prev: Member[]) => Member[]) => void,
+  eventId: string,
 ): DragAssignState {
   const [draggingMemberId, setDraggingMemberId] = useState<string | null>(null)
   const [overTask, setOverTask] = useState<string | null>(null)
@@ -56,9 +58,13 @@ export function useDragAssign(
     const target = findDropTarget(clientX, clientY)
     if (m && target?.type === 'task') {
       const taskId = target.id
-      if (!tasks.find(t => t.id === taskId)?.assigned.some(a => a.id === m.id)) {
+      const task = tasks.find(t => t.id === taskId)
+      if (!task?.assigned.some(a => a.id === m.id)) {
         setTasks(p => p.map(t => t.id !== taskId ? t : { ...t, assigned: [...t.assigned, m] }))
-        try { await assignMember(taskId, m.id) } catch (err) { console.error(err) }
+        try {
+          await assignMember(taskId, m.id)
+          void logInteraction('task.member_assigned', 'task', taskId, eventId, `assigned ${m.name} to "${task?.title ?? 'a task'}"`)
+        } catch (err) { console.error(err) }
       }
     } else if (m && target?.type === 'form') {
       if (!preAssigned.some(a => a.id === m.id)) setPreAssigned(p => [...p, m])
@@ -68,9 +74,13 @@ export function useDragAssign(
 
   const assignMemberToTask = async (taskId: string, memberId: string) => {
     const m = members.find(mem => mem.id === memberId)
-    if (!m || tasks.find(t => t.id === taskId)?.assigned.some(a => a.id === m.id)) return
+    const task = tasks.find(t => t.id === taskId)
+    if (!m || task?.assigned.some(a => a.id === m.id)) return
     setTasks(p => p.map(t => t.id !== taskId ? t : { ...t, assigned: [...t.assigned, m] }))
-    try { await assignMember(taskId, m.id) } catch (err) { console.error(err) }
+    try {
+      await assignMember(taskId, m.id)
+      void logInteraction('task.member_assigned', 'task', taskId, eventId, `assigned ${m.name} to "${task?.title ?? 'a task'}"`)
+    } catch (err) { console.error(err) }
   }
 
   return { draggingMemberId, overTask, overForm, setOverForm, beginMemberDrag, moveMemberDrag, endMemberDrag, assignMemberToTask }

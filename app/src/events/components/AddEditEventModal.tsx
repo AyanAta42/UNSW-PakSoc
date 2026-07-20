@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { createEvent }       from '@/events/services/createEvent'
 import { updateEvent }       from '@/events/services/updateEvent'
 import { uploadEventImage }  from '@/events/services/uploadEventImage'
+import { logInteraction }    from '@/interactions/services/logInteraction'
 import { ImageUploadZone }   from '@/events/components/ImageUploadZone'
 import { TimelineEditor }    from '@/events/components/TimelineEditor'
 import { TimeSelect12h, buildIso, parseIsoDate, parseTime12, addHours12 } from '@/events/components/TimePickerInput'
@@ -74,8 +75,15 @@ export function AddEditEventModal({ onClose, onCreated, onUpdated, event }: Prop
         buttons:  buttons.filter(b => b.label.trim()),
       }
 
-      if (isEdit && event) { await updateEvent(event.id, fields); onUpdated?.({ ...event, ...fields }) }
-      else                 { const ev = await createEvent(fields); onCreated?.(ev) }
+      if (isEdit && event) {
+        await updateEvent(event.id, fields)
+        onUpdated?.({ ...event, ...fields })
+        void logInteraction('event.updated', 'event', event.id, event.id, `updated event "${fields.name}"`)
+      } else {
+        const ev = await createEvent(fields)
+        onCreated?.(ev)
+        void logInteraction('event.created', 'event', ev.id, ev.id, `created event "${ev.name}"`)
+      }
     } catch (e) { setError(e instanceof Error ? e.message : 'Something went wrong.') }
     finally { setSaving(false); setUploading(false) }
   }

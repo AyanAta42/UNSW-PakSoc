@@ -4,6 +4,9 @@ import { getCatCfg } from '@/config/categoryConfig'
 import { AssignedChip }  from '@/tasks/components/assignment/AssignedChip'
 import { EditTaskModal } from '@/tasks/components/forms/EditTaskModal'
 import { ConfirmModal }  from '@/shared/components/ConfirmModal'
+import { HistoryIcon }   from '@/interactions/components/HistoryIcon'
+import { HistoryPanel }  from '@/interactions/components/HistoryPanel'
+import { fetchTaskInteractions } from '@/interactions/services/fetchTaskInteractions'
 
 interface Props {
   tasks:             Task[];  loading:          boolean; overTask:      string | null
@@ -20,6 +23,7 @@ export function TaskListPanel({ tasks, loading, overTask, allCategories, mobile,
   const [editingTask,   setEditingTask]   = useState<Task | null>(null)
   const [myTasksOnly,   setMyTasksOnly]   = useState(false)
   const [deletingTaskId, setDeletingTaskId] = useState<string | null>(null)
+  const [historyTask,   setHistoryTask]   = useState<Task | null>(null)
 
   const visibleTasks = myTasksOnly && currentUserAuthId
     ? tasks.filter(t => t.assigned.some(m => m.user_id === currentUserAuthId))
@@ -83,6 +87,10 @@ export function TaskListPanel({ tasks, loading, overTask, allCategories, mobile,
                       onClick={() => !mobile && onTaskClick?.(task.id)}
                       className={`motion-card relative bg-[#0B0E0C] rounded-xl p-4 transition-all select-none ${hasSelected && !mobile ? 'cursor-pointer hover:border-[#22C55E]' : ''} ${isOver ? 'border-2 border-dashed border-[#22C55E]' : 'border border-[#1D231F]'}`}>
                       <div className="absolute top-3 right-3 flex items-center gap-1">
+                        <button onClick={e => { e.stopPropagation(); setHistoryTask(task) }} aria-label="View task history" title="View task history"
+                          className="text-[#94A3B8] hover:text-[#4ADE80] bg-transparent border-none cursor-pointer leading-none transition-colors px-1.5 py-1 flex items-center">
+                          <HistoryIcon size={13} />
+                        </button>
                         <button onClick={e => { e.stopPropagation(); setEditingTask(task) }} className="text-[#94A3B8] hover:text-[#F8FAFC] bg-transparent border-none cursor-pointer text-[11px] font-semibold leading-none transition-colors px-1.5 py-1">Edit</button>
                         <button onClick={e => { e.stopPropagation(); setDeletingTaskId(task.id) }} className="text-[#64748B] hover:text-red-400 bg-transparent border-none cursor-pointer text-base leading-none transition-colors p-1">×</button>
                       </div>
@@ -126,6 +134,10 @@ export function TaskListPanel({ tasks, loading, overTask, allCategories, mobile,
           danger
           onConfirm={() => { onRemoveTask(deletingTaskId); setDeletingTaskId(null) }}
           onCancel={() => setDeletingTaskId(null)} />
+      )}
+      {historyTask && (
+        <HistoryPanel title={`History — ${historyTask.title}`} onClose={() => setHistoryTask(null)}
+          fetcher={() => fetchTaskInteractions(historyTask.id)} emptyMessage="No activity on this task yet." />
       )}
     </main>
   )
