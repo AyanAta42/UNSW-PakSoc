@@ -6,6 +6,23 @@ import { UserDropdown }   from './UserDropdown'
 import { ACCENT, ACCENT_TEXT, GLASS_CHIP, GLASS_NAV, PALETTE } from '@/config/theme'
 import { toast } from '@/shared/toast/toast'
 
+const CalendarIcon = () => (
+  <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+    strokeWidth="2.1" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" className="shrink-0">
+    <rect x="3" y="4.5" width="18" height="17" rx="2.5" />
+    <path d="M16 2.5v4M8 2.5v4M3 9.5h18" />
+  </svg>
+)
+
+const UsersIcon = () => (
+  <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+    strokeWidth="2.1" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" className="shrink-0">
+    <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+    <circle cx="9" cy="7" r="4" />
+    <path d="M22 21v-2a4 4 0 0 0-3-3.87M17 3.13a4 4 0 0 1 0 7.75" />
+  </svg>
+)
+
 interface Props {
   user?:         User | null
   avatarUrl?:    string
@@ -39,19 +56,23 @@ export function Navbar({ user, avatarUrl, avatarBroken, initial, onAvatarError, 
           </div>
         </div>
 
-        <div className="flex items-center gap-2 shrink-0 ml-auto">
+        <div className="flex items-center gap-1.5 sm:gap-2 shrink-0 ml-auto">
           {can.viewEvents && (
             <button onClick={() => navigate('/events')} data-cta
-              style={{ background: ACCENT, color: ACCENT_TEXT, borderRadius: PALETTE.radiusBtn, boxShadow: '0 0 20px rgba(34,197,94,0.25)' }}
-              className="motion-primary px-4 py-1.5 font-bold text-xs border-none cursor-pointer hover:opacity-85 transition-opacity whitespace-nowrap">
-              Manage Events
+              aria-label="Manage Events" title="Manage Events"
+              style={{ background: ACCENT, color: ACCENT_TEXT, boxShadow: '0 0 20px rgba(34,197,94,0.25)' }}
+              className="motion-primary flex items-center justify-center gap-1.5 shrink-0 border-none cursor-pointer hover:opacity-85 transition-opacity font-bold text-xs whitespace-nowrap w-9 h-9 rounded-full md:w-auto md:h-auto md:px-4 md:py-1.5 md:rounded-[14px]">
+              <CalendarIcon />
+              <span className="hidden md:inline">Manage Events</span>
             </button>
           )}
           {can.manageRoles && (
             <button onClick={() => navigate('/roles')}
-              style={{ ...GLASS_CHIP, color: PALETTE.secondary, borderRadius: PALETTE.radiusBtn }}
-              className="px-4 py-1.5 font-bold text-xs cursor-pointer hover:bg-white/[0.08] transition-colors whitespace-nowrap hidden sm:block">
-              Manage Roles
+              aria-label="Manage Roles" title="Manage Roles"
+              style={{ ...GLASS_CHIP, color: PALETTE.secondary }}
+              className="flex items-center justify-center gap-1.5 shrink-0 cursor-pointer hover:bg-white/[0.08] transition-colors font-bold text-xs whitespace-nowrap w-9 h-9 rounded-full md:w-auto md:h-auto md:px-4 md:py-1.5 md:rounded-[14px]">
+              <UsersIcon />
+              <span className="hidden md:inline">Manage Roles</span>
             </button>
           )}
 

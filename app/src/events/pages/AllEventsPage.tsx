@@ -23,7 +23,7 @@ function EventSection({ title, color, events, onSelect }: {
         <span className="text-xs font-bold px-2.5 py-0.5 rounded-full"
           style={{ background: `${color}22`, color }}>{events.length}</span>
       </div>
-      <div className="grid grid-cols-[repeat(auto-fill,minmax(260px,1fr))] gap-4">
+      <div className="grid grid-cols-[repeat(auto-fill,minmax(min(260px,100%),1fr))] gap-4">
         {events.map(ev => <AllEventsCard key={ev.id} event={ev} onClick={() => onSelect(ev)} />)}
       </div>
     </section>
@@ -64,7 +64,7 @@ export default function AllEventsPage() {
   return (
     <div style={{ minHeight: '100vh', background: PALETTE.page, fontFamily: 'system-ui, sans-serif' }}>
       <nav style={{ background: PALETTE.navbarGlass, backdropFilter: 'blur(16px)', borderBottom: `1px solid ${PALETTE.border}` }}
-        className="sticky top-0 z-50 min-h-[3.5rem] pt-[env(safe-area-inset-top)] flex items-center px-6 gap-3">
+        className="sticky top-0 z-50 min-h-[3.5rem] pt-[env(safe-area-inset-top)] flex items-center px-4 md:px-6 gap-2.5">
         <button onClick={() => navigate('/')}
           style={{ color: PALETTE.muted, background: 'transparent' }}
           className="text-sm font-semibold border-none cursor-pointer hover:text-green-400 transition-colors">← Home</button>
@@ -72,10 +72,10 @@ export default function AllEventsPage() {
         <span style={{ color: PALETTE.dark }} className="font-extrabold text-[15px]">All Events</span>
       </nav>
 
-      <div className="max-w-[1400px] mx-auto px-6 md:px-8 py-8 flex gap-6 items-start">
+      <div className="max-w-[1400px] mx-auto px-4 sm:px-6 md:px-8 py-8 flex gap-6 items-start">
         <div className="flex-1 min-w-0">
           {loading && events.length === 0 && (
-            <div className="grid grid-cols-[repeat(auto-fill,minmax(260px,1fr))] gap-4">
+            <div className="grid grid-cols-[repeat(auto-fill,minmax(min(260px,100%),1fr))] gap-4">
               {[1, 2, 3, 4].map(i => (
                 <div key={i} className="motion-skeleton h-44" style={{ borderRadius: 18, border: `1px solid ${PALETTE.border}` }} />
               ))}

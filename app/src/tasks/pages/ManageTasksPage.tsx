@@ -68,7 +68,7 @@ export default function ManageTasksPage() {
 
       {/* Mobile */}
       <div className="flex lg:hidden flex-col h-[100dvh] overflow-hidden font-sans bg-[#030408]">
-        <header className="shrink-0 px-4 py-3 bg-[#0B0E0C] border-b border-[#1D231F] flex items-center gap-2.5">
+        <header className="shrink-0 px-4 pb-3 pt-[calc(env(safe-area-inset-top)+0.75rem)] bg-[#0B0E0C] border-b border-[#1D231F] flex items-center gap-2.5">
           <button onClick={() => window.location.href = '/'} aria-label="Go to home"
             className="w-9 h-9 rounded-full overflow-hidden border-2 border-[#1D231F] cursor-pointer shrink-0 p-0 bg-transparent active:scale-95 transition-all">
             <img src="/logo.webp" alt="PakSoc" className="w-full h-full object-cover" />

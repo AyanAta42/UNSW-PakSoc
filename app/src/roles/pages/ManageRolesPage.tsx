@@ -55,7 +55,7 @@ export default function ManageRolesPage() {
   return (
     <div style={{ background: PALETTE.page, minHeight: '100vh', fontFamily: 'system-ui, sans-serif' }}>
       <nav style={{ background: PALETTE.navbarGlass, backdropFilter: 'blur(16px)', borderBottom: `1px solid ${PALETTE.border}` }}
-        className="sticky top-0 z-50 min-h-[3.5rem] pt-[env(safe-area-inset-top)] px-6 flex items-center gap-3">
+        className="sticky top-0 z-50 min-h-[3.5rem] pt-[env(safe-area-inset-top)] px-4 md:px-6 flex items-center gap-2.5">
         <button onClick={() => navigate('/')} style={{ color: PALETTE.muted, background: 'transparent' }}
           className="text-sm font-semibold border-none cursor-pointer hover:text-green-400 transition-colors p-0">← Home</button>
         <div className="w-px h-4" style={{ background: PALETTE.border }} />

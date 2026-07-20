@@ -2,9 +2,9 @@ import { LegalPageLayout, LegalSection, LegalList, LegalParagraph } from './Lega
 
 export default function TermsOfServicePage() {
   return (
-    <LegalPageLayout title="Terms of Service — PakSoc UNSW Web App">
+    <LegalPageLayout title="Terms of Service — UNSW PakSoc">
       <LegalSection title="1. Acceptance of Terms">
-        <LegalParagraph>By logging into the PakSoc UNSW Web App, you agree to comply with these terms.</LegalParagraph>
+        <LegalParagraph>By logging into UNSW PakSoc, you agree to comply with these terms.</LegalParagraph>
       </LegalSection>
       <LegalSection title="2. Description of Service">
         <LegalParagraph>This portal provides event management, an Instagram social feed, location mapping for venues, and internal communication tools for UNSW PakSoc.</LegalParagraph>

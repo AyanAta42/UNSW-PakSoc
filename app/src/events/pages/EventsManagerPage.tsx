@@ -29,7 +29,7 @@ function EventSection({ title, color, events, canEdit, onAnnounce, onUnpublish, 
         <span className="text-xs font-bold px-2.5 py-0.5 rounded-full"
           style={{ background: `${color}22`, color }}>{events.length}</span>
       </div>
-      <div className="grid grid-cols-[repeat(auto-fill,minmax(260px,1fr))] gap-4">
+      <div className="grid grid-cols-[repeat(auto-fill,minmax(min(260px,100%),1fr))] gap-4">
         {events.map(ev => <AdminEventCard key={ev.id} event={ev} canEdit={canEdit}
           onAnnounce={onAnnounce} onUnpublish={onUnpublish} onEdit={onEdit} onDelete={onDelete} />)}
       </div>
@@ -95,29 +95,31 @@ export default function EventsManagerPage() {
   return (
     <div style={{ minHeight: '100vh', background: PALETTE.page, fontFamily: 'system-ui, sans-serif' }}>
       <nav style={{ background: PALETTE.navbarGlass, backdropFilter: 'blur(16px)', borderBottom: `1px solid ${PALETTE.border}` }}
-        className="sticky top-0 z-50 min-h-[3.5rem] pt-[env(safe-area-inset-top)] flex items-center justify-between px-6">
-        <div className="flex items-center gap-3">
+        className="sticky top-0 z-50 min-h-[3.5rem] pt-[env(safe-area-inset-top)] flex items-center justify-between gap-2 px-4 md:px-6">
+        <div className="flex items-center gap-2.5 min-w-0">
           <button onClick={() => navigate('/')}
             style={{ color: PALETTE.muted, background: 'transparent' }}
-            className="text-sm font-semibold border-none cursor-pointer hover:text-green-400 transition-colors">← Home</button>
-          <div className="w-px h-4" style={{ background: PALETTE.border }} />
-          <span style={{ color: PALETTE.dark }} className="font-extrabold text-[15px]">Events Manager</span>
+            className="text-sm font-semibold border-none cursor-pointer hover:text-green-400 transition-colors shrink-0">← Home</button>
+          <div className="w-px h-4 shrink-0" style={{ background: PALETTE.border }} />
+          <span style={{ color: PALETTE.dark }} className="font-extrabold text-[15px] truncate">Events Manager</span>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 shrink-0">
           <HistoryButton onClick={() => setShowHistory(true)} label="View event history" />
           {can.editEvents && (
             <button onClick={() => setShowAdd(true)}
-              style={{ background: ACCENT, color: ACCENT_TEXT, borderRadius: 14, boxShadow: '0 0 20px rgba(34,197,94,0.3)' }}
-              className="px-5 py-1.5 font-bold text-sm cursor-pointer border-none hover:opacity-85 transition-opacity">
-              + New Event
+              aria-label="New Event" title="New Event"
+              style={{ background: ACCENT, color: ACCENT_TEXT, boxShadow: '0 0 20px rgba(34,197,94,0.3)' }}
+              className="font-bold cursor-pointer border-none hover:opacity-85 transition-opacity flex items-center justify-center shrink-0 w-9 h-9 rounded-full text-xl leading-none sm:w-auto sm:h-auto sm:px-5 sm:py-1.5 sm:rounded-[14px] sm:text-sm">
+              <span className="sm:hidden">+</span>
+              <span className="hidden sm:inline">+ New Event</span>
             </button>
           )}
         </div>
       </nav>
 
-      <div className="max-w-[1100px] mx-auto px-6 md:px-8 py-8">
+      <div className="max-w-[1100px] mx-auto px-4 sm:px-6 md:px-8 py-8">
         {loading && (
-          <div className="grid grid-cols-[repeat(auto-fill,minmax(260px,1fr))] gap-4">
+          <div className="grid grid-cols-[repeat(auto-fill,minmax(min(260px,100%),1fr))] gap-4">
             {[1,2,3,4].map(i => (
               <div key={i} className="motion-skeleton h-44" style={{ borderRadius: 18, border: `1px solid ${PALETTE.border}` }} />
             ))}
