@@ -1,5 +1,6 @@
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import type { Task } from '@/tasks/types/Task'
+import type { KeyboardEvent } from 'react'
 import { getCatCfg, inputCls, labelCls } from '@/config/categoryConfig'
 
 interface Props {
@@ -14,6 +15,16 @@ export function EditTaskModal({ task, allCategories, onClose, onSave }: Props) {
   const [cat,   setCat]   = useState(task.category)
   const [notes, setNotes] = useState(task.notes)
   const [subs,  setSubs]  = useState<string[]>(task.subtasks.map(s => s.title).concat(['']))
+  const subInputs = useRef<(HTMLInputElement | null)[]>([])
+
+  /** Enter adds a new subtask below the current one and focuses it. */
+  function subKeyDown(e: KeyboardEvent<HTMLInputElement>, i: number) {
+    if (e.key !== 'Enter') return
+    e.preventDefault()
+    if (!e.currentTarget.value.trim()) return
+    setSubs(p => { const a = [...p]; a.splice(i + 1, 0, ''); return a })
+    requestAnimationFrame(() => subInputs.current[i + 1]?.focus())
+  }
 
   function save() {
     if (!title.trim()) return
@@ -23,12 +34,12 @@ export function EditTaskModal({ task, allCategories, onClose, onSave }: Props) {
 
   return (
     <div className="motion-backdrop fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm px-4" onClick={onClose}>
-      <div className="motion-modal bg-[#0D110E] rounded-3xl w-full max-w-lg overflow-hidden border border-[#1D231F]"
+      <div className="motion-modal bg-[#0D1119] rounded-3xl w-full max-w-lg overflow-hidden border border-[#1D2129]"
         style={{ boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.05), 0 44px 95px -26px rgba(0,0,0,0.75), 0 14px 42px rgba(0,0,0,0.48)' }}
         onClick={e => e.stopPropagation()}>
-        <div className="px-6 py-4 flex items-center justify-between border-b border-[#1D231F]">
+        <div className="px-6 py-4 flex items-center justify-between border-b border-[#1D2129]">
           <h2 className="text-[#F8FAFC] font-extrabold text-base m-0">Edit Task</h2>
-          <button onClick={onClose} className="text-[#94A3B8] hover:text-[#F8FAFC] text-xl bg-transparent border-none cursor-pointer transition-colors">×</button>
+          <button onClick={onClose} className="text-[#94A3B8] hover:text-[#F8FAFC] text-xl bg-transparent border-none cursor-pointer transition-colors">{'×'}</button>
         </div>
         <div className="p-6 flex flex-col gap-4 max-h-[68vh] overflow-y-auto">
           <div><label className={labelCls}>Task Title</label>
@@ -40,7 +51,7 @@ export function EditTaskModal({ task, allCategories, onClose, onSave }: Props) {
                 const cfg = getCatCfg(c)
                 return (
                   <button key={c} onClick={() => setCat(c)}
-                    className={`px-3 py-2 rounded-lg text-xs font-bold border-[1.5px] cursor-pointer transition-all ${cat === c ? cfg.activeCls : 'border-[#1D231F] text-[#64748B] bg-transparent hover:border-[#2E3630]'}`}>{c}</button>
+                    className={`px-3 py-2 rounded-lg text-xs font-bold border-[1.5px] cursor-pointer transition-all ${cat === c ? cfg.activeCls : 'border-[#1D2129] text-[#64748B] bg-transparent hover:border-[#2E333D]'}`}>{c}</button>
                 )
               })}
             </div>
@@ -53,17 +64,17 @@ export function EditTaskModal({ task, allCategories, onClose, onSave }: Props) {
             <div className="flex flex-col gap-2">
               {subs.map((s, i) => (
                 <div key={i} className="flex gap-2 items-center">
-                  <input value={s} onChange={e => setSubs(p => { const a = [...p]; a[i] = e.target.value; return a })} placeholder={`Subtask ${i + 1}`} className={inputCls + ' flex-1'} />
-                  {subs.length > 1 && <button onClick={() => setSubs(p => p.filter((_, j) => j !== i))} className="text-[#64748B] hover:text-red-400 bg-transparent border-none cursor-pointer text-base leading-none transition-colors">×</button>}
+                  <input ref={el => { subInputs.current[i] = el }} value={s} onChange={e => setSubs(p => { const a = [...p]; a[i] = e.target.value; return a })} onKeyDown={e => subKeyDown(e, i)} placeholder={`Subtask ${i + 1}`} className={inputCls + ' flex-1'} />
+                  {subs.length > 1 && <button onClick={() => setSubs(p => p.filter((_, j) => j !== i))} className="text-[#64748B] hover:text-red-400 bg-transparent border-none cursor-pointer text-base leading-none transition-colors">{'×'}</button>}
                 </div>
               ))}
             </div>
           </div>
           <div><label className={labelCls}>Notes</label>
-            <textarea value={notes} onChange={e => setNotes(e.target.value)} rows={3} className={inputCls + ' resize-none'} placeholder="Additional notes…" /></div>
+            <textarea value={notes} onChange={e => setNotes(e.target.value)} rows={3} className={inputCls + ' resize-none'} placeholder="Additional notesâ€¦" /></div>
         </div>
-        <div className="px-6 pb-5 flex gap-3 border-t border-[#1D231F] pt-4">
-          <button onClick={onClose} className="flex-1 py-2.5 rounded-xl border border-[#1D231F] text-[#CBD5E1] text-sm font-semibold cursor-pointer bg-transparent hover:bg-white/5 transition-colors">Cancel</button>
+        <div className="px-6 pb-5 flex gap-3 border-t border-[#1D2129] pt-4">
+          <button onClick={onClose} className="flex-1 py-2.5 rounded-xl border border-[#1D2129] text-[#CBD5E1] text-sm font-semibold cursor-pointer bg-transparent hover:bg-white/5 transition-colors">Cancel</button>
           <button onClick={save} disabled={!title.trim()}
             style={title.trim() ? { boxShadow: '0 0 20px rgba(34,197,94,0.25)' } : undefined}
             className={`flex-1 py-2.5 rounded-xl text-sm font-bold border-none transition-all ${title.trim() ? 'bg-[#22C55E] text-white hover:bg-[#16A34A] cursor-pointer' : 'bg-white/5 text-[#475569] cursor-not-allowed'}`}>Save Changes</button>

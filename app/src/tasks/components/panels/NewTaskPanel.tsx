@@ -17,8 +17,8 @@ interface Props {
 
 export function NewTaskPanel({ title, setTitle, cat, setCat, allCategories, onAddCategory, onRemoveCategory, subtasks, setSubtasks, preAssigned, setPreAssigned, notes, setNotes, overForm, onAddTask }: Props) {
   return (
-    <aside className="hidden lg:flex w-[300px] shrink-0 flex-col overflow-hidden bg-[#0B0E0C] border-l border-[#1D231F]">
-      <div className="p-5 border-b border-[#1D231F] shrink-0">
+    <aside className="hidden lg:flex w-[300px] shrink-0 flex-col overflow-hidden bg-[#0B0E15] border-l border-[#1D2129]">
+      <div className="p-5 border-b border-[#1D2129] shrink-0">
         <div className="text-[15px] font-extrabold text-[#F8FAFC]">+ New Task</div>
         <div className="text-xs text-[#64748B] mt-1">Fill in details and hit Create</div>
       </div>

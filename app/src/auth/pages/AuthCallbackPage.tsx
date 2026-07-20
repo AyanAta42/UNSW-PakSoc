@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '@/core/supabase/client'
+import { AuroraPage } from '@/shared/components/AuroraPage'
 import { toast } from '@/shared/toast/toast'
 
 /** Handles the OAuth return from Google and completes the Supabase session exchange. */
@@ -39,8 +40,8 @@ export default function AuthCallbackPage() {
   }, [navigate])
 
   return (
-    <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'system-ui, sans-serif', color: '#94A3B8' }}>
+    <AuroraPage contentClassName="min-h-[100dvh] flex items-center justify-center px-6 text-center text-[#94A3B8]">
       {message}
-    </div>
+    </AuroraPage>
   )
 }

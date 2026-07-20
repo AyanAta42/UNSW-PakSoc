@@ -5,7 +5,7 @@ export const DEFAULT_CAT_CFG: Record<string, { color: string; activeCls: string;
   Game:  { color: '#F87171', activeCls: 'bg-red-500/10    border-red-400/70    text-red-300',    headerCls: 'bg-red-500/10    text-red-300'    },
   Stall: { color: '#FB923C', activeCls: 'bg-orange-500/10 border-orange-400/70 text-orange-300', headerCls: 'bg-orange-500/10 text-orange-300' },
 }
-/** Returns config for any category — custom ones get a generic teal style. */
+/** Returns config for any category â€” custom ones get a generic teal style. */
 export function getCatCfg(cat: string) {
   return DEFAULT_CAT_CFG[cat] ?? { color: '#2DD4BF', activeCls: 'bg-teal-500/10 border-teal-400/70 text-teal-300', headerCls: 'bg-teal-500/10 text-teal-300' }
 }
@@ -34,5 +34,5 @@ export const ROLE_SECTION_CFG = {
 } as const
 
 /** Shared Tailwind input classes for the dark task forms. */
-export const inputCls = 'w-full px-3 py-2.5 border border-[#1D231F] rounded-lg bg-[#090C0A] text-[#F8FAFC] text-sm outline-none focus:border-[#22C55E] transition-colors placeholder:text-[#475569]'
+export const inputCls = 'w-full px-3 py-2.5 border border-[#1D2129] rounded-lg bg-[#090C13] text-[#F8FAFC] text-sm outline-none focus:border-[#22C55E] transition-colors placeholder:text-[#475569]'
 export const labelCls = 'block text-[11px] font-bold text-[#94A3B8] uppercase tracking-wider mb-1.5'

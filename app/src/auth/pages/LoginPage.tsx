@@ -5,6 +5,7 @@ import { signUpWithEmail }  from '@/auth/services/signUpWithEmail'
 import { GoogleIdentityButton } from '@/auth/components/GoogleIdentityButton'
 import { EmailAuthForm }      from '@/auth/components/EmailAuthForm'
 import { PALETTE, ACCENT }   from '@/config/theme'
+import { AuroraPage }        from '@/shared/components/AuroraPage'
 import { toast }             from '@/shared/toast/toast'
 
 export default function LoginPage() {
@@ -28,7 +29,7 @@ export default function LoginPage() {
   }
 
   return (
-    <div style={{ background: PALETTE.page, minHeight: '100vh', fontFamily: 'system-ui,sans-serif' }} className="flex flex-col items-center justify-center px-4">
+    <AuroraPage contentClassName="min-h-[100dvh] flex flex-col items-center justify-center px-4">
       <div className="flex items-center gap-3 mb-8">
         <img src="/logo.webp" alt="PakSoc" className="w-11 h-11 rounded-full object-cover" />
         <div>
@@ -54,6 +55,6 @@ export default function LoginPage() {
         </p>
       </div>
       <p style={{ color: PALETTE.disabled }} className="text-xs mt-6">&copy; {new Date().getFullYear()} PakSoc UNSW</p>
-    </div>
+    </AuroraPage>
   )
 }

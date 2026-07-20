@@ -9,6 +9,7 @@ import { NewTaskModal }      from '@/tasks/components/forms/NewTaskModal'
 import { MemberPickerSheet } from '@/tasks/components/assignment/MemberPickerSheet'
 import { HistoryButton }     from '@/interactions/components/HistoryButton'
 import { HistoryPanel }      from '@/interactions/components/HistoryPanel'
+import { AmbientBackground } from '@/shared/components/AmbientBackground'
 import { fetchEventTaskInteractions } from '@/interactions/services/fetchEventTaskInteractions'
 import type { Member }       from '@/members/types/Member'
 
@@ -47,8 +48,9 @@ export default function ManageTasksPage() {
 
   return (
     <>
+      <AmbientBackground />
       {/* Desktop */}
-      <div className="hidden lg:flex h-screen overflow-hidden font-sans bg-[#030408]">
+      <div className="relative z-10 hidden lg:flex h-screen overflow-hidden font-sans">
         <RosterPanel
           members={board.members} loading={board.loading}
           draggingMemberId={board.draggingMemberId} selectedMemberId={board.selectedMemberId}
@@ -67,16 +69,14 @@ export default function ManageTasksPage() {
       </div>
 
       {/* Mobile */}
-      <div className="flex lg:hidden flex-col h-[100dvh] overflow-hidden font-sans bg-[#030408]">
-        <header className="shrink-0 px-4 pb-3 pt-[calc(env(safe-area-inset-top)+0.75rem)] bg-[#0B0E0C] border-b border-[#1D231F] flex items-center gap-2.5">
+      <div className="relative z-10 flex lg:hidden flex-col h-[100dvh] overflow-hidden font-sans">
+        <header className="shrink-0 px-4 pb-3 pt-[calc(env(safe-area-inset-top)+0.75rem)] bg-[#0B0E15] border-b border-[#1D2129] flex items-center gap-2.5">
           <button onClick={() => window.location.href = '/'} aria-label="Go to home"
-            className="w-9 h-9 rounded-full overflow-hidden border-2 border-[#1D231F] cursor-pointer shrink-0 p-0 bg-transparent active:scale-95 transition-all">
-            <img src="/logo.webp" alt="PakSoc" className="w-full h-full object-cover" />
+            className="w-9 h-9 rounded-full border-2 border-[#1D2129] flex items-center justify-center text-[#94A3B8] cursor-pointer shrink-0 p-0 bg-transparent active:scale-95 transition-all">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-[18px] h-[18px]"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V20a1 1 0 0 0 1 1h4v-6h4v6h4a1 1 0 0 0 1-1V9.5"/></svg>
           </button>
           <button onClick={() => navigate('/events')} aria-label="Back to events"
-            className="w-8 h-8 rounded-full bg-white/[0.06] border border-[#1D231F] flex items-center justify-center text-[#94A3B8] cursor-pointer active:bg-white/10 transition-colors shrink-0 text-sm font-bold">
-            ←
-          </button>
+            className="w-8 h-8 rounded-full bg-white/[0.06] border border-[#1D2129] flex items-center justify-center text-[#94A3B8] cursor-pointer active:bg-white/10 transition-colors shrink-0 text-sm font-bold"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4"><path d="M15 18l-6-6 6-6"/></svg></button>
           <div className="flex-1 min-w-0">
             <h1 className="m-0 text-base font-extrabold text-[#F8FAFC] truncate">Manage Tasks</h1>
             <p className="m-0 text-[10px] text-[#64748B]">{board.tasks.length} tasks</p>

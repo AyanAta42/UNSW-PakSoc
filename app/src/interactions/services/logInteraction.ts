@@ -20,7 +20,7 @@ export async function logInteraction(
     let actorId: string | null = null
     let actorName = 'Unknown'
     if (authUser) {
-      const { data: member } = await supabase.from('members').select('id, name').eq('user_id', authUser.id).single()
+      const { data: member } = await supabase.from('members').select('id, name').eq('user_id', authUser.id).maybeSingle()
       if (member) { actorId = member.id; actorName = member.name }
       else if (authUser.email) actorName = authUser.email
     }

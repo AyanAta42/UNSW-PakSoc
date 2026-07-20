@@ -1,3 +1,5 @@
+import { AuroraPage } from '@/shared/components/AuroraPage'
+
 interface Props {
   title:          string
   effectiveDate?: string
@@ -6,7 +8,7 @@ interface Props {
 
 export function LegalPageLayout({ title, effectiveDate, children }: Props) {
   return (
-    <div className="min-h-screen bg-[#030408] font-sans text-[#CBD5E1]">
+    <AuroraPage className="font-sans" contentClassName="text-[#CBD5E1]">
       <article className="max-w-[800px] mx-auto px-6 py-12 md:py-16">
         <div className="flex items-center gap-3 mb-8">
           <img src="/logo.webp" alt="UNSW PakSoc" className="w-10 h-10 rounded-full object-cover shrink-0" />
@@ -15,16 +17,16 @@ export function LegalPageLayout({ title, effectiveDate, children }: Props) {
             <div className="text-[10px] tracking-widest uppercase font-bold text-[#4ADE80]">Pakistani Society</div>
           </div>
         </div>
-        <header className="mb-10 pb-6 border-b border-[#1D231F]">
+        <header className="mb-10 pb-6 border-b border-[#1D2129]">
           <h1 className="text-2xl md:text-3xl font-bold text-[#F8FAFC] tracking-tight">{title}</h1>
           {effectiveDate && <p className="mt-2 text-sm text-[#94A3B8]">Effective Date: {effectiveDate}</p>}
         </header>
         <div className="space-y-8 text-[15px] leading-[1.75]">{children}</div>
-        <footer className="mt-14 pt-8 border-t border-[#1D231F]">
-          <a href="/" className="inline-flex items-center gap-1.5 text-sm font-semibold text-[#F8FAFC] hover:text-[#4ADE80] transition-colors no-underline">← Back to Home</a>
+        <footer className="mt-14 pt-8 border-t border-[#1D2129]">
+          <a href="/" className="inline-flex items-center gap-1.5 text-sm font-semibold text-[#F8FAFC] hover:text-[#4ADE80] transition-colors no-underline">â† Back to Home</a>
         </footer>
       </article>
-    </div>
+    </AuroraPage>
   )
 }
 

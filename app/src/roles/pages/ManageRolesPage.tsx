@@ -8,6 +8,7 @@ import { useRealtimeTable }       from '@/core/supabase/useRealtimeTable'
 import { ROLE_LABEL, ROLE_COLOR, ALL_ROLES } from '@/roles/config/roleLabels'
 import type { Member, MemberRole, Committee } from '@/members/types/Member'
 import { PALETTE } from '@/config/theme'
+import { AuroraPage } from '@/shared/components/AuroraPage'
 import { toast, errorMessage } from '@/shared/toast/toast'
 
 const NEEDS_COMMITTEE: MemberRole[] = ['subcom', 'executive']
@@ -53,18 +54,26 @@ export default function ManageRolesPage() {
   }, {})
 
   return (
-    <div style={{ background: PALETTE.page, minHeight: '100vh', fontFamily: 'system-ui, sans-serif' }}>
-      <nav style={{ background: PALETTE.navbarGlass, backdropFilter: 'blur(16px)', borderBottom: `1px solid ${PALETTE.border}` }}
-        className="sticky top-0 z-50 min-h-[3.5rem] pt-[env(safe-area-inset-top)] px-4 md:px-6 flex items-center gap-2.5">
-        <button onClick={() => navigate('/')} style={{ color: PALETTE.muted, background: 'transparent' }}
-          className="text-sm font-semibold border-none cursor-pointer hover:text-green-400 transition-colors p-0">← Home</button>
-        <div className="w-px h-4" style={{ background: PALETTE.border }} />
-        <span style={{ color: PALETTE.dark }} className="font-extrabold text-[15px]">Manage Roles</span>
-      </nav>
-      <div className="max-w-2xl mx-auto px-4 py-8">
-        <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search by name…"
-          style={{ border: `1px solid ${PALETTE.border}`, color: PALETTE.dark, background: PALETTE.input, borderRadius: PALETTE.radiusInput }}
-          className="w-full px-4 py-2.5 text-sm mb-6 outline-none focus:ring-2 focus:ring-green-500/30" />
+    <AuroraPage contentClassName="flex h-[100dvh] flex-col overflow-hidden">
+      {/* Fixed header — navbar + search stay pinned while the list scrolls */}
+      <div className="shrink-0" style={{ background: PALETTE.navbarGlass, backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)', borderBottom: `1px solid ${PALETTE.border}` }}>
+        <nav className="min-h-[3.5rem] pt-[env(safe-area-inset-top)] px-4 md:px-6 flex items-center gap-2.5">
+          <button onClick={() => navigate('/')} style={{ color: PALETTE.muted, background: 'transparent' }}
+            className="text-sm font-semibold border-none cursor-pointer hover:text-green-400 transition-colors p-0">← Home</button>
+          <div className="w-px h-4" style={{ background: PALETTE.border }} />
+          <span style={{ color: PALETTE.dark }} className="font-extrabold text-[15px]">Manage Roles</span>
+        </nav>
+        <div className="px-4 pb-3">
+          <div className="max-w-2xl mx-auto">
+            <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search by name…"
+              style={{ border: `1px solid ${PALETTE.border}`, color: PALETTE.dark, background: PALETTE.input, borderRadius: PALETTE.radiusInput }}
+              className="w-full px-4 py-2.5 text-sm outline-none focus:ring-2 focus:ring-green-500/30" />
+          </div>
+        </div>
+      </div>
+      {/* Scrollable member list */}
+      <div className="flex-1 min-h-0 overflow-y-auto">
+        <div className="max-w-2xl mx-auto px-4 py-6">
         {loading && [1,2,3,4].map(i => <div key={i} className="motion-skeleton h-14 mb-3" style={{ borderRadius: PALETTE.radiusInput, border: `1px solid ${PALETTE.border}` }} />)}
         {!loading && members.length === 0 && <div style={{ color: PALETTE.muted }} className="text-sm text-center py-16">No members yet. Users appear here after they log in.</div>}
         {!loading && Object.entries(grouped).map(([role, ms]) => (
@@ -85,7 +94,8 @@ export default function ManageRolesPage() {
             </div>
           </div>
         ))}
+        </div>
       </div>
-    </div>
+    </AuroraPage>
   )
 }

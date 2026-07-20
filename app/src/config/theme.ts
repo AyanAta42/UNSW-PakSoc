@@ -8,17 +8,17 @@ export const ACCENT_TEXT  = '#FFFFFF'
 
 // ─── Backgrounds ─────────────────────────────────────────────────────────────
 export const PALETTE = {
-  page:    '#030408',
-  navbar:  '#030408',
+  page:    '#03040A',
+  navbar:  '#03040A',
   navbarGlass: 'rgba(8, 8, 8, 0.42)',
-  card:    '#0B0E0C',
-  cardAlt: '#080B09',
-  modal:   '#0D110E',
-  input:   '#090C0A',
+  card:    '#0B0E15',
+  cardAlt: '#080B12',
+  modal:   '#0D1119',
+  input:   '#090C13',
 
   // Borders
-  border:       '#1D231F',
-  borderHover:  '#2E3630',
+  border:       '#1D2129',
+  borderHover:  '#2E333D',
   borderActive: '#22C55E',
 
   // Text
@@ -41,6 +41,13 @@ export const PALETTE = {
   radiusInput: '12px',
   radiusModal: '24px',
 } as const
+
+/**
+ * Shared page background — near-black page colour with a soft top-right emerald
+ * glow. Used by every route (via `AuroraPage`) so the animated ambient aurora
+ * sits over an identical base tint everywhere.
+ */
+export const PAGE_BG = `radial-gradient(58vw 55vh at 88% -8%, rgba(34,197,94,0.13), transparent 68%) no-repeat ${PALETTE.page}`
 
 /** PWA status bar / browser chrome — must match the glass navbar. */
 export const PWA_THEME_COLOR = PALETTE.navbar

@@ -14,6 +14,7 @@ import { HistoryPanel }      from '@/interactions/components/HistoryPanel'
 import { applyEventChange }  from '@/events/utils/applyEventChange'
 import type { DbEvent }      from '@/events/types/Event'
 import { ACCENT, ACCENT_TEXT, PALETTE } from '@/config/theme'
+import { AuroraPage } from '@/shared/components/AuroraPage'
 import { toast, errorMessage } from '@/shared/toast/toast'
 
 function EventSection({ title, color, events, canEdit, onAnnounce, onUnpublish, onEdit, onDelete }: {
@@ -93,7 +94,7 @@ export default function EventsManagerPage() {
   const sectionProps = { canEdit: can.editEvents, onAnnounce: announce, onUnpublish: unpublish, onEdit: setEditingEv, onDelete: handleDelete }
 
   return (
-    <div style={{ minHeight: '100vh', background: PALETTE.page, fontFamily: 'system-ui, sans-serif' }}>
+    <AuroraPage>
       <nav style={{ background: PALETTE.navbarGlass, backdropFilter: 'blur(16px)', borderBottom: `1px solid ${PALETTE.border}` }}
         className="sticky top-0 z-50 min-h-[3.5rem] pt-[env(safe-area-inset-top)] flex items-center justify-between gap-2 px-4 md:px-6">
         <div className="flex items-center gap-2.5 min-w-0">
@@ -150,6 +151,6 @@ export default function EventsManagerPage() {
         <HistoryPanel title="Event History" onClose={() => setShowHistory(false)}
           fetcher={fetchEventInteractions} emptyMessage="No event activity yet." />
       )}
-    </div>
+    </AuroraPage>
   )
 }
