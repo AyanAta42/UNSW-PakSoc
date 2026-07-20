@@ -21,8 +21,8 @@ export function Navbar({ user, avatarUrl, avatarBroken, initial, onAvatarError, 
   const { can }    = usePermissions()
 
   return (
-    <header style={GLASS_NAV} className="glass-nav sticky top-0 z-50 pt-[env(safe-area-inset-top)]">
-      <nav className="h-14 px-4 md:px-8 flex items-center justify-between gap-3">
+    <header style={GLASS_NAV} className="glass-nav sticky top-0 z-50 pt-[calc(env(safe-area-inset-top)+10px)]">
+      <nav className="h-14 px-4 md:px-8 max-w-[1400px] mx-auto flex items-center justify-between gap-3">
         <div className="flex items-center gap-1 shrink min-w-0">
           <img
             src="/logo.webp"

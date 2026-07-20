@@ -7,6 +7,9 @@ import { TaskListPanel }     from '@/tasks/components/panels/TaskListPanel'
 import { NewTaskPanel }      from '@/tasks/components/panels/NewTaskPanel'
 import { NewTaskModal }      from '@/tasks/components/forms/NewTaskModal'
 import { MemberPickerSheet } from '@/tasks/components/assignment/MemberPickerSheet'
+import { HistoryButton }     from '@/interactions/components/HistoryButton'
+import { HistoryPanel }      from '@/interactions/components/HistoryPanel'
+import { fetchEventTaskInteractions } from '@/interactions/services/fetchEventTaskInteractions'
 import type { Member }       from '@/members/types/Member'
 
 type PickerMode = 'task' | 'form' | null
@@ -17,6 +20,7 @@ export default function ManageTasksPage() {
   const [addOpen,      setAddOpen]     = useState(false)
   const [pickerMode,   setPickerMode]  = useState<PickerMode>(null)
   const [assignTaskId, setAssignTaskId] = useState<string | null>(null)
+  const [showHistory,  setShowHistory] = useState(false)
   const board   = useTaskBoard(eventId)
   const { user } = useAuth()
 
@@ -37,7 +41,7 @@ export default function ManageTasksPage() {
 
   const sharedPanelProps = {
     tasks: board.tasks, loading: board.loading, overTask: board.overTask, currentUserAuthId: user?.id,
-    allCategories: board.allCategories,
+    allCategories: board.allCategories, eventId,
     onRemoveTask: board.removeTask, onRemoveAssigned: board.removeAssigned, onEditTask: board.editTask,
   }
 
@@ -77,6 +81,7 @@ export default function ManageTasksPage() {
             <h1 className="m-0 text-base font-extrabold text-[#F8FAFC] truncate">Manage Tasks</h1>
             <p className="m-0 text-[10px] text-[#64748B]">{board.tasks.length} tasks</p>
           </div>
+          <HistoryButton onClick={() => setShowHistory(true)} label="View task history for this event" />
           <button onClick={() => setAddOpen(true)} style={{ background: '#22C55E', color: '#fff', boxShadow: '0 0 20px rgba(34,197,94,0.3)' }} className="shrink-0 w-9 h-9 rounded-full border-none cursor-pointer font-bold text-xl leading-none active:scale-95 transition-transform">+</button>
         </header>
         <TaskListPanel {...sharedPanelProps} mobile onAssignClick={id => { setAssignTaskId(id); setPickerMode('task') }} />
@@ -91,6 +96,11 @@ export default function ManageTasksPage() {
         <MemberPickerSheet open={pickerMode === 'task'} title={assignTask ? `Assign to "${assignTask.title}"` : 'Choose a member'} members={board.members} onClose={closePicker} onPick={handleMemberPick} />
         <MemberPickerSheet open={pickerMode === 'form'} title="Choose assignees" members={board.members} multi selectedIds={board.preAssigned.map(m => m.id)} onClose={closePicker} onPick={handleMemberPick} onDone={closePicker} />
       </div>
+
+      {showHistory && (
+        <HistoryPanel title="Task History" onClose={() => setShowHistory(false)}
+          fetcher={() => fetchEventTaskInteractions(eventId)} emptyMessage="No task activity for this event yet." />
+      )}
     </>
   )
 }

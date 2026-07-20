@@ -130,7 +130,6 @@ export function HeroBanner({ banner, loading }: Props) {
                 {banner.name}
               </h1>
               <div className="flex items-center gap-3 md:gap-4 mt-3.5 md:mt-4 w-fit">
-                <span className="hero-title-in text-2xl md:text-4xl shrink-0">in</span>
                 <div className="flex gap-2.5 w-fit">
                   {(['days','hrs','mins','secs'] as const).map((k, i) => {
                     const val = [cd.days, cd.hrs, cd.mins, cd.secs][i]

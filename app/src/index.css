@@ -232,14 +232,6 @@ body {
   }
 }
 
-/* The little editorial "in" between the headline and the countdown */
-.hero-title-in {
-  font-family: 'Cormorant Garamond', Georgia, 'Times New Roman', serif;
-  font-style: italic;
-  font-weight: 500;
-  color: #cbd5e1;
-}
-
 .motion-hero-enter {
   animation: heroEnter var(--motion-enter) var(--motion-ease) both;
 }
