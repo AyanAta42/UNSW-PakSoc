@@ -2,6 +2,7 @@ import type { DbEvent } from '@/events/types/Event'
 import { dateParts }    from '@/events/utils/dateParts'
 import { eventImageUrl } from '@/events/utils/eventImageUrl'
 import { ACCENT, PALETTE } from '@/config/theme'
+import { ClockIcon, PinIcon } from '@/shared/components/MetaIcons'
 
 interface Props { event: DbEvent; selected: boolean; now: Date; onClick: () => void }
 
@@ -59,10 +60,10 @@ export function PublicEventCard({ event: ev, selected, now, onClick }: Props) {
           </span>
         </div>
         <div className="text-[11px] flex items-center gap-1.5" style={{ color: PALETTE.muted }}>
-          <span style={{ color: ended ? PALETTE.disabled : ACCENT }}>◷</span>{time}
+          <ClockIcon color={ended ? PALETTE.disabled : ACCENT} />{time}
         </div>
         <div className="text-[11px] truncate flex items-center gap-1.5" style={{ color: PALETTE.muted }}>
-          <span style={{ color: ended ? PALETTE.disabled : ACCENT }}>◎</span>{ev.location}
+          <PinIcon color={ended ? PALETTE.disabled : ACCENT} />{ev.location}
         </div>
         <p className="lg:hidden text-[10px] m-0 mt-1.5 font-semibold" style={{ color: PALETTE.disabled }}>Tap for schedule →</p>
       </div>

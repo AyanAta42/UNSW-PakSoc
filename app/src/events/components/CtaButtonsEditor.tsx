@@ -1,4 +1,6 @@
+import { useState } from 'react'
 import type { EventButton } from '@/events/types/Event'
+import { ConfirmModal } from '@/shared/components/ConfirmModal'
 import { ACCENT, PALETTE } from '@/config/theme'
 
 interface Props {
@@ -10,15 +12,19 @@ const inp = { border: `1px solid ${PALETTE.border}`, color: PALETTE.dark, backgr
 const lbl = 'block text-[11px] font-bold uppercase tracking-wider mb-1 text-[#94A3B8]'
 
 export function CtaButtonsEditor({ buttons, onChange }: Props) {
+  const [confirmIdx, setConfirmIdx] = useState<number | null>(null)
+
   const update = (i: number, patch: Partial<EventButton>) =>
     onChange(buttons.map((b, idx) => idx === i ? { ...b, ...patch } : b))
+  const remove = (i: number) => onChange(buttons.filter((_, idx) => idx !== i))
 
   return (
     <div className="flex flex-col gap-3">
       {buttons.map((btn, i) => (
         <div key={i} style={{ background: PALETTE.cardAlt, border: `1px solid ${PALETTE.border}`, borderRadius: PALETTE.radiusInput }}
           className="p-3 flex flex-col gap-2 relative">
-          <button type="button" onClick={() => onChange(buttons.filter((_, idx) => idx !== i))}
+          <button type="button"
+            onClick={() => (btn.label.trim() || btn.url.trim()) ? setConfirmIdx(i) : remove(i)}
             style={{ color: PALETTE.muted }} className="absolute top-2.5 right-2.5 bg-transparent border-none cursor-pointer text-base leading-none hover:text-red-400 transition-colors">×</button>
           <div>
             <label className={lbl}>Button {i + 1} label</label>
@@ -42,6 +48,16 @@ export function CtaButtonsEditor({ buttons, onChange }: Props) {
         </button>
       )}
       <p style={{ color: PALETTE.disabled }} className="text-[10px] m-0">0–2 buttons displayed on public event cards.</p>
+      {confirmIdx !== null && (
+        <ConfirmModal
+          title="Remove action button?"
+          message={`"${buttons[confirmIdx]?.label.trim() || 'This button'}" will no longer appear on the public event card.`}
+          confirmLabel="Remove"
+          danger
+          onConfirm={() => { remove(confirmIdx); setConfirmIdx(null) }}
+          onCancel={() => setConfirmIdx(null)}
+        />
+      )}
     </div>
   )
 }

@@ -3,6 +3,7 @@ import { dateParts }          from '@/events/utils/dateParts'
 import { getEventButtons, getCtaVariant }    from '@/events/utils/getEventButtons'
 import { EventCtaButton }     from '@/events/components/EventCtaButton'
 import { formatTimelineTime } from '@/shared/utils/formatTimelineTime'
+import { ClockIcon, PinIcon, PriceIcon } from '@/shared/components/MetaIcons'
 import { ACCENT, PALETTE }    from '@/config/theme'
 
 interface Props { event: DbEvent; now: Date; hideButtons?: boolean }
@@ -28,11 +29,11 @@ export function EventDetailContent({ event, now, hideButtons = false }: Props) {
 
       {/* Meta */}
       <div className="flex flex-col gap-1.5">
-        <div className="flex items-center gap-2 text-xs" style={{ color: PALETTE.muted }}><span style={{ color: ACCENT }}>◷</span>{time}</div>
-        <div className="flex items-center gap-2 text-xs" style={{ color: PALETTE.muted }}><span style={{ color: ACCENT }}>◎</span>{event.location}</div>
+        <div className="flex items-center gap-2 text-xs" style={{ color: PALETTE.muted }}><ClockIcon color={ACCENT} />{time}</div>
+        <div className="flex items-center gap-2 text-xs" style={{ color: PALETTE.muted }}><PinIcon color={ACCENT} />{event.location}</div>
         {event.price != null && (
           <div className="flex items-center gap-2 text-xs" style={{ color: PALETTE.muted }}>
-            <span style={{ color: ACCENT }}>$</span>{event.price > 0 ? `$${Number(event.price).toFixed(2)}` : 'Free entry'}
+            <PriceIcon color={ACCENT} />{event.price > 0 ? `$${Number(event.price).toFixed(2)}` : 'Free entry'}
           </div>
         )}
       </div>

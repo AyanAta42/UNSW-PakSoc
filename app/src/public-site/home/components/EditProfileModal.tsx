@@ -3,6 +3,7 @@ import type { User } from '@supabase/supabase-js'
 import { updateMemberName } from '@/members/services/updateMemberName'
 import { fetchMemberName }  from '@/members/services/fetchMemberName'
 import { PALETTE } from '@/config/theme'
+import { toast, errorMessage } from '@/shared/toast/toast'
 
 interface Props {
   user:    User
@@ -31,8 +32,8 @@ export function EditProfileModal({ user, onClose }: Props) {
   async function save() {
     if (!name.trim()) return
     setSaving(true)
-    try { await updateMemberName(user.id, name.trim()); onClose() }
-    catch (e) { console.error(e) }
+    try { await updateMemberName(user.id, name.trim()); toast.success('Profile updated'); onClose() }
+    catch (e) { console.error(e); toast.error("Couldn't update profile", errorMessage(e, 'Please try again.')) }
     finally { setSaving(false) }
   }
 

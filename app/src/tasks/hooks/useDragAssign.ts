@@ -3,6 +3,7 @@ import type { Member } from '@/members/types/Member'
 import type { Task } from '@/tasks/types/Task'
 import { assignMember } from '@/tasks/services/assignMember'
 import { logInteraction } from '@/interactions/services/logInteraction'
+import { toast, errorMessage } from '@/shared/toast/toast'
 
 function findDropTarget(x: number, y: number) {
   const el = document.elementFromPoint(x, y)
@@ -63,8 +64,9 @@ export function useDragAssign(
         setTasks(p => p.map(t => t.id !== taskId ? t : { ...t, assigned: [...t.assigned, m] }))
         try {
           await assignMember(taskId, m.id)
+          toast.success(`${m.name} assigned`)
           void logInteraction('task.member_assigned', 'task', taskId, eventId, `assigned ${m.name} to "${task?.title ?? 'a task'}"`)
-        } catch (err) { console.error(err) }
+        } catch (err) { console.error(err); toast.error("Couldn't assign member", errorMessage(err, 'Please try again.')) }
       }
     } else if (m && target?.type === 'form') {
       if (!preAssigned.some(a => a.id === m.id)) setPreAssigned(p => [...p, m])
@@ -79,8 +81,9 @@ export function useDragAssign(
     setTasks(p => p.map(t => t.id !== taskId ? t : { ...t, assigned: [...t.assigned, m] }))
     try {
       await assignMember(taskId, m.id)
+      toast.success(`${m.name} assigned`)
       void logInteraction('task.member_assigned', 'task', taskId, eventId, `assigned ${m.name} to "${task?.title ?? 'a task'}"`)
-    } catch (err) { console.error(err) }
+    } catch (err) { console.error(err); toast.error("Couldn't assign member", errorMessage(err, 'Please try again.')) }
   }
 
   return { draggingMemberId, overTask, overForm, setOverForm, beginMemberDrag, moveMemberDrag, endMemberDrag, assignMemberToTask }

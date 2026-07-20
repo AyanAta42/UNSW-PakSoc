@@ -4,6 +4,7 @@ import type { User } from '@supabase/supabase-js'
 import { usePermissions } from '@/roles/hooks/usePermissions'
 import { UserDropdown }   from './UserDropdown'
 import { ACCENT, ACCENT_TEXT, GLASS_CHIP, GLASS_NAV, PALETTE } from '@/config/theme'
+import { toast } from '@/shared/toast/toast'
 
 interface Props {
   user?:         User | null
@@ -72,7 +73,8 @@ export function Navbar({ user, avatarUrl, avatarBroken, initial, onAvatarError, 
                   setMenuOpen(false)
                   void import('@/auth/services/signOut')
                     .then(m => m.signOut())
-                    .then(() => navigate('/login'))
+                    .then(() => { toast.success('Logged out'); navigate('/') })
+                    .catch(() => toast.error("Couldn't log out", 'Please try again.'))
                 }}
                 onClose={() => setMenuOpen(false)} />}
             </div>

@@ -16,6 +16,7 @@ import type { DragAssignState } from '@/tasks/hooks/useDragAssign'
 import { useRealtimeTable } from '@/core/supabase/useRealtimeTable'
 import { logInteraction }  from '@/interactions/services/logInteraction'
 import { DEFAULT_TASK_CATEGORIES } from '@/tasks/types/Task'
+import { toast, errorMessage } from '@/shared/toast/toast'
 
 export interface TaskBoardState extends DragAssignState {
   members:         Member[];  tasks:          Task[];          loading:        boolean
@@ -99,9 +100,12 @@ export function useTaskBoard(eventId: string): TaskBoardState {
       )
       // Delete all tasks with this category from Supabase
       supabase.from('tasks').delete().eq('event_id', eventId).eq('category', name)
-        .then(({ error }) => { if (error) console.error('[useTaskBoard] Failed to delete tasks for category:', error) })
+        .then(({ error }) => {
+          if (error) { console.error('[useTaskBoard] Failed to delete tasks for category:', error); toast.error("Couldn't delete category", error.message) }
+        })
       return next
     })
+    toast.success(`"${name}" category deleted`)
   }
 
   async function addTask() {
@@ -115,8 +119,12 @@ export function useTaskBoard(eventId: string): TaskBoardState {
     try {
       const realId = await createTask(eventId, optimistic.title, cat, optimistic.notes, subtitleList, memberIds)
       setTasks(p => p.map(t => t.id === tempId ? { ...t, id: realId } : t))
+      toast.success('Task created')
       void logInteraction('task.created', 'task', realId, eventId, `created task "${optimistic.title}"`)
-    } catch (e) { console.error(e); setTasks(p => p.filter(t => t.id !== tempId)) }
+    } catch (e) {
+      console.error(e); setTasks(p => p.filter(t => t.id !== tempId))
+      toast.error("Couldn't create task", errorMessage(e, 'Please try again.'))
+    }
   }
 
   async function editTask(id: string, title: string, cat: string, notes: string, subtitles: string[]) {
@@ -124,8 +132,9 @@ export function useTaskBoard(eventId: string): TaskBoardState {
     setTasks(p => p.map(t => t.id !== id ? t : { ...t, title, category: cat, notes, subtasks: newSubs }))
     try {
       await updateTask(id, title, cat, notes, subtitles)
+      toast.success('Task updated')
       void logInteraction('task.updated', 'task', id, eventId, `updated task "${title}"`)
-    } catch (e) { console.error(e) }
+    } catch (e) { console.error(e); toast.error("Couldn't update task", errorMessage(e, 'Please try again.')) }
   }
 
   async function removeTask(id: string) {
@@ -133,8 +142,9 @@ export function useTaskBoard(eventId: string): TaskBoardState {
     setTasks(p => p.filter(t => t.id !== id))
     try {
       await deleteTask(id)
+      toast.success('Task deleted')
       void logInteraction('task.deleted', 'task', id, eventId, `deleted task "${removedTitle}"`)
-    } catch (e) { console.error(e) }
+    } catch (e) { console.error(e); toast.error("Couldn't delete task", errorMessage(e, 'Please try again.')) }
   }
 
   async function removeAssigned(taskId: string, mId: string) {
@@ -143,8 +153,9 @@ export function useTaskBoard(eventId: string): TaskBoardState {
     setTasks(p => p.map(t => t.id === taskId ? { ...t, assigned: t.assigned.filter(a => a.id !== mId) } : t))
     try {
       await unassignMember(taskId, mId)
+      toast.info('Member unassigned')
       void logInteraction('task.member_unassigned', 'task', taskId, eventId, `removed ${memberName} from "${task?.title ?? 'a task'}"`)
-    } catch (e) { console.error(e) }
+    } catch (e) { console.error(e); toast.error("Couldn't unassign member", errorMessage(e, 'Please try again.')) }
   }
 
   return { members, tasks, loading, title, setTitle, cat, setCat, subtasks, setSubtasks, preAssigned, setPreAssigned, notes, setNotes, allCategories, selectedMemberId, selectMember, addCustomCategory, removeCustomCategory, addTask, editTask, removeTask, removeAssigned, ...drag }

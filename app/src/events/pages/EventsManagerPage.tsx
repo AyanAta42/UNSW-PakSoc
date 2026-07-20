@@ -11,8 +11,10 @@ import { logInteraction }        from '@/interactions/services/logInteraction'
 import { fetchEventInteractions } from '@/interactions/services/fetchEventInteractions'
 import { HistoryButton }     from '@/interactions/components/HistoryButton'
 import { HistoryPanel }      from '@/interactions/components/HistoryPanel'
+import { applyEventChange }  from '@/events/utils/applyEventChange'
 import type { DbEvent }      from '@/events/types/Event'
 import { ACCENT, ACCENT_TEXT, PALETTE } from '@/config/theme'
+import { toast, errorMessage } from '@/shared/toast/toast'
 
 function EventSection({ title, color, events, canEdit, onAnnounce, onUnpublish, onEdit, onDelete }: {
   title: string; color: string; events: DbEvent[]; canEdit: boolean
@@ -46,8 +48,13 @@ export default function EventsManagerPage() {
 
   useEffect(() => { fetchAllEvents().then(setEvents).catch(console.error).finally(() => setLoading(false)) }, [])
 
-  // Live updates from other execs editing/publishing events
-  useRealtimeTable('events', () => { fetchAllEvents().then(setEvents).catch(console.error) }, !loading)
+  // Live updates from other execs: apply each change instantly, then reconcile
+  useRealtimeTable(
+    'events',
+    () => { fetchAllEvents().then(setEvents).catch(console.error) },
+    !loading,
+    change => setEvents(prev => applyEventChange(prev, change)),
+  )
 
   const now    = new Date()
   const ended  = events.filter(e => new Date(e.time) <= now).sort((a, b) => +new Date(b.time) - +new Date(a.time))
@@ -57,21 +64,30 @@ export default function EventsManagerPage() {
 
   const announce = async (id: string) => {
     const name = events.find(e => e.id === id)?.name ?? 'an event'
-    await setEventPublic(id, true)
-    setEvents(p => p.map(e => e.id === id ? { ...e, public: true } : e))
-    void logInteraction('event.published', 'event', id, id, `announced "${name}"`)
+    try {
+      await setEventPublic(id, true)
+      setEvents(p => p.map(e => e.id === id ? { ...e, public: true } : e))
+      toast.success('Event announced')
+      void logInteraction('event.published', 'event', id, id, `announced "${name}"`)
+    } catch (e) { toast.error("Couldn't announce event", errorMessage(e, 'Please try again.')) }
   }
   const unpublish = async (id: string) => {
     const name = events.find(e => e.id === id)?.name ?? 'an event'
-    await setEventPublic(id, false)
-    setEvents(p => p.map(e => e.id === id ? { ...e, public: false } : e))
-    void logInteraction('event.unpublished', 'event', id, id, `unpublished "${name}"`)
+    try {
+      await setEventPublic(id, false)
+      setEvents(p => p.map(e => e.id === id ? { ...e, public: false } : e))
+      toast.info('Event unannounced')
+      void logInteraction('event.unpublished', 'event', id, id, `unpublished "${name}"`)
+    } catch (e) { toast.error("Couldn't unannounce event", errorMessage(e, 'Please try again.')) }
   }
   const handleDelete = async (id: string) => {
     const name = events.find(e => e.id === id)?.name ?? 'an event'
-    await deleteEvent(id)
-    setEvents(p => p.filter(e => e.id !== id))
-    void logInteraction('event.deleted', 'event', id, id, `deleted event "${name}"`)
+    try {
+      await deleteEvent(id)
+      setEvents(p => p.filter(e => e.id !== id))
+      toast.success('Event deleted')
+      void logInteraction('event.deleted', 'event', id, id, `deleted event "${name}"`)
+    } catch (e) { toast.error("Couldn't delete event", errorMessage(e, 'Please try again.')) }
   }
 
   const sectionProps = { canEdit: can.editEvents, onAnnounce: announce, onUnpublish: unpublish, onEdit: setEditingEv, onDelete: handleDelete }
@@ -126,8 +142,8 @@ export default function EventsManagerPage() {
         </>}
       </div>
 
-      {showAdd   && <AddEditEventModal onClose={() => setShowAdd(false)} onCreated={ev => { setEvents(p => [...p, ev]); setShowAdd(false) }} />}
-      {editingEv && <AddEditEventModal event={editingEv} onClose={() => setEditingEv(null)} onUpdated={updated => { setEvents(p => p.map(e => e.id === updated.id ? updated : e)); setEditingEv(null) }} />}
+      {showAdd   && <AddEditEventModal onClose={() => setShowAdd(false)} onCreated={ev => { setEvents(p => [...p, ev]); setShowAdd(false); toast.success('Event created') }} />}
+      {editingEv && <AddEditEventModal event={editingEv} onClose={() => setEditingEv(null)} onUpdated={updated => { setEvents(p => p.map(e => e.id === updated.id ? updated : e)); setEditingEv(null); toast.success('Event updated') }} />}
       {showHistory && (
         <HistoryPanel title="Event History" onClose={() => setShowHistory(false)}
           fetcher={fetchEventInteractions} emptyMessage="No event activity yet." />

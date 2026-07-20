@@ -8,6 +8,7 @@ import { useRealtimeTable }       from '@/core/supabase/useRealtimeTable'
 import { ROLE_LABEL, ROLE_COLOR, ALL_ROLES } from '@/roles/config/roleLabels'
 import type { Member, MemberRole, Committee } from '@/members/types/Member'
 import { PALETTE } from '@/config/theme'
+import { toast, errorMessage } from '@/shared/toast/toast'
 
 const NEEDS_COMMITTEE: MemberRole[] = ['subcom', 'executive']
 
@@ -31,7 +32,9 @@ export default function ManageRolesPage() {
       if (NEEDS_COMMITTEE.includes(role) && !committee) { committee = 'Events'; await updateMemberCommittee(member.id, 'Events') }
       else if (!NEEDS_COMMITTEE.includes(role))         { committee = undefined; await updateMemberCommittee(member.id, null) }
       setMembers(ms => ms.map(m => m.id === member.id ? { ...m, role, committee } : m))
-    } catch (e) { console.error(e) } finally { setSaving(null) }
+      toast.success(`${member.name || 'Member'} is now ${ROLE_LABEL[role]}`)
+    } catch (e) { console.error(e); toast.error("Couldn't update role", errorMessage(e, 'Please try again.')) }
+    finally { setSaving(null) }
   }
 
   async function handleCommitteeChange(member: Member, committee: Committee) {
@@ -39,7 +42,9 @@ export default function ManageRolesPage() {
     try {
       await updateMemberCommittee(member.id, committee)
       setMembers(ms => ms.map(m => m.id === member.id ? { ...m, committee } : m))
-    } catch (e) { console.error(e) } finally { setSaving(null) }
+      toast.success(`${member.name || 'Member'} moved to ${committee}`)
+    } catch (e) { console.error(e); toast.error("Couldn't update committee", errorMessage(e, 'Please try again.')) }
+    finally { setSaving(null) }
   }
 
   const filtered = members.filter(m => (m.name ?? '').toLowerCase().includes(search.toLowerCase()))

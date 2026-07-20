@@ -1,8 +1,9 @@
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { ACCENT, PALETTE } from '@/config/theme'
 import { usePermissions } from '@/roles/hooks/usePermissions'
 import { useRealtimeTable } from '@/core/supabase/useRealtimeTable'
 import { fetchSocialPosts, refreshSocialPosts, IG_USERNAME, WALL_SIZE, type SocialPost } from '../services/socialPosts'
+import { toast, errorMessage } from '@/shared/toast/toast'
 
 const PLACEHOLDERS = [
   { id: 1, type: 'reel', likes: 412, caption: 'Highlights from our last event' },
@@ -19,12 +20,14 @@ const GRADS = [
   'linear-gradient(135deg,#0A1E30,#050C18)', 'linear-gradient(135deg,#1E0D1A,#0D060E)',
 ]
 
-function CardOverlay({ caption, likes }: { caption: string; likes: number }) {
+function CardOverlay({ caption }: { caption: string }) {
   return (
-    <div className="absolute bottom-0 left-0 right-0 flex items-end gap-1.5 px-2.5 pb-2.5 pt-8"
+    <div className="absolute bottom-0 left-0 right-0 px-2.5 pb-2.5 pt-8"
       style={{ background: 'linear-gradient(to top,rgba(0,0,0,0.85),transparent)' }}>
-      <p className="m-0 flex-1 line-clamp-2 leading-snug" style={{ fontSize: 10, color: PALETTE.dark }}>{caption}</p>
-      <span className="shrink-0" style={{ color: PALETTE.muted, fontSize: 9 }}>{likes} likes</span>
+      <p className="m-0 leading-snug overflow-hidden"
+        style={{ fontSize: 10, color: PALETTE.dark, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }}>
+        {caption}
+      </p>
     </div>
   )
 }
@@ -33,6 +36,20 @@ function ReelBadge() {
   return (
     <span className="absolute top-2 right-2 font-bold px-1.5 py-0.5 rounded text-white"
       style={{ fontSize: 9, background: 'rgba(0,0,0,0.65)' }}>REEL</span>
+  )
+}
+
+function ScrollArrow({ dir, onClick }: { dir: 'left' | 'right'; onClick: () => void }) {
+  return (
+    <button onClick={onClick} aria-label={dir === 'left' ? 'Scroll left' : 'Scroll right'}
+      className="absolute top-1/2 -translate-y-1/2 z-10 hidden md:flex items-center justify-center cursor-pointer hover:opacity-80"
+      style={{
+        [dir]: -6, width: 34, height: 34, borderRadius: '50%',
+        background: 'rgba(0,0,0,0.7)', border: `1px solid ${PALETTE.border}`,
+        color: PALETTE.dark, fontSize: 16, lineHeight: 1,
+      }}>
+      {dir === 'left' ? '‹' : '›'}
+    </button>
   )
 }
 
@@ -56,7 +73,7 @@ function WallCard({ post }: { post: SocialPost }) {
         className="absolute inset-0 w-full h-full object-cover transition-opacity duration-500"
         style={{ opacity: imgLoaded ? 1 : 0 }} />
       {post.media_type === 'VIDEO' && <ReelBadge />}
-      <CardOverlay caption={post.caption} likes={post.like_count} />
+      <CardOverlay caption={post.caption} />
     </a>
   )
 }
@@ -67,6 +84,29 @@ export function SocialWall() {
   const [loading, setLoading] = useState(true)
   const [refreshing, setRefreshing] = useState<number | null>(null)
   const [error, setError] = useState<string | null>(null)
+  const scrollerRef = useRef<HTMLDivElement>(null)
+  const [canLeft, setCanLeft] = useState(false)
+  const [canRight, setCanRight] = useState(false)
+
+  const updateArrows = useCallback(() => {
+    const el = scrollerRef.current
+    if (!el) return
+    setCanLeft(el.scrollLeft > 4)
+    setCanRight(el.scrollLeft < el.scrollWidth - el.clientWidth - 4)
+  }, [])
+
+  // Re-check when content changes (posts load) or the window resizes
+  useEffect(() => {
+    updateArrows()
+    window.addEventListener('resize', updateArrows)
+    return () => window.removeEventListener('resize', updateArrows)
+  }, [updateArrows, posts, loading])
+
+  function scrollByDir(dir: 'left' | 'right') {
+    const el = scrollerRef.current
+    if (!el) return
+    el.scrollBy({ left: (dir === 'left' ? -1 : 1) * el.clientWidth * 0.8, behavior: 'smooth' })
+  }
 
   // Served from Supabase only — Instagram is never hit on page load
   useEffect(() => {
@@ -89,8 +129,10 @@ export function SocialWall() {
     try {
       await refreshSocialPosts(count)
       setPosts(await fetchSocialPosts())
+      toast.success(count === 1 ? 'Latest post fetched' : 'Reels fetched')
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Refetch failed')
+      toast.error("Couldn't fetch reels", errorMessage(e, 'Please try again.'))
     } finally {
       setRefreshing(null)
     }
@@ -119,7 +161,11 @@ export function SocialWall() {
       {error && <p className="text-xs -mt-2 mb-3" style={{ color: '#EF4444' }}>{error}</p>}
 
       {/* pt/px + negative margins give hover-scaled cards headroom inside the scrollport */}
-      <div className="allow-pan-x flex gap-3 overflow-x-auto scrollbar-none pt-2 -mt-2 pb-2 -mb-1 px-2 -mx-2" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
+      <div className="relative">
+      {canLeft && <ScrollArrow dir="left" onClick={() => scrollByDir('left')} />}
+      {canRight && <ScrollArrow dir="right" onClick={() => scrollByDir('right')} />}
+      <div ref={scrollerRef} onScroll={updateArrows}
+        className="allow-pan-x flex gap-3 overflow-x-auto scrollbar-none pt-2 -mt-2 pb-2 -mb-1 px-2 -mx-2" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
         {loading
           ? Array.from({ length: 6 }, (_, i) => <CardSkeleton key={i} />)
           : posts.length > 0
@@ -129,9 +175,10 @@ export function SocialWall() {
               style={{ background: GRADS[i], border: `1px solid ${PALETTE.border}`, borderRadius: 14, minWidth: 150, aspectRatio: '3/4' }}
               className="motion-social-card relative overflow-hidden cursor-pointer shrink-0">
               {p.type === 'reel' && <ReelBadge />}
-              <CardOverlay caption={p.caption} likes={p.likes} />
+              <CardOverlay caption={p.caption} />
             </div>
           ))}
+      </div>
       </div>
     </>
   )

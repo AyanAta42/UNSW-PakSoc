@@ -1,7 +1,7 @@
 {
-  "name": "UNSW PakSoc Manager",
+  "name": "PakSoc UNSW Web App",
   "short_name": "PakSoc",
-  "description": "PakSoc UNSW Society Manager",
+  "description": "See upcoming PakSoc event details, locations and access links, plus all our social media in one place.",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
