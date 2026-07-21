@@ -672,24 +672,12 @@ body {
   to   { opacity: 0; transform: translateY(-8px) scale(0.97); }
 }
 
-@keyframes toastProgress {
-  from { transform: scaleX(1); }
-  to   { transform: scaleX(0); }
-}
-
 .motion-toast-in {
   animation: toastIn var(--motion-base) var(--motion-ease) both;
 }
 
 .motion-toast-out {
   animation: toastOut var(--motion-fast) var(--motion-ease-in) both;
-}
-
-.motion-toast-progress {
-  transform-origin: left;
-  animation-name: toastProgress;
-  animation-timing-function: linear;
-  animation-fill-mode: forwards;
 }
 
 /* ─── Ambient background ───────────────────────────────────────────────────── */

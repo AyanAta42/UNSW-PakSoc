@@ -110,9 +110,6 @@ function ToastCard({ item }: { item: ToastItem }) {
           <p className="m-0 text-[11px] leading-snug mt-0.5 line-clamp-2" style={{ color: PALETTE.muted }}>{item.description}</p>
         )}
       </div>
-      <div className="absolute left-0 right-0 bottom-0 h-[2px]" style={{ background: PALETTE.border }}>
-        <div className="motion-toast-progress h-full" style={{ background: ACCENT[item.variant], animationDuration: `${item.duration}ms` }} />
-      </div>
     </div>
   )
 }

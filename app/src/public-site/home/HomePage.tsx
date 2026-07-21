@@ -123,7 +123,7 @@ export default function HomePage() {
 
   return (
     <div
-      className="relative flex h-[calc(100dvh_-_env(safe-area-inset-bottom))] flex-col overflow-hidden"
+      className="relative flex h-[100dvh] flex-col overflow-hidden mb-[calc(-1_*_env(safe-area-inset-bottom))]"
       style={{
         // Same static aurora tint as the html shell — the animated layers fade
         // in over it, so the background never pops
@@ -134,6 +134,10 @@ export default function HomePage() {
     >
       <AmbientBackground />
 
+      {/* Elastic scroll region — the ONLY surface that rubber-bands. The navbar
+          rides at the top of this flow and scrolls away with the content (not
+          pinned); the footer sits at the end; the aurora is fixed behind. */}
+      <main className={`home-scroll relative z-10 flex flex-col flex-1 min-h-0 no-scrollbar ${overlayOpen ? 'overflow-hidden' : 'overflow-y-auto'}`}>
       <Navbar
         user={user}
         avatarUrl={avatarUrl}
@@ -142,10 +146,6 @@ export default function HomePage() {
         onAvatarError={() => setAvatarBroken(true)}
         onEditProfile={handleEditProfile}
       />
-
-      {/* Elastic scroll region — the ONLY surface that rubber-bands. The navbar
-          above and footer below stay fixed (unelastic); the aurora is fixed behind. */}
-      <main className={`home-scroll relative z-10 flex flex-col flex-1 min-h-0 no-scrollbar ${overlayOpen ? 'overflow-hidden' : 'overflow-y-auto'}`}>
       <div className="flex gap-0 lg:gap-5 px-0 lg:px-8 py-0 lg:py-5 max-w-[1400px] mx-auto items-start w-full">
         <div className="flex flex-col gap-0 lg:gap-5 flex-[7] min-w-0 w-full">
           <HeroBanner banner={banner} loading={loading && !banner} />
