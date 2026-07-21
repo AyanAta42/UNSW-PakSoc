@@ -145,7 +145,7 @@ export default function HomePage() {
 
       {/* Elastic scroll region — the ONLY surface that rubber-bands. The navbar
           above and footer below stay fixed (unelastic); the aurora is fixed behind. */}
-      <main className={`home-scroll relative z-10 flex-1 min-h-0 no-scrollbar ${overlayOpen ? 'overflow-hidden' : 'overflow-y-auto'}`}>
+      <main className={`home-scroll relative z-10 flex flex-col flex-1 min-h-0 no-scrollbar ${overlayOpen ? 'overflow-hidden' : 'overflow-y-auto'}`}>
       <div className="flex gap-0 lg:gap-5 px-0 lg:px-8 py-0 lg:py-5 max-w-[1400px] mx-auto items-start w-full">
         <div className="flex flex-col gap-0 lg:gap-5 flex-[7] min-w-0 w-full">
           <HeroBanner banner={banner} loading={loading && !banner} />
@@ -203,6 +203,12 @@ export default function HomePage() {
           </Suspense>
         </div>
       </div>
+
+        {/* Footer lives at the end of the scroll flow — reached by scrolling, not
+            pinned. mt-auto drops it to the bottom when the page is short. */}
+        <div className="relative z-10 mt-auto">
+          <Footer />
+        </div>
       </main>
 
       {sheetEvent && (
@@ -213,10 +219,6 @@ export default function HomePage() {
           <EditProfileModal user={user} onClose={() => setEditOpen(false)} />
         </Suspense>
       )}
-
-      <div className="relative z-10 shrink-0">
-        <Footer />
-      </div>
     </div>
   )
 }

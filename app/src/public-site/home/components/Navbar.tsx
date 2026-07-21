@@ -38,7 +38,7 @@ export function Navbar({ user, avatarUrl, avatarBroken, initial, onAvatarError, 
   const { can }    = usePermissions()
 
   return (
-    <header style={GLASS_NAV} className="glass-nav sticky top-0 z-50 shrink-0 pt-[calc(env(safe-area-inset-top)+2px)] md:pt-[calc(env(safe-area-inset-top)+10px)]">
+    <header style={GLASS_NAV} className="glass-nav sticky top-0 z-50 shrink-0 pt-[env(safe-area-inset-top)] md:pt-[calc(env(safe-area-inset-top)+8px)]">
       <nav className="min-h-16 px-4 md:px-8 max-w-[1400px] mx-auto flex items-center justify-between gap-3">
         <div className="flex items-center gap-1 shrink min-w-0">
           <img
