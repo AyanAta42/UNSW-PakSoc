@@ -1,6 +1,7 @@
 import { Navigate } from 'react-router-dom'
 import { usePermissions, ROLE_RANK } from '@/roles/hooks/usePermissions'
 import { useAuth }                   from '@/auth/hooks/useAuth'
+import { PAGE_BG }                   from '@/config/theme'
 import type { MemberRole }           from '@/members/types/Member'
 
 interface Props {
@@ -10,7 +11,7 @@ interface Props {
 }
 
 const Spinner = () => (
-  <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'system-ui, sans-serif', color: '#94A3B8' }}>
+  <div style={{ minHeight: '100dvh', background: PAGE_BG, display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'system-ui, sans-serif', color: '#94A3B8' }}>
     Loading…
   </div>
 )

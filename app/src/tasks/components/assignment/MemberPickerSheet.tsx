@@ -2,6 +2,7 @@ import { useEffect } from 'react'
 import type { Member } from '@/members/types/Member'
 import { getMemberSections } from '@/members/utils/getMemberSections'
 import { MemberPickerRow }   from './MemberPickerRow'
+import { useSheetSwipe }     from '@/shared/hooks/useSheetSwipe'
 
 interface Props {
   open:        boolean
@@ -16,6 +17,8 @@ interface Props {
 
 /** Bottom-sheet member picker used on mobile for task assignment. */
 export function MemberPickerSheet({ open, title = 'Choose a member', members, multi, selectedIds = [], onClose, onPick, onDone }: Props) {
+  const { sheetRef, scrollRef, close, backdropOpacity, sheetStyle, touchHandlers } = useSheetSwipe(onClose, open)
+
   useEffect(() => {
     if (!open) return
     const prev = document.body.style.overflow
@@ -26,18 +29,18 @@ export function MemberPickerSheet({ open, title = 'Choose a member', members, mu
   if (!open) return null
   return (
     <div className="fixed inset-0 z-[80]">
-      <div className="absolute inset-0 bg-black/55 backdrop-blur-[2px] touch-none" onClick={onClose} />
-      <div className="absolute bottom-0 left-0 right-0 rounded-t-[28px] h-[85dvh] flex flex-col bg-[#0D110E] border-t border-[#1D231F] shadow-[0_-8px_60px_rgba(0,0,0,0.6)] animate-[slideUp_0.28s_ease-out]" onClick={e => e.stopPropagation()}>
-        <div className="flex justify-center pt-3 pb-1 shrink-0"><div className="w-10 h-1 rounded-full bg-[#1D231F]" /></div>
+      <div className="absolute inset-0 bg-black/55 backdrop-blur-[2px] touch-none transition-opacity duration-[220ms]" style={{ opacity: backdropOpacity }} onClick={close} />
+      <div ref={sheetRef} style={sheetStyle} {...touchHandlers} className="absolute bottom-0 left-0 right-0 rounded-t-[28px] h-[85dvh] flex flex-col bg-[#0D1119] border-t border-[#1D2129] shadow-[0_-8px_60px_rgba(0,0,0,0.6)] animate-[slideUp_0.28s_ease-out]" onClick={e => e.stopPropagation()}>
+        <div className="flex justify-center pt-3 pb-1 shrink-0"><div className="w-10 h-1 rounded-full bg-[#1D2129]" /></div>
         <div className="flex items-center justify-between px-5 pb-3 shrink-0">
           <div className="text-[15px] font-extrabold text-[#F8FAFC]">{title}</div>
-          <button onClick={onClose} className="w-8 h-8 rounded-full border border-[#1D231F] flex items-center justify-center text-lg leading-none cursor-pointer text-[#94A3B8] bg-[#080B09] hover:bg-white/5 transition-colors">×</button>
+          <button onClick={close} className="w-8 h-8 rounded-full border border-[#1D2129] flex items-center justify-center text-lg leading-none cursor-pointer text-[#94A3B8] bg-[#080B12] hover:bg-white/5 transition-colors">{'×'}</button>
         </div>
-        <div className="flex-1 overflow-y-auto overscroll-contain px-4 pb-4 min-h-0">
+        <div ref={scrollRef} className="flex-1 overflow-y-auto no-scrollbar overscroll-contain px-4 pb-4 min-h-0">
           {getMemberSections(members).map(section => (
             <div key={section.key} className="mb-3">
               <div className="flex items-center gap-2 px-1 pt-2 pb-1.5">
-                <span className="w-2 h-2 rounded-full shrink-0" style={{ background: section.color }} />
+                <span className="w-[3px] h-3.5 rounded-full shrink-0" style={{ background: section.color }} />
                 <span className="text-[10px] font-bold uppercase tracking-[0.8px] text-[#94A3B8]">{section.label}</span>
               </div>
               <div className="flex flex-col gap-1.5">
@@ -49,8 +52,8 @@ export function MemberPickerSheet({ open, title = 'Choose a member', members, mu
           ))}
         </div>
         {multi && (
-          <div className="shrink-0 px-5 pb-[max(1rem,env(safe-area-inset-bottom))] pt-2 border-t border-[#1D231F]">
-            <button onClick={() => { onDone?.(); onClose() }}
+          <div className="shrink-0 px-5 pb-[max(1rem,env(safe-area-inset-bottom))] pt-2 border-t border-[#1D2129]">
+            <button onClick={() => { onDone?.(); close() }}
               style={{ boxShadow: '0 0 20px rgba(34,197,94,0.25)' }}
               className="w-full py-3 rounded-xl text-sm font-bold border-none cursor-pointer bg-[#22C55E] text-white hover:bg-[#16A34A] transition-colors">
               Done{selectedIds.length > 0 ? ` (${selectedIds.length} selected)` : ''}

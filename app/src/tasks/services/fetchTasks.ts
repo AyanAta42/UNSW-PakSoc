@@ -5,7 +5,7 @@ import type { Member } from '@/members/types/Member'
 export async function fetchTasks(eventId: string): Promise<Task[]> {
   const { data, error } = await supabase
     .from('tasks')
-    .select(`id, title, category, notes, subtasks(id, title), task_assignments(member_id, members(id, name, role, committee))`)
+    .select(`id, title, category, notes, subtasks(id, title), task_assignments(member_id, members(id, user_id, name, role, committee))`)
     .eq('event_id', eventId)
     .order('created_at')
   if (error) throw error

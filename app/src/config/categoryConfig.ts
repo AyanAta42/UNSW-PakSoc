@@ -17,22 +17,23 @@ export const ALL_CATS = DEFAULT_TASK_CATEGORIES
 /** @deprecated use getCatCfg */
 export const CAT_CFG = DEFAULT_CAT_CFG as Record<string, { color: string; activeCls: string; headerCls: string }>
 
+/** Muted, low-saturation tones that sit calmly on the dark UI instead of clashing like flat primary colours. */
 export const COMM_CFG: Record<string, { color: string }> = {
-  Presidents: { color: '#C9A84C' },
-  Sports:     { color: '#3B9DDD' },
-  Marketing:  { color: '#E67E22' },
-  Events:     { color: '#E74C3C' },
-  HR:         { color: '#A855F7' },
+  Presidents: { color: '#C9A97E' },
+  Sports:     { color: '#6FA8C7' },
+  Marketing:  { color: '#C79A6B' },
+  Events:     { color: '#BD7F7F' },
+  HR:         { color: '#9B8FC2' },
 }
 
 export const COMM_ORDER = ['Presidents', 'Sports', 'Marketing', 'Events', 'HR']
 export const COMMITTEE_ORDER: Committee[] = ['Sports', 'Marketing', 'Events', 'HR']
 
 export const ROLE_SECTION_CFG = {
-  president:      { label: 'President',      color: '#C084FC' },
-  vice_president: { label: 'Vice President', color: '#4ADE80' },
+  president:      { label: 'President',      color: '#D4B36A' },
+  vice_president: { label: 'Vice President', color: '#6FBF97' },
 } as const
 
 /** Shared Tailwind input classes for the dark task forms. */
-export const inputCls = 'w-full px-3 py-2.5 border border-[#1D231F] rounded-lg bg-[#090C0A] text-[#F8FAFC] text-sm outline-none focus:border-[#22C55E] transition-colors placeholder:text-[#475569]'
+export const inputCls = 'w-full px-3 py-2.5 border border-[#1D2129] rounded-lg bg-[#090C13] text-[#F8FAFC] text-sm outline-none focus:border-[#22C55E] transition-colors placeholder:text-[#475569]'
 export const labelCls = 'block text-[11px] font-bold text-[#94A3B8] uppercase tracking-wider mb-1.5'

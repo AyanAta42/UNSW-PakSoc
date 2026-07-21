@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo, lazy, Suspense } from 'react'
 import { usePublicEvents } from '@/events/context/PublicEventsContext'
 import { useAuth } from '@/auth/hooks/useAuth'
+import { useCurrentMember } from '@/roles/context/CurrentMemberContext'
 import type { DbEvent } from '@/events/types/Event'
 import { Navbar } from './components/Navbar'
 import { HeroBanner } from './components/HeroBanner'
@@ -10,7 +11,7 @@ import { Footer } from './components/Footer'
 import { SocialWall } from './components/SocialWall'
 import { MobileEventSheet } from './components/MobileEventSheet'
 import { useNavigate } from 'react-router-dom'
-import { ACCENT, PALETTE } from '@/config/theme'
+import { ACCENT, PALETTE, PAGE_BG } from '@/config/theme'
 
 import { AmbientBackground } from '@/shared/components/AmbientBackground'
 
@@ -59,8 +60,10 @@ function isPhone(): boolean {
 export default function HomePage() {
   const navigate = useNavigate()
   const { user, avatarUrl: authAvatar } = useAuth()
+  const { member } = useCurrentMember()
   const { events, loading, ready: eventsReady } = usePublicEvents()
-  const [avatarUrl, setAvatarUrl] = useState<string | undefined>()
+  // OAuth metadata avatar is instant; otherwise fall back to the cached member row.
+  const avatarUrl = authAvatar ?? member?.avatarUrl ?? undefined
   const [avatarBroken, setAvatarBroken] = useState(false)
   const [selectedId, setSelectedId] = useState<string | null>(null)
   const [sheetEvent, setSheetEvent] = useState<DbEvent | null>(null)
@@ -76,18 +79,7 @@ export default function HomePage() {
     return () => clearTimeout(fontsId)
   }, [eventsReady])
 
-  useEffect(() => {
-    setAvatarBroken(false)
-    if (!user) { setAvatarUrl(undefined); return }
-    if (authAvatar) { setAvatarUrl(authAvatar); return }
-    if (!eventsReady) return
-    let alive = true
-    void import('@/members/services/fetchMemberAvatar')
-      .then(m => m.fetchMemberAvatar(user.id))
-      .then(url => { if (alive) setAvatarUrl(url ?? undefined) })
-      .catch(() => {})
-    return () => { alive = false }
-  }, [user, authAvatar, eventsReady])
+  useEffect(() => { setAvatarBroken(false) }, [avatarUrl])
 
   const overlayOpen = !!sheetEvent || editOpen
   useEffect(() => {
@@ -133,7 +125,7 @@ export default function HomePage() {
     <div style={{
       // Same static aurora tint as the html shell — the animated layers fade
       // in over it, so the background never pops
-      background: `radial-gradient(58vw 55vh at 88% -8%, rgba(34,197,94,0.13), transparent 68%) no-repeat ${PALETTE.page}`,
+      background: PAGE_BG,
       color: PALETTE.dark,
       fontFamily: 'system-ui, sans-serif',
       minHeight: '100vh',
@@ -213,7 +205,7 @@ export default function HomePage() {
       )}
       {editOpen && user && (
         <Suspense fallback={null}>
-          <EditProfileModal user={user} initial={initial ?? '?'} onClose={() => setEditOpen(false)} />
+          <EditProfileModal user={user} onClose={() => setEditOpen(false)} />
         </Suspense>
       )}
 

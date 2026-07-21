@@ -6,6 +6,7 @@ import { MobileEventSheet } from '@/public-site/home/components/MobileEventSheet
 import { EventDetailContent } from '@/public-site/home/components/EventDetailContent'
 import type { DbEvent } from '@/events/types/Event'
 import { ACCENT, PALETTE } from '@/config/theme'
+import { AuroraPage } from '@/shared/components/AuroraPage'
 
 function isPhone(): boolean {
   return typeof window !== 'undefined' && window.matchMedia('(max-width: 1023px)').matches
@@ -23,7 +24,7 @@ function EventSection({ title, color, events, onSelect }: {
         <span className="text-xs font-bold px-2.5 py-0.5 rounded-full"
           style={{ background: `${color}22`, color }}>{events.length}</span>
       </div>
-      <div className="grid grid-cols-[repeat(auto-fill,minmax(260px,1fr))] gap-4">
+      <div className="grid grid-cols-[repeat(auto-fill,minmax(min(260px,100%),1fr))] gap-4">
         {events.map(ev => <AllEventsCard key={ev.id} event={ev} onClick={() => onSelect(ev)} />)}
       </div>
     </section>
@@ -62,9 +63,10 @@ export default function AllEventsPage() {
   }
 
   return (
-    <div style={{ minHeight: '100vh', background: PALETTE.page, fontFamily: 'system-ui, sans-serif' }}>
-      <nav style={{ background: PALETTE.navbarGlass, backdropFilter: 'blur(16px)', borderBottom: `1px solid ${PALETTE.border}` }}
-        className="sticky top-0 z-50 min-h-[3.5rem] pt-[env(safe-area-inset-top)] flex items-center px-6 gap-3">
+    <AuroraPage contentClassName="flex h-[100dvh] flex-col overflow-hidden">
+      {/* Fixed navbar */}
+      <nav style={{ background: PALETTE.navbarGlass, backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)', borderBottom: `1px solid ${PALETTE.border}` }}
+        className="shrink-0 min-h-16 pt-[env(safe-area-inset-top)] flex items-center px-4 md:px-6 gap-2.5">
         <button onClick={() => navigate('/')}
           style={{ color: PALETTE.muted, background: 'transparent' }}
           className="text-sm font-semibold border-none cursor-pointer hover:text-green-400 transition-colors">← Home</button>
@@ -72,10 +74,11 @@ export default function AllEventsPage() {
         <span style={{ color: PALETTE.dark }} className="font-extrabold text-[15px]">All Events</span>
       </nav>
 
-      <div className="max-w-[1400px] mx-auto px-6 md:px-8 py-8 flex gap-6 items-start">
-        <div className="flex-1 min-w-0">
+      <div className="flex-1 min-h-0 w-full max-w-[1400px] mx-auto px-4 sm:px-6 md:px-8 py-6 flex gap-6 items-stretch">
+        {/* Scrollable events column */}
+        <div className="flex-1 min-w-0 min-h-0 overflow-y-auto">
           {loading && events.length === 0 && (
-            <div className="grid grid-cols-[repeat(auto-fill,minmax(260px,1fr))] gap-4">
+            <div className="grid grid-cols-[repeat(auto-fill,minmax(min(260px,100%),1fr))] gap-4">
               {[1, 2, 3, 4].map(i => (
                 <div key={i} className="motion-skeleton h-44" style={{ borderRadius: 18, border: `1px solid ${PALETTE.border}` }} />
               ))}
@@ -92,11 +95,12 @@ export default function AllEventsPage() {
           </>}
         </div>
 
+        {/* Fixed-height detail + timeline panel — constant height for every event, scrolls internally */}
         {featured && (
-          <aside className="hidden lg:block w-[340px] shrink-0 sticky top-[72px]">
+          <aside className="hidden lg:block w-[340px] shrink-0 min-h-0">
             <div style={{ background: PALETTE.card, border: `1px solid ${PALETTE.border}`, borderRadius: 18, boxShadow: PALETTE.shadowMd }}
-              className="overflow-hidden flex flex-col">
-              <div className="px-5 pt-5 pb-5 flex flex-col gap-3.5">
+              className="h-full overflow-hidden flex flex-col">
+              <div className="px-5 py-5 flex flex-col gap-3.5 overflow-y-auto">
                 <EventDetailContent event={featured} now={now} />
               </div>
             </div>
@@ -105,6 +109,6 @@ export default function AllEventsPage() {
       </div>
 
       {modalEvent && <MobileEventSheet event={modalEvent} now={now} mapCacheId="all-events-sheet" onClose={() => setModalEvent(null)} />}
-    </div>
+    </AuroraPage>
   )
 }

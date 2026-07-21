@@ -7,9 +7,14 @@ import { AdminEventCard }    from '@/events/components/AdminEventCard'
 import { AddEditEventModal } from '@/events/components/AddEditEventModal'
 import { usePermissions }    from '@/roles/hooks/usePermissions'
 import { useRealtimeTable }  from '@/core/supabase/useRealtimeTable'
+import { logInteraction }        from '@/interactions/services/logInteraction'
+import { fetchEventInteractions } from '@/interactions/services/fetchEventInteractions'
+import { HistoryButton }     from '@/interactions/components/HistoryButton'
+import { HistoryPanel }      from '@/interactions/components/HistoryPanel'
 import { applyEventChange }  from '@/events/utils/applyEventChange'
 import type { DbEvent }      from '@/events/types/Event'
 import { ACCENT, ACCENT_TEXT, PALETTE } from '@/config/theme'
+import { AuroraPage } from '@/shared/components/AuroraPage'
 import { toast, errorMessage } from '@/shared/toast/toast'
 
 function EventSection({ title, color, events, canEdit, onAnnounce, onUnpublish, onEdit, onDelete }: {
@@ -25,7 +30,7 @@ function EventSection({ title, color, events, canEdit, onAnnounce, onUnpublish, 
         <span className="text-xs font-bold px-2.5 py-0.5 rounded-full"
           style={{ background: `${color}22`, color }}>{events.length}</span>
       </div>
-      <div className="grid grid-cols-[repeat(auto-fill,minmax(260px,1fr))] gap-4">
+      <div className="grid grid-cols-[repeat(auto-fill,minmax(min(260px,100%),1fr))] gap-4">
         {events.map(ev => <AdminEventCard key={ev.id} event={ev} canEdit={canEdit}
           onAnnounce={onAnnounce} onUnpublish={onUnpublish} onEdit={onEdit} onDelete={onDelete} />)}
       </div>
@@ -40,6 +45,7 @@ export default function EventsManagerPage() {
   const [loading, setLoading] = useState(true)
   const [showAdd, setShowAdd] = useState(false)
   const [editingEv, setEditingEv] = useState<DbEvent | null>(null)
+  const [showHistory, setShowHistory] = useState(false)
 
   useEffect(() => { fetchAllEvents().then(setEvents).catch(console.error).finally(() => setLoading(false)) }, [])
 
@@ -57,44 +63,64 @@ export default function EventsManagerPage() {
   const live   = active.filter(e => e.public)
   const drafts = active.filter(e => !e.public)
 
-  const announce  = async (id: string) => {
-    try { await setEventPublic(id, true); setEvents(p => p.map(e => e.id === id ? { ...e, public: true } : e)); toast.success('Event announced') }
-    catch (e) { toast.error("Couldn't announce event", errorMessage(e, 'Please try again.')) }
+  const announce = async (id: string) => {
+    const name = events.find(e => e.id === id)?.name ?? 'an event'
+    try {
+      await setEventPublic(id, true)
+      setEvents(p => p.map(e => e.id === id ? { ...e, public: true } : e))
+      toast.success('Event announced')
+      void logInteraction('event.published', 'event', id, id, `announced "${name}"`)
+    } catch (e) { toast.error("Couldn't announce event", errorMessage(e, 'Please try again.')) }
   }
   const unpublish = async (id: string) => {
-    try { await setEventPublic(id, false); setEvents(p => p.map(e => e.id === id ? { ...e, public: false } : e)); toast.info('Event unannounced') }
-    catch (e) { toast.error("Couldn't unannounce event", errorMessage(e, 'Please try again.')) }
+    const name = events.find(e => e.id === id)?.name ?? 'an event'
+    try {
+      await setEventPublic(id, false)
+      setEvents(p => p.map(e => e.id === id ? { ...e, public: false } : e))
+      toast.info('Event unannounced')
+      void logInteraction('event.unpublished', 'event', id, id, `unpublished "${name}"`)
+    } catch (e) { toast.error("Couldn't unannounce event", errorMessage(e, 'Please try again.')) }
   }
   const handleDelete = async (id: string) => {
-    try { await deleteEvent(id); setEvents(p => p.filter(e => e.id !== id)); toast.success('Event deleted') }
-    catch (e) { toast.error("Couldn't delete event", errorMessage(e, 'Please try again.')) }
+    const name = events.find(e => e.id === id)?.name ?? 'an event'
+    try {
+      await deleteEvent(id)
+      setEvents(p => p.filter(e => e.id !== id))
+      toast.success('Event deleted')
+      void logInteraction('event.deleted', 'event', id, id, `deleted event "${name}"`)
+    } catch (e) { toast.error("Couldn't delete event", errorMessage(e, 'Please try again.')) }
   }
 
   const sectionProps = { canEdit: can.editEvents, onAnnounce: announce, onUnpublish: unpublish, onEdit: setEditingEv, onDelete: handleDelete }
 
   return (
-    <div style={{ minHeight: '100vh', background: PALETTE.page, fontFamily: 'system-ui, sans-serif' }}>
+    <AuroraPage>
       <nav style={{ background: PALETTE.navbarGlass, backdropFilter: 'blur(16px)', borderBottom: `1px solid ${PALETTE.border}` }}
-        className="sticky top-0 z-50 min-h-[3.5rem] pt-[env(safe-area-inset-top)] flex items-center justify-between px-6">
-        <div className="flex items-center gap-3">
+        className="sticky top-0 z-50 min-h-16 pt-[env(safe-area-inset-top)] flex items-center justify-between gap-2 px-4 md:px-6">
+        <div className="flex items-center gap-2.5 min-w-0">
           <button onClick={() => navigate('/')}
             style={{ color: PALETTE.muted, background: 'transparent' }}
-            className="text-sm font-semibold border-none cursor-pointer hover:text-green-400 transition-colors">← Home</button>
-          <div className="w-px h-4" style={{ background: PALETTE.border }} />
-          <span style={{ color: PALETTE.dark }} className="font-extrabold text-[15px]">Events Manager</span>
+            className="text-sm font-semibold border-none cursor-pointer hover:text-green-400 transition-colors shrink-0">← Home</button>
+          <div className="w-px h-4 shrink-0" style={{ background: PALETTE.border }} />
+          <span style={{ color: PALETTE.dark }} className="font-extrabold text-[15px] truncate">Events Manager</span>
         </div>
-        {can.editEvents && (
-          <button onClick={() => setShowAdd(true)}
-            style={{ background: ACCENT, color: ACCENT_TEXT, borderRadius: 14, boxShadow: '0 0 20px rgba(34,197,94,0.3)' }}
-            className="px-5 py-1.5 font-bold text-sm cursor-pointer border-none hover:opacity-85 transition-opacity">
-            + New Event
-          </button>
-        )}
+        <div className="flex items-center gap-2 shrink-0">
+          <HistoryButton onClick={() => setShowHistory(true)} label="View event history" />
+        </div>
       </nav>
 
-      <div className="max-w-[1100px] mx-auto px-6 md:px-8 py-8">
+      <div className="max-w-[1100px] mx-auto px-4 sm:px-6 md:px-8 py-8">
+        {can.editEvents && (
+          <div className="flex justify-end mb-6">
+            <button onClick={() => setShowAdd(true)}
+              style={{ background: ACCENT, color: ACCENT_TEXT, boxShadow: '0 0 20px rgba(34,197,94,0.3)' }}
+              className="font-bold cursor-pointer border-none hover:opacity-85 transition-opacity flex items-center gap-1.5 px-5 py-2.5 rounded-[14px] text-sm">
+              <span className="text-base leading-none">+</span> New Event
+            </button>
+          </div>
+        )}
         {loading && (
-          <div className="grid grid-cols-[repeat(auto-fill,minmax(260px,1fr))] gap-4">
+          <div className="grid grid-cols-[repeat(auto-fill,minmax(min(260px,100%),1fr))] gap-4">
             {[1,2,3,4].map(i => (
               <div key={i} className="motion-skeleton h-44" style={{ borderRadius: 18, border: `1px solid ${PALETTE.border}` }} />
             ))}
@@ -121,6 +147,10 @@ export default function EventsManagerPage() {
 
       {showAdd   && <AddEditEventModal onClose={() => setShowAdd(false)} onCreated={ev => { setEvents(p => [...p, ev]); setShowAdd(false); toast.success('Event created') }} />}
       {editingEv && <AddEditEventModal event={editingEv} onClose={() => setEditingEv(null)} onUpdated={updated => { setEvents(p => p.map(e => e.id === updated.id ? updated : e)); setEditingEv(null); toast.success('Event updated') }} />}
-    </div>
+      {showHistory && (
+        <HistoryPanel title="Event History" onClose={() => setShowHistory(false)}
+          fetcher={fetchEventInteractions} emptyMessage="No event activity yet." />
+      )}
+    </AuroraPage>
   )
 }

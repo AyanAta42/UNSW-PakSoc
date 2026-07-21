@@ -3,11 +3,13 @@
 @tailwind utilities;
 
 html {
-  /* Static aurora shell — green left, violet right; identical to index.html so
-     the very first paint already carries the tint (no pop when React mounts). */
+  /* Static aurora shell — must stay pixel-identical to PAGE_BG (theme.ts) and
+     index.html's inline shell. Any drift between these shows up as a hard
+     seam at the top edge during PWA rubber-band overscroll, since that's
+     exactly where these gradients are most concentrated (-8% ≈ just above
+     the viewport). */
   background:
-    radial-gradient(58vw 55vh at 10% -8%, rgba(34, 197, 94, 0.13), transparent 68%) no-repeat,
-    radial-gradient(58vw 55vh at 90% -8%, rgba(139, 92, 246, 0.13), transparent 68%) no-repeat #030408;
+    radial-gradient(58vw 55vh at 88% -8%, rgba(34, 197, 94, 0.13), transparent 68%) no-repeat #03040A;
   color-scheme: dark;
   scroll-behavior: smooth;
   overflow-x: hidden;
@@ -21,12 +23,14 @@ html {
   overflow: hidden;
 }
 
-/* Installed PWA only — kill pull-to-refresh / rubber band so the shell feels
-   native. Browser tabs keep normal pull-to-refresh. */
+/* Installed PWA only — keep the vertical rubber-band bounce (feels native on
+   iOS/Android) but contain it so an overscroll never chains into the
+   browser's own pull-to-refresh/reload gesture. Horizontal stays locked via
+   overscroll-behavior-x: none above. */
 @media (display-mode: standalone), (display-mode: fullscreen) {
   html,
   body {
-    overscroll-behavior: none;
+    overscroll-behavior-y: contain;
   }
 }
 
@@ -38,6 +42,18 @@ body {
   padding-left: env(safe-area-inset-left);
   padding-right: env(safe-area-inset-right);
   padding-bottom: env(safe-area-inset-bottom);
+}
+
+/* Reusable: hide a scrollable element's scrollbar while keeping scroll enabled. */
+.no-scrollbar {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+  width: 0;
+  height: 0;
 }
 
 /* Hide scrollbars on phone — scrolling still works.
@@ -123,6 +139,11 @@ body {
 @keyframes modalIn {
   from { opacity: 0; transform: translateY(10px) scale(0.98); }
   to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes panelIn {
+  from { transform: translateX(100%); }
+  to { transform: translateX(0); }
 }
 
 @keyframes heroZoom {
@@ -225,14 +246,6 @@ body {
     background-clip: text;
     -webkit-text-fill-color: transparent;
   }
-}
-
-/* The little editorial "in" between the headline and the countdown */
-.hero-title-in {
-  font-family: 'Cormorant Garamond', Georgia, 'Times New Roman', serif;
-  font-style: italic;
-  font-weight: 500;
-  color: #cbd5e1;
 }
 
 .motion-hero-enter {
@@ -439,6 +452,22 @@ body {
   transition: transform var(--motion-slow) var(--motion-ease);
 }
 
+/* Tasks board card — clean, flat, no travelling border glow. Border colour is
+   left to Tailwind hover utilities; this only adds a subtle desktop lift. */
+.task-card {
+  transition: transform var(--motion-fast) var(--motion-ease),
+              border-color var(--motion-base) ease,
+              background-color var(--motion-base) ease,
+              box-shadow var(--motion-base) ease;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .task-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 30px -14px rgba(0, 0, 0, 0.6);
+  }
+}
+
 /* Soft layered glows — static blur, animate opacity + scale only */
 .motion-glow {
   position: relative;
@@ -609,6 +638,10 @@ body {
   animation: modalIn var(--motion-base) var(--motion-ease) both;
 }
 
+.motion-panel {
+  animation: panelIn var(--motion-base) var(--motion-ease) both;
+}
+
 .motion-backdrop {
   animation: fadeIn var(--motion-fast) var(--motion-ease) both;
 }
@@ -645,9 +678,15 @@ body {
 }
 
 /* ─── Ambient background ───────────────────────────────────────────────────── */
+/* Bleeds 220px past the viewport top/bottom so the rubber-band overscroll
+   bounce (PWA) reveals more aurora/grain instead of a hard seam where the
+   flat html background would otherwise show through. */
 .ambient-root {
   position: fixed;
-  inset: 0;
+  top: -220px;
+  right: 0;
+  bottom: -220px;
+  left: 0;
   z-index: 0;
   overflow: hidden;
   pointer-events: none;

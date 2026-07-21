@@ -1,4 +1,5 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
+import type { TouchEvent as ReactTouchEvent } from 'react'
 import { createPortal } from 'react-dom'
 import { PALETTE } from '@/config/theme'
 import { subscribeToasts, toast, type ToastItem, type ToastVariant } from './toast'
@@ -32,8 +33,15 @@ function ToastIcon({ variant }: { variant: ToastVariant }) {
   )
 }
 
+const SWIPE_DISMISS = 44
+
 function ToastCard({ item }: { item: ToastItem }) {
-  const [leaving, setLeaving] = useState(false)
+  const [leaving, setLeaving]       = useState(false)
+  const [dragY, setDragY]           = useState(0)
+  const [dragging, setDragging]     = useState(false)
+  const [interacted, setInteracted] = useState(false)
+  const startY = useRef<number | null>(null)
+  const moved  = useRef(false)
 
   useEffect(() => {
     const leaveDelay = Math.max(item.duration - 220, 0)
@@ -42,16 +50,57 @@ function ToastCard({ item }: { item: ToastItem }) {
     return () => { window.clearTimeout(leaveTimer); window.clearTimeout(removeTimer) }
   }, [item.id, item.duration])
 
+  function onTouchStart(e: ReactTouchEvent) {
+    startY.current = e.touches[0].clientY
+    moved.current  = false
+    setDragging(true)
+  }
+
+  function onTouchMove(e: ReactTouchEvent) {
+    if (startY.current === null) return
+    const delta = e.touches[0].clientY - startY.current
+    if (delta > 0) { setDragY(0); return }   // only track upward drag
+    if (delta < -4) { moved.current = true; setInteracted(true) }
+    setDragY(delta)
+  }
+
+  function onTouchEnd(e: ReactTouchEvent) {
+    if (startY.current === null) return
+    const delta = e.changedTouches[0].clientY - startY.current
+    startY.current = null
+    setDragging(false)
+    if (delta < -SWIPE_DISMISS) {
+      setDragY(-180)   // slide up out, then remove
+      window.setTimeout(() => toast.dismiss(item.id), 180)
+    } else {
+      setDragY(0)      // spring back
+    }
+  }
+
+  function onClick() {
+    if (moved.current) { moved.current = false; return }  // swipe, not a tap
+    toast.dismiss(item.id)
+  }
+
   return (
     <div
       role="status"
-      onClick={() => toast.dismiss(item.id)}
-      className={`pointer-events-auto relative overflow-hidden flex items-center gap-2.5 pl-3 pr-4 py-2.5 cursor-pointer w-full max-w-[340px] ${leaving ? 'motion-toast-out' : 'motion-toast-in'}`}
+      onClick={onClick}
+      onTouchStart={onTouchStart}
+      onTouchMove={onTouchMove}
+      onTouchEnd={onTouchEnd}
+      className={`pointer-events-auto relative overflow-hidden flex items-center gap-2.5 pl-3 pr-4 py-2.5 cursor-pointer w-full max-w-[340px] ${leaving ? 'motion-toast-out' : interacted ? '' : 'motion-toast-in'}`}
       style={{
         background: PALETTE.modal,
         border: `1px solid ${PALETTE.border}`,
         borderRadius: 14,
         boxShadow: `${PALETTE.shadowMd}, 0 0 24px ${GLOW[item.variant]}`,
+        touchAction: 'none',
+        ...(interacted && {
+          transform:  `translateY(${dragY}px)`,
+          opacity:    Math.max(0, 1 + dragY / 90),
+          transition: dragging ? 'none' : 'transform 200ms cubic-bezier(0.4,0,1,1), opacity 200ms ease',
+        }),
       }}
     >
       <ToastIcon variant={item.variant} />

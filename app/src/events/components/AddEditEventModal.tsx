@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { createEvent }       from '@/events/services/createEvent'
 import { updateEvent }       from '@/events/services/updateEvent'
 import { uploadEventImage }  from '@/events/services/uploadEventImage'
+import { logInteraction }    from '@/interactions/services/logInteraction'
 import { ImageUploadZone }   from '@/events/components/ImageUploadZone'
 import { TimelineEditor }    from '@/events/components/TimelineEditor'
 import { TimeField, buildIso, buildEndIso, parseIsoDate, parseTimeHM, addHoursHM, formatHM } from '@/events/components/TimePickerInput'
@@ -9,6 +10,7 @@ import { CtaButtonsEditor }  from '@/events/components/CtaButtonsEditor'
 import type { DbEvent, NewEvent, TimelineItem, EventButton } from '@/events/types/Event'
 import { DEFAULT_BUTTONS }   from '@/events/types/Event'
 import { ACCENT, ACCENT_TEXT, PALETTE } from '@/config/theme'
+import { useSheetSwipe }     from '@/shared/hooks/useSheetSwipe'
 
 interface Props {
   onClose:    () => void
@@ -53,6 +55,8 @@ export function AddEditEventModal({ onClose, onCreated, onUpdated, event }: Prop
   const [error,        setError]        = useState('')
   const [mapPreview,   setMapPreview]   = useState(false)
 
+  const { sheetRef, scrollRef, close, backdropOpacity, sheetStyle, touchHandlers } = useSheetSwipe(onClose)
+
   const crossesMidnight = !!endTime && endTime < startTime
 
   function handleFile(file: File) {
@@ -78,8 +82,15 @@ export function AddEditEventModal({ onClose, onCreated, onUpdated, event }: Prop
         buttons:  buttons.filter(b => b.label.trim()),
       }
 
-      if (isEdit && event) { await updateEvent(event.id, fields); onUpdated?.({ ...event, ...fields }) }
-      else                 { const ev = await createEvent(fields); onCreated?.(ev) }
+      if (isEdit && event) {
+        await updateEvent(event.id, fields)
+        onUpdated?.({ ...event, ...fields })
+        void logInteraction('event.updated', 'event', event.id, event.id, `updated event "${fields.name}"`)
+      } else {
+        const ev = await createEvent(fields)
+        onCreated?.(ev)
+        void logInteraction('event.created', 'event', ev.id, ev.id, `created event "${ev.name}"`)
+      }
     } catch (e) { setError(e instanceof Error ? e.message : 'Something went wrong.') }
     finally { setSaving(false); setUploading(false) }
   }
@@ -87,10 +98,15 @@ export function AddEditEventModal({ onClose, onCreated, onUpdated, event }: Prop
   const canSave = name.trim() && eventDate
 
   return (
-    <div className="motion-backdrop fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/60 backdrop-blur-sm sm:px-4" onClick={onClose}>
-      <div onClick={e => e.stopPropagation()}
-        className="motion-modal w-full max-w-md overflow-hidden max-h-[94dvh] sm:max-h-[92dvh] flex flex-col rounded-t-3xl sm:rounded-3xl"
-        style={{ background: PALETTE.modal, border: `1px solid ${PALETTE.border}`, boxShadow: PALETTE.shadowLg }}>
+    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center sm:px-4">
+      <div
+        className="absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity duration-[220ms] animate-[fadeIn_var(--motion-fast)_var(--motion-ease)]"
+        style={{ opacity: backdropOpacity }}
+        onClick={close}
+      />
+      <div ref={sheetRef} {...touchHandlers} onClick={e => e.stopPropagation()}
+        className="relative w-full max-w-md overflow-hidden max-h-[94dvh] sm:max-h-[92dvh] flex flex-col rounded-t-3xl sm:rounded-3xl animate-[slideUp_0.28s_ease-out] sm:animate-[modalIn_var(--motion-base)_var(--motion-ease)]"
+        style={{ background: PALETTE.modal, border: `1px solid ${PALETTE.border}`, boxShadow: PALETTE.shadowLg, ...sheetStyle }}>
 
         {/* Grab handle (mobile sheet affordance) */}
         <div className="sm:hidden flex justify-center pt-2.5">
@@ -102,10 +118,10 @@ export function AddEditEventModal({ onClose, onCreated, onUpdated, event }: Prop
             <div className="w-2 h-2 rounded-full" style={{ background: ACCENT, boxShadow: '0 0 10px rgba(34,197,94,0.7)' }} />
             <h2 style={{ color: PALETTE.dark }} className="font-extrabold text-base m-0">{isEdit ? 'Edit Event' : 'New Event'}</h2>
           </div>
-          <button onClick={onClose} style={{ color: PALETTE.muted, background: PALETTE.cardAlt, border: `1px solid ${PALETTE.border}`, borderRadius: '50%' }} className="w-8 h-8 flex items-center justify-center text-lg cursor-pointer hover:border-white/30 transition-colors">×</button>
+          <button onClick={close} style={{ color: PALETTE.muted, background: PALETTE.cardAlt, border: `1px solid ${PALETTE.border}`, borderRadius: '50%' }} className="w-8 h-8 flex items-center justify-center text-lg cursor-pointer hover:border-white/30 transition-colors">×</button>
         </div>
 
-        <div className="p-5 sm:p-6 flex flex-col gap-5 overflow-y-auto overscroll-contain">
+        <div ref={scrollRef} className="p-5 sm:p-6 flex flex-col gap-5 overflow-y-auto overscroll-contain">
           {/* Name */}
           <div><Label icon="✨">Event Name</Label>
             <input value={name} onChange={e => setName(e.target.value)} placeholder="e.g. Eid Gala 2026" style={inp} className="w-full px-3.5 py-2.5 text-sm outline-none focus:ring-2 focus:ring-green-500/30" /></div>
@@ -166,7 +182,7 @@ export function AddEditEventModal({ onClose, onCreated, onUpdated, event }: Prop
         )}
 
         <div className="px-5 sm:px-6 pt-3 pb-[max(1.25rem,env(safe-area-inset-bottom))] flex gap-3 shrink-0" style={{ borderTop: `1px solid ${PALETTE.border}` }}>
-          <button onClick={onClose}
+          <button onClick={close}
             style={{ border: `1px solid ${PALETTE.border}`, color: PALETTE.secondary, borderRadius: 14, background: 'transparent' }}
             className="flex-1 py-2.5 text-sm font-semibold cursor-pointer hover:bg-white/5 transition-colors">Cancel</button>
           <button onClick={submit} disabled={!canSave || saving}
