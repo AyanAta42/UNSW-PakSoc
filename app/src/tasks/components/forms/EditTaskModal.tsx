@@ -41,7 +41,7 @@ export function EditTaskModal({ task, allCategories, onClose, onSave }: Props) {
           <h2 className="text-[#F8FAFC] font-extrabold text-base m-0">Edit Task</h2>
           <button onClick={onClose} className="text-[#94A3B8] hover:text-[#F8FAFC] text-xl bg-transparent border-none cursor-pointer transition-colors">{'×'}</button>
         </div>
-        <div className="p-6 flex flex-col gap-4 max-h-[68vh] overflow-y-auto">
+        <div className="p-6 flex flex-col gap-4 max-h-[68vh] overflow-y-auto no-scrollbar">
           <div><label className={labelCls}>Task Title</label>
             <input value={title} onChange={e => setTitle(e.target.value)} className={inputCls} /></div>
           <div>
@@ -71,7 +71,7 @@ export function EditTaskModal({ task, allCategories, onClose, onSave }: Props) {
             </div>
           </div>
           <div><label className={labelCls}>Notes</label>
-            <textarea value={notes} onChange={e => setNotes(e.target.value)} rows={3} className={inputCls + ' resize-none'} placeholder="Additional notesâ€¦" /></div>
+            <textarea value={notes} onChange={e => setNotes(e.target.value)} rows={3} className={inputCls + ' resize-none'} placeholder="Additional notes…" /></div>
         </div>
         <div className="px-6 pb-5 flex gap-3 border-t border-[#1D2129] pt-4">
           <button onClick={onClose} className="flex-1 py-2.5 rounded-xl border border-[#1D2129] text-[#CBD5E1] text-sm font-semibold cursor-pointer bg-transparent hover:bg-white/5 transition-colors">Cancel</button>

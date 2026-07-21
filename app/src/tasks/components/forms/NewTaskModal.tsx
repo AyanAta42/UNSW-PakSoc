@@ -47,7 +47,7 @@ export function NewTaskModal({ open, onClose, title, setTitle, cat, setCat, allC
           </div>
           <button onClick={close} className="w-8 h-8 rounded-full border border-[#1D2129] bg-[#080B12] flex items-center justify-center text-lg leading-none cursor-pointer text-[#94A3B8] hover:bg-white/5 transition-colors">{'×'}</button>
         </div>
-        <div ref={scrollRef} className="flex-1 min-h-0 overflow-y-auto overscroll-contain px-5 pb-8">
+        <div ref={scrollRef} className="flex-1 min-h-0 overflow-y-auto no-scrollbar overscroll-contain px-5 pb-8">
           <NewTaskForm title={title} setTitle={setTitle} cat={cat} setCat={setCat} allCategories={allCategories}
             onAddCategory={onAddCategory} onRemoveCategory={onRemoveCategory}
             subtasks={subtasks} setSubtasks={setSubtasks} preAssigned={preAssigned} setPreAssigned={setPreAssigned}

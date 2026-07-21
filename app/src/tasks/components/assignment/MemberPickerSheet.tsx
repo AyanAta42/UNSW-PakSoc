@@ -36,7 +36,7 @@ export function MemberPickerSheet({ open, title = 'Choose a member', members, mu
           <div className="text-[15px] font-extrabold text-[#F8FAFC]">{title}</div>
           <button onClick={close} className="w-8 h-8 rounded-full border border-[#1D2129] flex items-center justify-center text-lg leading-none cursor-pointer text-[#94A3B8] bg-[#080B12] hover:bg-white/5 transition-colors">{'×'}</button>
         </div>
-        <div ref={scrollRef} className="flex-1 overflow-y-auto overscroll-contain px-4 pb-4 min-h-0">
+        <div ref={scrollRef} className="flex-1 overflow-y-auto no-scrollbar overscroll-contain px-4 pb-4 min-h-0">
           {getMemberSections(members).map(section => (
             <div key={section.key} className="mb-3">
               <div className="flex items-center gap-2 px-1 pt-2 pb-1.5">

@@ -45,7 +45,7 @@ export function HistoryPanel({ title, onClose, fetcher, emptyMessage = 'No activ
             className="w-8 h-8 flex items-center justify-center text-lg cursor-pointer hover:border-white/30 transition-colors shrink-0">×</button>
         </div>
 
-        <div className="flex-1 overflow-y-auto px-5 py-5">
+        <div className="flex-1 overflow-y-auto no-scrollbar px-5 py-5">
           {loading && (
             <div className="flex flex-col gap-3">
               {[1, 2, 3, 4].map(i => <div key={i} className="motion-skeleton h-14" style={{ borderRadius: 14, border: `1px solid ${PALETTE.border}` }} />)}

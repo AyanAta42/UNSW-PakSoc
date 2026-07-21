@@ -39,7 +39,7 @@ export function Navbar({ user, avatarUrl, avatarBroken, initial, onAvatarError, 
 
   return (
     <header style={GLASS_NAV} className="glass-nav sticky top-0 z-50 pt-[calc(env(safe-area-inset-top)+10px)]">
-      <nav className="h-14 px-4 md:px-8 max-w-[1400px] mx-auto flex items-center justify-between gap-3">
+      <nav className="min-h-16 px-4 md:px-8 max-w-[1400px] mx-auto flex items-center justify-between gap-3">
         <div className="flex items-center gap-1 shrink min-w-0">
           <img
             src="/logo.webp"
@@ -56,7 +56,7 @@ export function Navbar({ user, avatarUrl, avatarBroken, initial, onAvatarError, 
           </div>
         </div>
 
-        <div className="flex items-center gap-1.5 sm:gap-2 shrink-0 ml-auto">
+        <div className="flex items-center gap-2 sm:gap-2.5 shrink-0 ml-auto">
           {can.viewEvents && (
             <button onClick={() => navigate('/events')} data-cta
               aria-label="Manage Events" title="Manage Events"
@@ -81,9 +81,9 @@ export function Navbar({ user, avatarUrl, avatarBroken, initial, onAvatarError, 
               <button onClick={() => setMenuOpen(o => !o)} className="p-0 border-none bg-transparent cursor-pointer rounded-full">
                 {avatarUrl && !avatarBroken
                   ? <img src={avatarUrl} alt="" referrerPolicy="no-referrer" onError={onAvatarError}
-                      className="w-8 h-8 rounded-full object-cover hover:opacity-90 transition-opacity ring-2 ring-[#22C55E]/80 ring-offset-2 ring-offset-transparent" />
+                      className="w-9 h-9 rounded-full object-cover hover:opacity-90 transition-opacity ring-2 ring-inset ring-[#22C55E]/70" />
                   : <div style={{ ...GLASS_CHIP, color: PALETTE.secondary, borderRadius: '9999px' }}
-                      className="w-8 h-8 rounded-full flex items-center justify-center font-bold text-xs hover:bg-white/[0.08] transition-colors">
+                      className="w-9 h-9 rounded-full flex items-center justify-center font-bold text-xs hover:bg-white/[0.08] transition-colors">
                       {initial}
                     </div>
                 }

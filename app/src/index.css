@@ -3,11 +3,13 @@
 @tailwind utilities;
 
 html {
-  /* Static aurora shell â€” green left, violet right; identical to index.html so
-     the very first paint already carries the tint (no pop when React mounts). */
+  /* Static aurora shell — must stay pixel-identical to PAGE_BG (theme.ts) and
+     index.html's inline shell. Any drift between these shows up as a hard
+     seam at the top edge during PWA rubber-band overscroll, since that's
+     exactly where these gradients are most concentrated (-8% ≈ just above
+     the viewport). */
   background:
-    radial-gradient(58vw 55vh at 10% -8%, rgba(34, 197, 94, 0.13), transparent 68%) no-repeat,
-    radial-gradient(58vw 55vh at 90% -8%, rgba(139, 92, 246, 0.13), transparent 68%) no-repeat #03040A;
+    radial-gradient(58vw 55vh at 88% -8%, rgba(34, 197, 94, 0.13), transparent 68%) no-repeat #03040A;
   color-scheme: dark;
   scroll-behavior: smooth;
   overflow-x: hidden;
@@ -15,18 +17,20 @@ html {
   overscroll-behavior-x: none;
 }
 
-/* Overlay open â€” freeze the page behind the sheet so drag gestures can't move it */
+/* Overlay open — freeze the page behind the sheet so drag gestures can't move it */
 .modal-open,
 .modal-open body {
   overflow: hidden;
 }
 
-/* Installed PWA only â€” kill pull-to-refresh / rubber band so the shell feels
-   native. Browser tabs keep normal pull-to-refresh. */
+/* Installed PWA only — keep the vertical rubber-band bounce (feels native on
+   iOS/Android) but contain it so an overscroll never chains into the
+   browser's own pull-to-refresh/reload gesture. Horizontal stays locked via
+   overscroll-behavior-x: none above. */
 @media (display-mode: standalone), (display-mode: fullscreen) {
   html,
   body {
-    overscroll-behavior: none;
+    overscroll-behavior-y: contain;
   }
 }
 
@@ -40,7 +44,19 @@ body {
   padding-bottom: env(safe-area-inset-bottom);
 }
 
-/* Hide scrollbars on phone â€” scrolling still works.
+/* Reusable: hide a scrollable element's scrollbar while keeping scroll enabled. */
+.no-scrollbar {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+  width: 0;
+  height: 0;
+}
+
+/* Hide scrollbars on phone — scrolling still works.
    Lock horizontal pan so the page can't slide left/right. */
 @media (max-width: 1023px) {
   html,
@@ -84,7 +100,7 @@ body {
   z-index: 1;
 }
 
-/* iOS Safari zooms focused inputs below 16px â€” keep mobile fields at 16px+ */
+/* iOS Safari zooms focused inputs below 16px — keep mobile fields at 16px+ */
 @media (max-width: 767px) {
   input,
   textarea,
@@ -93,7 +109,7 @@ body {
   }
 }
 
-/* â”€â”€â”€ Motion tokens (calm, cohesive timing scale) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+/* ─── Motion tokens (calm, cohesive timing scale) ──────────────────────────── */
 :root {
   --motion-fast: 160ms;
   --motion-base: 220ms;
@@ -212,8 +228,8 @@ body {
   100% { transform: translate3d(0, 0, 0); }
 }
 
-/* â”€â”€â”€ Hero â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
-/* Big display headline â€” smooth thin serif italic with a whiteâ†’mint gradient fill */
+/* ─── Hero ─────────────────────────────────────────────────────────────────── */
+/* Big display headline — smooth thin serif italic with a white→mint gradient fill */
 .hero-title-text {
   font-family: 'Cormorant Garamond', Georgia, 'Times New Roman', serif;
   font-style: italic;
@@ -272,7 +288,7 @@ body {
   animation: heroZoom 28s ease-in-out alternate infinite;
 }
 
-/* â”€â”€â”€ Hero crescent moon (top-right focal point) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+/* ─── Hero crescent moon (top-right focal point) ───────────────────────────── */
 .hero-moon-wrap {
   position: absolute;
   top: 11%;
@@ -283,7 +299,7 @@ body {
   z-index: 2;
 }
 
-/* Soft halo â€” gradient only, no filter: blur() */
+/* Soft halo — gradient only, no filter: blur() */
 .hero-moon-wrap::before {
   content: '';
   position: absolute;
@@ -311,7 +327,7 @@ body {
   }
 }
 
-/* Right-side emerald spotlight â€” depth without competing artwork */
+/* Right-side emerald spotlight — depth without competing artwork */
 .motion-hero-spotlight {
   position: absolute;
   right: -6%;
@@ -353,14 +369,14 @@ body {
   pointer-events: none;
 }
 
-/* Hero content visible immediately â€” no opacity:0 gate on the live timer */
+/* Hero content visible immediately — no opacity:0 gate on the live timer */
 .motion-hero-title,
 .motion-hero-details,
 .motion-hero-actions {
   opacity: 1;
 }
 
-/* â”€â”€â”€ Reveal / stagger â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+/* ─── Reveal / stagger ─────────────────────────────────────────────────────── */
 .motion-reveal {
   opacity: 0;
   transform: translateY(20px);
@@ -384,7 +400,7 @@ body {
 .motion-stagger > *:nth-child(5) { animation-delay: 280ms; }
 .motion-stagger > *:nth-child(6) { animation-delay: 340ms; }
 
-/* Section headings â€” static emerald tint (no continuous paint animation) */
+/* Section headings — static emerald tint (no continuous paint animation) */
 .motion-heading {
   background: linear-gradient(100deg, #94A3B8 0%, #94A3B8 38%, #34D399 52%, #94A3B8 66%, #94A3B8 100%);
   background-size: 180% 100%;
@@ -395,7 +411,7 @@ body {
   color: transparent;
 }
 
-/* â”€â”€â”€ Cards â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+/* ─── Cards ────────────────────────────────────────────────────────────────── */
 .motion-card {
   position: relative;
   overflow: hidden;
@@ -403,7 +419,7 @@ body {
 }
 
 /*
- * Travelling border light â€” conic gradient rotated via transform only
+ * Travelling border light — conic gradient rotated via transform only
  * (no custom properties / layout thrash). Masked to a 1px edge.
  */
 .motion-card::after {
@@ -436,7 +452,7 @@ body {
   transition: transform var(--motion-slow) var(--motion-ease);
 }
 
-/* Tasks board card â€” clean, flat, no travelling border glow. Border colour is
+/* Tasks board card — clean, flat, no travelling border glow. Border colour is
    left to Tailwind hover utilities; this only adds a subtle desktop lift. */
 .task-card {
   transition: transform var(--motion-fast) var(--motion-ease),
@@ -452,7 +468,7 @@ body {
   }
 }
 
-/* Soft layered glows â€” static blur, animate opacity + scale only */
+/* Soft layered glows — static blur, animate opacity + scale only */
 .motion-glow {
   position: relative;
   isolation: isolate;
@@ -498,7 +514,7 @@ body {
   }
 }
 
-/* â”€â”€â”€ CTAs â€” glow via pseudo opacity/scale; sweep via transform â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+/* ─── CTAs — glow via pseudo opacity/scale; sweep via transform ────────────── */
 .motion-cta {
   transition: transform var(--motion-fast) var(--motion-ease), background-color var(--motion-fast) ease, border-color var(--motion-fast) ease, opacity var(--motion-fast) ease;
 }
@@ -506,11 +522,11 @@ body {
 .motion-primary {
   position: relative;
   overflow: hidden;
-  /* Soft static emerald halo â€” no filter animation */
+  /* Soft static emerald halo — no filter animation */
   box-shadow: 0 0 26px rgba(34, 197, 94, 0.28);
 }
 
-/* Luxury light sweep â€” transform only (never animate `left`) */
+/* Luxury light sweep — transform only (never animate `left`) */
 .motion-primary::before {
   content: '';
   position: absolute;
@@ -560,7 +576,7 @@ body {
   }
 }
 
-/* â”€â”€â”€ Odometer â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+/* ─── Odometer ─────────────────────────────────────────────────────────────── */
 .odometer {
   display: inline-flex;
   align-items: flex-start;
@@ -630,7 +646,7 @@ body {
   animation: fadeIn var(--motion-fast) var(--motion-ease) both;
 }
 
-/* â”€â”€â”€ Toasts â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+/* ─── Toasts ───────────────────────────────────────────────────────────────── */
 @keyframes toastIn {
   from { opacity: 0; transform: translateY(-14px) scale(0.96); }
   to   { opacity: 1; transform: translateY(0) scale(1); }
@@ -661,10 +677,16 @@ body {
   animation-fill-mode: forwards;
 }
 
-/* â”€â”€â”€ Ambient background â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+/* ─── Ambient background ───────────────────────────────────────────────────── */
+/* Bleeds 220px past the viewport top/bottom so the rubber-band overscroll
+   bounce (PWA) reveals more aurora/grain instead of a hard seam where the
+   flat html background would otherwise show through. */
 .ambient-root {
   position: fixed;
-  inset: 0;
+  top: -220px;
+  right: 0;
+  bottom: -220px;
+  left: 0;
   z-index: 0;
   overflow: hidden;
   pointer-events: none;
@@ -702,7 +724,7 @@ body {
   width: 110vw;
   height: 85vh;
   opacity: 0.12;
-  /* No filter: blur() here â€” a 160px blur over a full-viewport layer stalls
+  /* No filter: blur() here — a 160px blur over a full-viewport layer stalls
      phone GPUs for seconds on first raster. The gradients are already soft. */
   background:
     radial-gradient(42% 58% at 28% 38%, rgba(34, 197, 94, 0.6), transparent 72%),
@@ -713,7 +735,7 @@ body {
   animation: auroraFloat 34s ease-in-out infinite alternate;
 }
 
-/* Tall aurora curtain sweeping green â†’ teal â†’ cyan â†’ violet. Soft edges come
+/* Tall aurora curtain sweeping green → teal → cyan → violet. Soft edges come
    from the gradient stops + radial mask, not filter: blur() (GPU-safe). */
 .ambient-aurora-ribbon {
   position: absolute;
@@ -752,7 +774,7 @@ body {
   inset: 0;
   z-index: 0;
   pointer-events: none;
-  /* Canvas mounts after idle â€” ease it in rather than popping */
+  /* Canvas mounts after idle — ease it in rather than popping */
   animation: fadeIn 1s ease both;
 }
 
@@ -761,7 +783,7 @@ body {
 }
 
 /* Pause ambient/hero loops when the tab is hidden.
-   Popups no longer pause or hide any of this â€” the background stays alive. */
+   Popups no longer pause or hide any of this — the background stays alive. */
 .ambient-paused .ambient-layer,
 .ambient-paused .ambient-aurora,
 .ambient-paused .ambient-aurora-ribbon,

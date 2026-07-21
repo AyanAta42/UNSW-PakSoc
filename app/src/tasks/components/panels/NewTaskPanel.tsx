@@ -22,7 +22,7 @@ export function NewTaskPanel({ title, setTitle, cat, setCat, allCategories, onAd
         <div className="text-[15px] font-extrabold text-[#F8FAFC]">+ New Task</div>
         <div className="text-xs text-[#64748B] mt-1">Fill in details and hit Create</div>
       </div>
-      <div className="flex-1 overflow-y-auto p-5">
+      <div className="flex-1 overflow-y-auto no-scrollbar p-5">
         <NewTaskForm title={title} setTitle={setTitle} cat={cat} setCat={setCat} allCategories={allCategories}
           onAddCategory={onAddCategory} onRemoveCategory={onRemoveCategory}
           subtasks={subtasks} setSubtasks={setSubtasks} preAssigned={preAssigned} setPreAssigned={setPreAssigned}

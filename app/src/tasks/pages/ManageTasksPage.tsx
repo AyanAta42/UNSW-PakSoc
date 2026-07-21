@@ -82,8 +82,13 @@ export default function ManageTasksPage() {
             <p className="m-0 text-[10px] text-[#64748B]">{board.tasks.length} tasks</p>
           </div>
           <HistoryButton onClick={() => setShowHistory(true)} label="View task history for this event" />
-          <button onClick={() => setAddOpen(true)} style={{ background: '#22C55E', color: '#fff', boxShadow: '0 0 20px rgba(34,197,94,0.3)' }} className="shrink-0 w-9 h-9 rounded-full border-none cursor-pointer font-bold text-xl leading-none active:scale-95 transition-transform">+</button>
         </header>
+        <div className="shrink-0 px-4 py-2.5 bg-[#0B0E15] border-b border-[#1D2129] flex justify-end">
+          <button onClick={() => setAddOpen(true)} style={{ background: '#22C55E', color: '#fff', boxShadow: '0 0 20px rgba(34,197,94,0.3)' }}
+            className="border-none cursor-pointer font-bold text-sm px-5 py-2 rounded-[14px] active:scale-95 transition-transform flex items-center gap-1.5">
+            <span className="text-base leading-none">+</span> Add Task
+          </button>
+        </div>
         <TaskListPanel {...sharedPanelProps} mobile onAssignClick={id => { setAssignTaskId(id); setPickerMode('task') }} />
         <NewTaskModal open={addOpen} onClose={() => setAddOpen(false)}
           title={board.title} setTitle={board.setTitle} cat={board.cat} setCat={board.setCat}

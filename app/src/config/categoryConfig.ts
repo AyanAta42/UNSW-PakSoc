@@ -5,7 +5,7 @@ export const DEFAULT_CAT_CFG: Record<string, { color: string; activeCls: string;
   Game:  { color: '#F87171', activeCls: 'bg-red-500/10    border-red-400/70    text-red-300',    headerCls: 'bg-red-500/10    text-red-300'    },
   Stall: { color: '#FB923C', activeCls: 'bg-orange-500/10 border-orange-400/70 text-orange-300', headerCls: 'bg-orange-500/10 text-orange-300' },
 }
-/** Returns config for any category â€” custom ones get a generic teal style. */
+/** Returns config for any category — custom ones get a generic teal style. */
 export function getCatCfg(cat: string) {
   return DEFAULT_CAT_CFG[cat] ?? { color: '#2DD4BF', activeCls: 'bg-teal-500/10 border-teal-400/70 text-teal-300', headerCls: 'bg-teal-500/10 text-teal-300' }
 }
@@ -17,20 +17,21 @@ export const ALL_CATS = DEFAULT_TASK_CATEGORIES
 /** @deprecated use getCatCfg */
 export const CAT_CFG = DEFAULT_CAT_CFG as Record<string, { color: string; activeCls: string; headerCls: string }>
 
+/** Muted, low-saturation tones that sit calmly on the dark UI instead of clashing like flat primary colours. */
 export const COMM_CFG: Record<string, { color: string }> = {
-  Presidents: { color: '#C9A84C' },
-  Sports:     { color: '#3B9DDD' },
-  Marketing:  { color: '#E67E22' },
-  Events:     { color: '#E74C3C' },
-  HR:         { color: '#A855F7' },
+  Presidents: { color: '#C9A97E' },
+  Sports:     { color: '#6FA8C7' },
+  Marketing:  { color: '#C79A6B' },
+  Events:     { color: '#BD7F7F' },
+  HR:         { color: '#9B8FC2' },
 }
 
 export const COMM_ORDER = ['Presidents', 'Sports', 'Marketing', 'Events', 'HR']
 export const COMMITTEE_ORDER: Committee[] = ['Sports', 'Marketing', 'Events', 'HR']
 
 export const ROLE_SECTION_CFG = {
-  president:      { label: 'President',      color: '#C084FC' },
-  vice_president: { label: 'Vice President', color: '#4ADE80' },
+  president:      { label: 'President',      color: '#D4B36A' },
+  vice_president: { label: 'Vice President', color: '#6FBF97' },
 } as const
 
 /** Shared Tailwind input classes for the dark task forms. */

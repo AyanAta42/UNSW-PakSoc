@@ -23,7 +23,7 @@ interface Props {
   submitLabel?:   string
 }
 
-export function NewTaskForm({ title, setTitle, cat, setCat, allCategories, onAddCategory, onRemoveCategory, subtasks, setSubtasks, preAssigned, setPreAssigned, notes, setNotes, overForm = false, mobileAssignees = false, onOpenAssigneePicker, onAddTask, submitLabel = 'Create Task â†’' }: Props) {
+export function NewTaskForm({ title, setTitle, cat, setCat, allCategories, onAddCategory, onRemoveCategory, subtasks, setSubtasks, preAssigned, setPreAssigned, notes, setNotes, overForm = false, mobileAssignees = false, onOpenAssigneePicker, onAddTask, submitLabel = 'Create Task →' }: Props) {
   const [showAddCat,      setShowAddCat]      = useState(false)
   const [catInput,        setCatInput]        = useState('')
   const [pendingDeleteCat, setPendingDeleteCat] = useState<string | null>(null)
@@ -57,7 +57,7 @@ export function NewTaskForm({ title, setTitle, cat, setCat, allCategories, onAdd
         {showAddCat && onAddCategory && (
           <div className="flex gap-2 mb-2.5">
             <input value={catInput} onChange={e => setCatInput(e.target.value)} onKeyDown={e => e.key === 'Enter' && submitCategory()}
-              placeholder="New category nameâ€¦" autoFocus
+              placeholder="New category name…" autoFocus
               className="flex-1 px-3 py-1.5 border border-[#1D2129] rounded-lg bg-[#090C13] text-[#F8FAFC] placeholder:text-[#475569] text-sm outline-none focus:border-[#22C55E] transition-colors" />
             <button type="button" onClick={submitCategory} disabled={!catInput.trim()}
               className={`px-3 py-1.5 rounded-lg text-xs font-bold border-none shrink-0 transition-colors ${catInput.trim() ? 'bg-[#22C55E] text-white hover:bg-[#16A34A] cursor-pointer' : 'bg-white/5 text-[#475569] cursor-not-allowed'}`}>Add</button>
@@ -92,7 +92,7 @@ export function NewTaskForm({ title, setTitle, cat, setCat, allCategories, onAdd
           <div className="rounded-xl border border-[#1D2129] bg-white/[0.03] p-3">
             {preAssigned.length > 0 && <div className="flex flex-wrap gap-1.5 mb-2">{preAssigned.map(m => <AssignedChip key={m.id} member={m} onRemove={() => setPreAssigned(p => p.filter(a => a.id !== m.id))} />)}</div>}
             <button type="button" onClick={onOpenAssigneePicker} className="w-full py-2.5 rounded-lg text-xs font-bold border border-dashed border-[#2E333D] bg-transparent text-[#94A3B8] cursor-pointer active:scale-[0.98] transition-transform">
-              {preAssigned.length > 0 ? 'Edit assignees â†’' : '+ Choose assignees'}
+              {preAssigned.length > 0 ? 'Edit assignees →' : '+ Choose assignees'}
             </button>
           </div>
         ) : (

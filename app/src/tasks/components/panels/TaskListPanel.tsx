@@ -47,7 +47,7 @@ export function TaskListPanel({ tasks, loading, overTask, allCategories, eventId
           )}
           {hasSelected && (
             <span className="ml-2 px-3 py-1 rounded-full text-xs font-semibold bg-blue-500/10 border border-blue-400/40 text-blue-300">
-              Member selected â€” click a task to assign
+              Member selected — click a task to assign
             </span>
           )}
           <div className="ml-auto">
@@ -64,12 +64,12 @@ export function TaskListPanel({ tasks, loading, overTask, allCategories, eventId
         </div>
       )}
 
-      <div className={`flex-1 overflow-y-auto flex flex-col gap-3 ${mobile ? 'p-4' : 'p-6'}`}>
+      <div className={`flex-1 overflow-y-auto no-scrollbar flex flex-col gap-3 ${mobile ? 'p-4' : 'p-6'}`}>
         {loading && <div className="flex flex-col gap-3 pt-2">{[1,2,3].map(i => <div key={i} className="motion-skeleton h-24 rounded-xl border border-[#1D2129]" />)}</div>}
         {!loading && visibleTasks.length === 0 && (
           <div className="flex-1 flex flex-col items-center justify-center text-center pt-12 px-4">
             <div className="text-base font-bold text-[#94A3B8] mb-1.5">{myTasksOnly ? 'No tasks assigned to you' : 'No tasks yet'}</div>
-            <div className="text-sm text-[#64748B]">{myTasksOnly ? 'Ask an exec to assign you a task' : mobile ? 'Tap + to create a task' : 'Use the form on the right â†’'}</div>
+            <div className="text-sm text-[#64748B]">{myTasksOnly ? 'Ask an exec to assign you a task' : mobile ? 'Tap + to create a task' : 'Use the form on the right →'}</div>
           </div>
         )}
         {!loading && allCategories.map(category => {

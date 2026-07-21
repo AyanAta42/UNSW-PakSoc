@@ -96,7 +96,7 @@ export default function EventsManagerPage() {
   return (
     <AuroraPage>
       <nav style={{ background: PALETTE.navbarGlass, backdropFilter: 'blur(16px)', borderBottom: `1px solid ${PALETTE.border}` }}
-        className="sticky top-0 z-50 min-h-[3.5rem] pt-[env(safe-area-inset-top)] flex items-center justify-between gap-2 px-4 md:px-6">
+        className="sticky top-0 z-50 min-h-16 pt-[env(safe-area-inset-top)] flex items-center justify-between gap-2 px-4 md:px-6">
         <div className="flex items-center gap-2.5 min-w-0">
           <button onClick={() => navigate('/')}
             style={{ color: PALETTE.muted, background: 'transparent' }}
@@ -106,19 +106,19 @@ export default function EventsManagerPage() {
         </div>
         <div className="flex items-center gap-2 shrink-0">
           <HistoryButton onClick={() => setShowHistory(true)} label="View event history" />
-          {can.editEvents && (
-            <button onClick={() => setShowAdd(true)}
-              aria-label="New Event" title="New Event"
-              style={{ background: ACCENT, color: ACCENT_TEXT, boxShadow: '0 0 20px rgba(34,197,94,0.3)' }}
-              className="font-bold cursor-pointer border-none hover:opacity-85 transition-opacity flex items-center justify-center shrink-0 w-9 h-9 rounded-full text-xl leading-none sm:w-auto sm:h-auto sm:px-5 sm:py-1.5 sm:rounded-[14px] sm:text-sm">
-              <span className="sm:hidden">+</span>
-              <span className="hidden sm:inline">+ New Event</span>
-            </button>
-          )}
         </div>
       </nav>
 
       <div className="max-w-[1100px] mx-auto px-4 sm:px-6 md:px-8 py-8">
+        {can.editEvents && (
+          <div className="flex justify-end mb-6">
+            <button onClick={() => setShowAdd(true)}
+              style={{ background: ACCENT, color: ACCENT_TEXT, boxShadow: '0 0 20px rgba(34,197,94,0.3)' }}
+              className="font-bold cursor-pointer border-none hover:opacity-85 transition-opacity flex items-center gap-1.5 px-5 py-2.5 rounded-[14px] text-sm">
+              <span className="text-base leading-none">+</span> New Event
+            </button>
+          </div>
+        )}
         {loading && (
           <div className="grid grid-cols-[repeat(auto-fill,minmax(min(260px,100%),1fr))] gap-4">
             {[1,2,3,4].map(i => (

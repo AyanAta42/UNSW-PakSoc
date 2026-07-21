@@ -66,7 +66,7 @@ export default function AllEventsPage() {
     <AuroraPage contentClassName="flex h-[100dvh] flex-col overflow-hidden">
       {/* Fixed navbar */}
       <nav style={{ background: PALETTE.navbarGlass, backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)', borderBottom: `1px solid ${PALETTE.border}` }}
-        className="shrink-0 min-h-[3.5rem] pt-[env(safe-area-inset-top)] flex items-center px-4 md:px-6 gap-2.5">
+        className="shrink-0 min-h-16 pt-[env(safe-area-inset-top)] flex items-center px-4 md:px-6 gap-2.5">
         <button onClick={() => navigate('/')}
           style={{ color: PALETTE.muted, background: 'transparent' }}
           className="text-sm font-semibold border-none cursor-pointer hover:text-green-400 transition-colors">← Home</button>

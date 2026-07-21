@@ -23,7 +23,7 @@ export function LegalPageLayout({ title, effectiveDate, children }: Props) {
         </header>
         <div className="space-y-8 text-[15px] leading-[1.75]">{children}</div>
         <footer className="mt-14 pt-8 border-t border-[#1D2129]">
-          <a href="/" className="inline-flex items-center gap-1.5 text-sm font-semibold text-[#F8FAFC] hover:text-[#4ADE80] transition-colors no-underline">â† Back to Home</a>
+          <a href="/" className="inline-flex items-center gap-1.5 text-sm font-semibold text-[#F8FAFC] hover:text-[#4ADE80] transition-colors no-underline">← Back to Home</a>
         </footer>
       </article>
     </AuroraPage>

@@ -41,7 +41,7 @@ export function RosterPanel({ members, loading, draggingMemberId, selectedMember
         </div>
       )}
       {mobile && <div className="px-4 py-3 border-b border-[#1D2129] shrink-0"><p className="text-xs text-[#94A3B8] m-0 font-semibold">Tap a member, then tap a task to assign</p></div>}
-      <div className="flex-1 overflow-y-auto py-2">
+      <div className="flex-1 overflow-y-auto no-scrollbar py-2">
         {loading && <div className="px-4 py-6 flex flex-col gap-3">{[1,2,3,4,5].map(i => <div key={i} className="motion-skeleton h-9 rounded-lg" />)}</div>}
         {!loading && getMemberSections(members).map(section => (
           <div key={section.key} className="mb-1">
