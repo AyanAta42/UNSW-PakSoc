@@ -8,6 +8,18 @@ void prefetchPublicEvents()
 
 ReactDOM.createRoot(document.getElementById('root')!).render(<App />)
 
+// Fade the boot splash out once the mounted app has actually painted —
+// double rAF so we're past React's first commit, not just synchronously after render().
+const loader = document.getElementById('app-loader')
+if (loader) {
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
+      loader.classList.add('app-loader-hide')
+      window.setTimeout(() => loader.remove(), 340)
+    })
+  })
+}
+
 // Portrait lock for the installed PWA (Android honors it; ignored elsewhere)
 const orientation = screen.orientation as { lock?: (o: string) => Promise<void> }
 orientation?.lock?.('portrait-primary').catch(() => {})
