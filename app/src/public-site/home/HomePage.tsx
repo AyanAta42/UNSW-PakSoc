@@ -122,15 +122,16 @@ export default function HomePage() {
   const showSkeletons = loading && events.length === 0
 
   return (
-    <div style={{
-      // Same static aurora tint as the html shell — the animated layers fade
-      // in over it, so the background never pops
-      background: PAGE_BG,
-      color: PALETTE.dark,
-      fontFamily: 'system-ui, sans-serif',
-      minHeight: '100vh',
-      position: 'relative',
-    }}>
+    <div
+      className="relative flex h-[calc(100dvh_-_env(safe-area-inset-bottom))] flex-col overflow-hidden"
+      style={{
+        // Same static aurora tint as the html shell — the animated layers fade
+        // in over it, so the background never pops
+        background: PAGE_BG,
+        color: PALETTE.dark,
+        fontFamily: 'system-ui, sans-serif',
+      }}
+    >
       <AmbientBackground />
 
       <Navbar
@@ -142,7 +143,10 @@ export default function HomePage() {
         onEditProfile={handleEditProfile}
       />
 
-      <div className="relative z-10 flex gap-0 lg:gap-5 px-0 lg:px-8 py-0 lg:py-5 max-w-[1400px] mx-auto items-start w-full">
+      {/* Elastic scroll region — the ONLY surface that rubber-bands. The navbar
+          above and footer below stay fixed (unelastic); the aurora is fixed behind. */}
+      <main className={`home-scroll relative z-10 flex-1 min-h-0 no-scrollbar ${overlayOpen ? 'overflow-hidden' : 'overflow-y-auto'}`}>
+      <div className="flex gap-0 lg:gap-5 px-0 lg:px-8 py-0 lg:py-5 max-w-[1400px] mx-auto items-start w-full">
         <div className="flex flex-col gap-0 lg:gap-5 flex-[7] min-w-0 w-full">
           <HeroBanner banner={banner} loading={loading && !banner} />
 
@@ -199,6 +203,7 @@ export default function HomePage() {
           </Suspense>
         </div>
       </div>
+      </main>
 
       {sheetEvent && (
         <MobileEventSheet event={sheetEvent} now={now} onClose={() => setSheetEvent(null)} />
@@ -209,7 +214,7 @@ export default function HomePage() {
         </Suspense>
       )}
 
-      <div className="relative z-10">
+      <div className="relative z-10 shrink-0">
         <Footer />
       </div>
     </div>

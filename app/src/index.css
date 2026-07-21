@@ -57,6 +57,17 @@ body {
   height: 0;
 }
 
+/* Home app-shell scroll region — the ONLY elastic surface on the page. The navbar
+   and footer are fixed flex children; this middle region keeps the iOS rubber-band
+   bounce that the document-level scroll had to suppress (overscroll-behavior:none on
+   html/body) to stop the sticky nav from being dragged. `contain` preserves the
+   bounce at this element's own edges while blocking overscroll chaining to the
+   locked body. The aurora sits fixed behind (z-0) and never moves. */
+.home-scroll {
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-y: contain;
+}
+
 /* Hide scrollbars on phone — scrolling still works.
    Lock horizontal pan so the page can't slide left/right. */
 @media (max-width: 1023px) {
