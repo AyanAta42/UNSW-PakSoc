@@ -135,8 +135,7 @@ export function AddEditEventModal({ onClose, onCreated, onUpdated, event }: Prop
         </div>
 
         <div className="px-6 py-4 flex items-center justify-between shrink-0" style={{ borderBottom: `1px solid ${PALETTE.border}` }}>
-          <div className="flex items-center gap-2.5">
-            <div className="w-2 h-2 rounded-full" style={{ background: ACCENT, boxShadow: '0 0 10px rgba(34,197,94,0.7)' }} />
+          <div className="flex items-center">
             <h2 style={{ color: PALETTE.dark }} className="font-extrabold text-base m-0">{isEdit ? 'Edit Event' : 'New Event'}</h2>
           </div>
           <button onClick={close} style={{ color: PALETTE.muted, background: PALETTE.cardAlt, border: `1px solid ${PALETTE.border}`, borderRadius: '50%' }} className="w-8 h-8 flex items-center justify-center text-lg cursor-pointer hover:border-white/30 transition-colors">×</button>

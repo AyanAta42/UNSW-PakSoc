@@ -1,5 +1,4 @@
 import { useState, useEffect, useMemo } from 'react'
-import { useNavigate } from 'react-router-dom'
 import { usePublicEvents } from '@/events/context/PublicEventsContext'
 import { AllEventsCard } from '@/events/components/AllEventsCard'
 import { MobileEventSheet } from '@/public-site/home/components/MobileEventSheet'
@@ -7,6 +6,7 @@ import { EventDetailContent } from '@/public-site/home/components/EventDetailCon
 import type { DbEvent } from '@/events/types/Event'
 import { ACCENT, PALETTE } from '@/config/theme'
 import { AuroraPage } from '@/shared/components/AuroraPage'
+import { HomeButton } from '@/shared/components/HomeButton'
 
 function isPhone(): boolean {
   return typeof window !== 'undefined' && window.matchMedia('(max-width: 1023px)').matches
@@ -32,7 +32,6 @@ function EventSection({ title, color, events, onSelect }: {
 }
 
 export default function AllEventsPage() {
-  const navigate = useNavigate()
   const { events, loading } = usePublicEvents()
   const [selectedId, setSelectedId] = useState<string | null>(null)
   const [modalEvent, setModalEvent] = useState<DbEvent | null>(null)
@@ -67,16 +66,14 @@ export default function AllEventsPage() {
       {/* Fixed navbar */}
       <nav style={{ background: PALETTE.navbarGlass, backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)', borderBottom: `1px solid ${PALETTE.border}` }}
         className="shrink-0 min-h-[68px] pt-[env(safe-area-inset-top)] flex items-center px-4 md:px-6 gap-3">
-        <button onClick={() => navigate('/')}
-          style={{ color: PALETTE.muted, background: 'transparent' }}
-          className="text-sm font-semibold border-none cursor-pointer hover:text-green-400 transition-colors shrink-0">← Home</button>
+        <HomeButton />
         <div className="w-px h-5 shrink-0" style={{ background: PALETTE.border }} />
         <span style={{ color: PALETTE.dark }} className="font-extrabold text-lg md:text-xl">All Events</span>
       </nav>
 
       <div className="flex-1 min-h-0 w-full max-w-[1400px] mx-auto px-4 sm:px-6 md:px-8 py-6 flex gap-6 items-stretch">
         {/* Scrollable events column */}
-        <div className="flex-1 min-w-0 min-h-0 overflow-y-auto">
+        <div className="flex-1 min-w-0 min-h-0 overflow-y-auto no-scrollbar">
           {loading && events.length === 0 && (
             <div className="grid grid-cols-[repeat(auto-fill,minmax(min(260px,100%),1fr))] gap-4">
               {[1, 2, 3, 4].map(i => (
@@ -100,7 +97,7 @@ export default function AllEventsPage() {
           <aside className="hidden lg:block w-[340px] shrink-0 min-h-0">
             <div style={{ background: PALETTE.card, border: `1px solid ${PALETTE.border}`, borderRadius: 18, boxShadow: PALETTE.shadowMd }}
               className="h-full overflow-hidden flex flex-col">
-              <div className="px-5 py-5 flex flex-col gap-3.5 overflow-y-auto">
+              <div className="px-5 py-5 flex flex-col gap-3.5 overflow-y-auto no-scrollbar">
                 <EventDetailContent event={featured} now={now} />
               </div>
             </div>

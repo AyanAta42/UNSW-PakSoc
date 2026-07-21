@@ -21,9 +21,23 @@ interface Props {
   onOpenAssigneePicker?: () => void
   onAddTask:      () => void
   submitLabel?:   string
+  /** Hide the inline submit button (when the parent pins it in a fixed footer). */
+  hideSubmit?:    boolean
 }
 
-export function NewTaskForm({ title, setTitle, cat, setCat, allCategories, onAddCategory, onRemoveCategory, subtasks, setSubtasks, preAssigned, setPreAssigned, notes, setNotes, overForm = false, mobileAssignees = false, onOpenAssigneePicker, onAddTask, submitLabel = 'Create Task →' }: Props) {
+/** Create-task submit button — shared so it can live inline or in a pinned footer. */
+export function CreateTaskButton({ title, onAddTask, label = 'Create Task →' }: { title: string; onAddTask: () => void; label?: string }) {
+  const enabled = !!title.trim()
+  return (
+    <button onClick={onAddTask} disabled={!enabled}
+      style={enabled ? { boxShadow: '0 0 20px rgba(34,197,94,0.25)' } : undefined}
+      className={`w-full py-3 rounded-xl text-sm font-bold transition-all border-none ${enabled ? 'bg-[#22C55E] text-white hover:bg-[#16A34A] cursor-pointer' : 'bg-white/5 text-[#475569] cursor-not-allowed'}`}>
+      {label}
+    </button>
+  )
+}
+
+export function NewTaskForm({ title, setTitle, cat, setCat, allCategories, onAddCategory, onRemoveCategory, subtasks, setSubtasks, preAssigned, setPreAssigned, notes, setNotes, overForm = false, mobileAssignees = false, onOpenAssigneePicker, onAddTask, submitLabel = 'Create Task →', hideSubmit = false }: Props) {
   const [showAddCat,      setShowAddCat]      = useState(false)
   const [catInput,        setCatInput]        = useState('')
   const [pendingDeleteCat, setPendingDeleteCat] = useState<string | null>(null)
@@ -49,7 +63,7 @@ export function NewTaskForm({ title, setTitle, cat, setCat, allCategories, onAdd
           {onAddCategory && (
             <button type="button" onClick={() => { setShowAddCat(v => !v); setCatInput('') }}
               aria-label={showAddCat ? 'Close category manager' : 'Add custom category'}
-              className={`w-6 h-6 rounded-full border-none flex items-center justify-center text-sm font-bold leading-none cursor-pointer transition-all shrink-0 ${showAddCat ? 'bg-white/10 text-[#94A3B8] hover:bg-white/15' : 'bg-[#22C55E] text-white hover:bg-[#16A34A]'}`}>
+              className={`w-6 h-6 rounded-full border-none flex items-center justify-center text-sm font-bold leading-none cursor-pointer transition-all shrink-0 ${showAddCat ? 'bg-white/10 text-[#94A3B8] hover:bg-white/15' : 'bg-white/[0.08] text-[#94A3B8] hover:bg-white/[0.14] hover:text-[#F8FAFC]'}`}>
               {showAddCat ? '×' : '+'}
             </button>
           )}
@@ -108,11 +122,7 @@ export function NewTaskForm({ title, setTitle, cat, setCat, allCategories, onAdd
         <label className={labelCls}>Notes</label>
         <textarea value={notes} onChange={e => setNotes(e.target.value)} placeholder="Any additional details..." rows={3} className={inputCls + ' resize-y leading-relaxed'} />
       </div>
-      <button onClick={onAddTask} disabled={!title.trim()}
-        style={title.trim() ? { boxShadow: '0 0 20px rgba(34,197,94,0.25)' } : undefined}
-        className={`w-full py-3 rounded-xl text-sm font-bold transition-all border-none ${title.trim() ? 'bg-[#22C55E] text-white hover:bg-[#16A34A] cursor-pointer' : 'bg-white/5 text-[#475569] cursor-not-allowed'}`}>
-        {submitLabel}
-      </button>
+      {!hideSubmit && <CreateTaskButton title={title} onAddTask={onAddTask} label={submitLabel} />}
 
       {pendingDeleteCat && onRemoveCategory && (
         <ConfirmModal

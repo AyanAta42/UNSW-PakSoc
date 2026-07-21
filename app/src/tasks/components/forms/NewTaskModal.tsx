@@ -1,7 +1,7 @@
 import { useEffect } from 'react'
 import type { Dispatch, SetStateAction } from 'react'
 import type { Member } from '@/members/types/Member'
-import { NewTaskForm } from './NewTaskForm'
+import { NewTaskForm, CreateTaskButton } from './NewTaskForm'
 import { useSheetSwipe } from '@/shared/hooks/useSheetSwipe'
 
 interface Props {
@@ -47,11 +47,15 @@ export function NewTaskModal({ open, onClose, title, setTitle, cat, setCat, allC
           </div>
           <button onClick={close} className="w-8 h-8 rounded-full border border-[#1D2129] bg-[#080B12] flex items-center justify-center text-lg leading-none cursor-pointer text-[#94A3B8] hover:bg-white/5 transition-colors">{'×'}</button>
         </div>
-        <div ref={scrollRef} className="flex-1 min-h-0 overflow-y-auto no-scrollbar overscroll-contain px-5 pb-8">
+        <div ref={scrollRef} className="flex-1 min-h-0 overflow-y-auto no-scrollbar overscroll-contain px-5 pb-5">
           <NewTaskForm title={title} setTitle={setTitle} cat={cat} setCat={setCat} allCategories={allCategories}
             onAddCategory={onAddCategory} onRemoveCategory={onRemoveCategory}
             subtasks={subtasks} setSubtasks={setSubtasks} preAssigned={preAssigned} setPreAssigned={setPreAssigned}
-            notes={notes} setNotes={setNotes} mobileAssignees onOpenAssigneePicker={onOpenAssigneePicker} onAddTask={handleCreate} />
+            notes={notes} setNotes={setNotes} mobileAssignees onOpenAssigneePicker={onOpenAssigneePicker} onAddTask={handleCreate} hideSubmit />
+        </div>
+        {/* Pinned footer — Create button always visible while the form scrolls */}
+        <div className="shrink-0 px-5 pt-3 pb-[max(1.25rem,env(safe-area-inset-bottom))] border-t border-[#1D2129] bg-[#0D1119]">
+          <CreateTaskButton title={title} onAddTask={handleCreate} label="Create Task" />
         </div>
       </div>
     </div>

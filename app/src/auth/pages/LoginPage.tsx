@@ -54,7 +54,7 @@ export default function LoginPage() {
           </button>
         </p>
       </div>
-      <p style={{ color: PALETTE.disabled }} className="text-xs mt-6">&copy; {new Date().getFullYear()} PakSoc UNSW</p>
+      <p style={{ color: PALETTE.disabled }} className="text-xs absolute bottom-[max(1.25rem,env(safe-area-inset-bottom))] left-0 right-0 text-center">&copy; {new Date().getFullYear()} PakSoc UNSW</p>
     </AuroraPage>
   )
 }

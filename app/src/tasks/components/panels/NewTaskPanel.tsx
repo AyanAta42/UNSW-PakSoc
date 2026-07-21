@@ -1,6 +1,6 @@
 import type { Dispatch, SetStateAction } from 'react'
 import type { Member } from '@/members/types/Member'
-import { NewTaskForm } from '@/tasks/components/forms/NewTaskForm'
+import { NewTaskForm, CreateTaskButton } from '@/tasks/components/forms/NewTaskForm'
 
 interface Props {
   title:         string;        setTitle:       Dispatch<SetStateAction<string>>
@@ -26,7 +26,11 @@ export function NewTaskPanel({ title, setTitle, cat, setCat, allCategories, onAd
         <NewTaskForm title={title} setTitle={setTitle} cat={cat} setCat={setCat} allCategories={allCategories}
           onAddCategory={onAddCategory} onRemoveCategory={onRemoveCategory}
           subtasks={subtasks} setSubtasks={setSubtasks} preAssigned={preAssigned} setPreAssigned={setPreAssigned}
-          notes={notes} setNotes={setNotes} overForm={overForm} onAddTask={onAddTask} />
+          notes={notes} setNotes={setNotes} overForm={overForm} onAddTask={onAddTask} hideSubmit />
+      </div>
+      {/* Pinned footer — Create button always visible while the form scrolls */}
+      <div className="shrink-0 p-5 pt-3 border-t border-[#1D2129] bg-[#0B0E15]">
+        <CreateTaskButton title={title} onAddTask={onAddTask} />
       </div>
     </aside>
   )

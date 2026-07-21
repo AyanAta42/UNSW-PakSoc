@@ -4,6 +4,7 @@ import { useTaskBoard }      from '@/tasks/hooks/useTaskBoard'
 import { useAuth }           from '@/auth/hooks/useAuth'
 import { RosterPanel }       from '@/tasks/components/panels/RosterPanel'
 import { TaskListPanel }     from '@/tasks/components/panels/TaskListPanel'
+import { TaskFilterMenu }    from '@/tasks/components/panels/TaskFilterMenu'
 import { NewTaskPanel }      from '@/tasks/components/panels/NewTaskPanel'
 import { NewTaskModal }      from '@/tasks/components/forms/NewTaskModal'
 import { MemberPickerSheet } from '@/tasks/components/assignment/MemberPickerSheet'
@@ -22,6 +23,7 @@ export default function ManageTasksPage() {
   const [pickerMode,   setPickerMode]  = useState<PickerMode>(null)
   const [assignTaskId, setAssignTaskId] = useState<string | null>(null)
   const [showHistory,  setShowHistory] = useState(false)
+  const [myTasksOnly,  setMyTasksOnly] = useState(false)
   const board   = useTaskBoard(eventId)
   const { user } = useAuth()
 
@@ -43,6 +45,7 @@ export default function ManageTasksPage() {
   const sharedPanelProps = {
     tasks: board.tasks, loading: board.loading, overTask: board.overTask, currentUserAuthId: user?.id,
     allCategories: board.allCategories, eventId,
+    myTasksOnly, onMyTasksChange: setMyTasksOnly,
     onRemoveTask: board.removeTask, onRemoveAssigned: board.removeAssigned, onEditTask: board.editTask,
   }
 
@@ -70,10 +73,10 @@ export default function ManageTasksPage() {
 
       {/* Mobile */}
       <div className="relative z-10 flex lg:hidden flex-col h-[100dvh] overflow-hidden font-sans">
-        <header className="shrink-0 px-4 pb-3 pt-[calc(env(safe-area-inset-top)+0.75rem)] bg-[#0B0E15] border-b border-[#1D2129] flex items-center gap-2.5">
+        <header className="shrink-0 px-4 pb-3 pt-[calc(env(safe-area-inset-top)+0.75rem)] bg-[#0B0E15] border-b border-[#1D2129] flex items-center gap-2">
           <button onClick={() => window.location.href = '/'} aria-label="Go to home"
-            className="w-9 h-9 rounded-full border-2 border-[#1D2129] flex items-center justify-center text-[#94A3B8] cursor-pointer shrink-0 p-0 bg-transparent active:scale-95 transition-all">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-[18px] h-[18px]"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V20a1 1 0 0 0 1 1h4v-6h4v6h4a1 1 0 0 0 1-1V9.5"/></svg>
+            className="w-8 h-8 rounded-full border border-[#1D2129] flex items-center justify-center text-[#94A3B8] cursor-pointer shrink-0 p-0 bg-transparent active:scale-95 transition-all">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V20a1 1 0 0 0 1 1h4v-6h4v6h4a1 1 0 0 0 1-1V9.5"/></svg>
           </button>
           <button onClick={() => navigate('/events')} aria-label="Back to events"
             className="w-8 h-8 rounded-full bg-white/[0.06] border border-[#1D2129] flex items-center justify-center text-[#94A3B8] cursor-pointer active:bg-white/10 transition-colors shrink-0 text-sm font-bold"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4"><path d="M15 18l-6-6 6-6"/></svg></button>
@@ -81,15 +84,17 @@ export default function ManageTasksPage() {
             <h1 className="m-0 text-lg font-extrabold text-[#F8FAFC] truncate">Manage Tasks</h1>
             <p className="m-0 text-[11px] text-[#64748B]">{board.tasks.length} tasks</p>
           </div>
+          <TaskFilterMenu myTasksOnly={myTasksOnly} onChange={setMyTasksOnly} showMine={!!user?.id} />
           <HistoryButton onClick={() => setShowHistory(true)} label="View task history for this event" />
         </header>
-        <div className="shrink-0 px-4 py-2.5 bg-[#0B0E15] border-b border-[#1D2129] flex justify-end">
-          <button onClick={() => setAddOpen(true)} style={{ background: '#22C55E', color: '#fff', boxShadow: '0 0 20px rgba(34,197,94,0.3)' }}
-            className="border-none cursor-pointer font-bold text-sm px-5 py-2 rounded-[14px] active:scale-95 transition-transform flex items-center gap-1.5">
-            <span className="text-base leading-none">+</span> Add Task
-          </button>
-        </div>
         <TaskListPanel {...sharedPanelProps} mobile onAssignClick={id => { setAssignTaskId(id); setPickerMode('task') }} />
+
+        {/* Floating "Add Task" — fixed bottom-right, phones only */}
+        <button onClick={() => setAddOpen(true)} aria-label="Add task"
+          style={{ background: '#22C55E', color: '#fff', boxShadow: '0 10px 28px -6px rgba(34,197,94,0.5), 0 0 22px rgba(34,197,94,0.35)' }}
+          className="lg:hidden fixed z-40 right-5 bottom-[max(1.25rem,calc(env(safe-area-inset-bottom)+1rem))] w-14 h-14 rounded-full border-none cursor-pointer flex items-center justify-center active:scale-95 transition-transform">
+          <svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden><path d="M12 5v14M5 12h14" /></svg>
+        </button>
         <NewTaskModal open={addOpen} onClose={() => setAddOpen(false)}
           title={board.title} setTitle={board.setTitle} cat={board.cat} setCat={board.setCat}
           allCategories={board.allCategories}

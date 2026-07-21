@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react'
-import { useNavigate }       from 'react-router-dom'
 import { fetchAllEvents }    from '@/events/services/fetchAllEvents'
 import { setEventPublic }    from '@/events/services/setEventPublic'
 import { deleteEvent }       from '@/events/services/deleteEvent'
@@ -15,6 +14,7 @@ import { applyEventChange }  from '@/events/utils/applyEventChange'
 import type { DbEvent }      from '@/events/types/Event'
 import { ACCENT, ACCENT_TEXT, PALETTE } from '@/config/theme'
 import { AuroraPage } from '@/shared/components/AuroraPage'
+import { HomeButton } from '@/shared/components/HomeButton'
 import { toast, errorMessage } from '@/shared/toast/toast'
 
 function EventSection({ title, color, events, canEdit, onAnnounce, onUnpublish, onEdit, onDelete }: {
@@ -39,7 +39,6 @@ function EventSection({ title, color, events, canEdit, onAnnounce, onUnpublish, 
 }
 
 export default function EventsManagerPage() {
-  const navigate              = useNavigate()
   const { can }               = usePermissions()
   const [events, setEvents]   = useState<DbEvent[]>([])
   const [loading, setLoading] = useState(true)
@@ -94,55 +93,54 @@ export default function EventsManagerPage() {
   const sectionProps = { canEdit: can.editEvents, onAnnounce: announce, onUnpublish: unpublish, onEdit: setEditingEv, onDelete: handleDelete }
 
   return (
-    <AuroraPage>
-      <nav style={{ background: PALETTE.navbarGlass, backdropFilter: 'blur(16px)', borderBottom: `1px solid ${PALETTE.border}` }}
-        className="sticky top-0 z-50 min-h-[68px] pt-[env(safe-area-inset-top)] flex items-center justify-between gap-2 px-4 md:px-6">
+    <AuroraPage contentClassName="flex h-[100dvh] flex-col overflow-hidden">
+      <nav style={{ background: PALETTE.navbarGlass, backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)', borderBottom: `1px solid ${PALETTE.border}` }}
+        className="shrink-0 min-h-[68px] pt-[env(safe-area-inset-top)] flex items-center justify-between gap-2 px-4 md:px-6">
         <div className="flex items-center gap-3 min-w-0">
-          <button onClick={() => navigate('/')}
-            style={{ color: PALETTE.muted, background: 'transparent' }}
-            className="text-sm font-semibold border-none cursor-pointer hover:text-green-400 transition-colors shrink-0">← Home</button>
+          <HomeButton />
           <div className="w-px h-5 shrink-0" style={{ background: PALETTE.border }} />
           <span style={{ color: PALETTE.dark }} className="font-extrabold text-lg md:text-xl truncate">Events Manager</span>
         </div>
         <div className="flex items-center gap-2 shrink-0">
           <HistoryButton onClick={() => setShowHistory(true)} label="View event history" />
+          {can.editEvents && (
+            <button onClick={() => setShowAdd(true)} aria-label="New Event" title="New Event"
+              style={{ background: ACCENT, color: ACCENT_TEXT, boxShadow: '0 0 20px rgba(34,197,94,0.3)' }}
+              className="flex items-center justify-center gap-1.5 shrink-0 border-none cursor-pointer hover:opacity-85 transition-opacity font-bold text-sm whitespace-nowrap w-9 h-9 rounded-full md:w-auto md:h-auto md:px-4 md:py-2 md:rounded-[14px]">
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden><path d="M12 5v14M5 12h14" /></svg>
+              <span className="hidden md:inline">New Event</span>
+            </button>
+          )}
         </div>
       </nav>
 
-      <div className="max-w-[1100px] mx-auto px-4 sm:px-6 md:px-8 py-8">
-        {can.editEvents && (
-          <div className="flex justify-end mb-6">
-            <button onClick={() => setShowAdd(true)}
-              style={{ background: ACCENT, color: ACCENT_TEXT, boxShadow: '0 0 20px rgba(34,197,94,0.3)' }}
-              className="font-bold cursor-pointer border-none hover:opacity-85 transition-opacity flex items-center gap-1.5 px-5 py-2.5 rounded-[14px] text-sm">
-              <span className="text-base leading-none">+</span> New Event
-            </button>
-          </div>
-        )}
-        {loading && (
-          <div className="grid grid-cols-[repeat(auto-fill,minmax(min(260px,100%),1fr))] gap-4">
-            {[1,2,3,4].map(i => (
-              <div key={i} className="motion-skeleton h-44" style={{ borderRadius: 18, border: `1px solid ${PALETTE.border}` }} />
-            ))}
-          </div>
-        )}
-        {!loading && <>
-          {live.length > 0   && <EventSection title="Live on Home Page" color={ACCENT}          events={live}   {...sectionProps} />}
-          {drafts.length > 0 && <EventSection title="Drafts"            color={PALETTE.disabled} events={drafts} {...sectionProps} />}
-          {ended.length > 0  && <EventSection title="Ended"             color={PALETTE.disabled} events={ended}  {...sectionProps} />}
-          {events.length === 0 && (
-            <div className="flex flex-col items-center justify-center py-28 text-center">
-              <div className="text-base font-bold mb-4" style={{ color: PALETTE.muted }}>No events yet</div>
-              {can.editEvents && (
-                <button onClick={() => setShowAdd(true)}
-                  style={{ background: ACCENT, color: ACCENT_TEXT, borderRadius: 14 }}
-                  className="border-none px-6 py-2.5 text-sm font-bold cursor-pointer hover:opacity-85">
-                  + Create your first event
-                </button>
-              )}
+      <div className="flex-1 min-h-0 overflow-y-auto no-scrollbar">
+        <div className="max-w-[1100px] mx-auto px-4 sm:px-6 md:px-8 py-8">
+          {loading && (
+            <div className="grid grid-cols-[repeat(auto-fill,minmax(min(260px,100%),1fr))] gap-4">
+              {[1,2,3,4].map(i => (
+                <div key={i} className="motion-skeleton h-44" style={{ borderRadius: 18, border: `1px solid ${PALETTE.border}` }} />
+              ))}
             </div>
           )}
-        </>}
+          {!loading && <>
+            {live.length > 0   && <EventSection title="Live on Home Page" color={ACCENT}          events={live}   {...sectionProps} />}
+            {drafts.length > 0 && <EventSection title="Drafts"            color={PALETTE.disabled} events={drafts} {...sectionProps} />}
+            {ended.length > 0  && <EventSection title="Ended"             color={PALETTE.disabled} events={ended}  {...sectionProps} />}
+            {events.length === 0 && (
+              <div className="flex flex-col items-center justify-center py-28 text-center">
+                <div className="text-base font-bold mb-4" style={{ color: PALETTE.muted }}>No events yet</div>
+                {can.editEvents && (
+                  <button onClick={() => setShowAdd(true)}
+                    style={{ background: ACCENT, color: ACCENT_TEXT, borderRadius: 14 }}
+                    className="border-none px-6 py-2.5 text-sm font-bold cursor-pointer hover:opacity-85">
+                    + Create your first event
+                  </button>
+                )}
+              </div>
+            )}
+          </>}
+        </div>
       </div>
 
       {showAdd   && <AddEditEventModal onClose={() => setShowAdd(false)} onCreated={ev => { setEvents(p => [...p, ev]); setShowAdd(false); toast.success('Event created') }} />}

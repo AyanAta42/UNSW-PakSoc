@@ -5,9 +5,9 @@ export const DEFAULT_CAT_CFG: Record<string, { color: string; activeCls: string;
   Game:  { color: '#F87171', activeCls: 'bg-red-500/10    border-red-400/70    text-red-300',    headerCls: 'bg-red-500/10    text-red-300'    },
   Stall: { color: '#FB923C', activeCls: 'bg-orange-500/10 border-orange-400/70 text-orange-300', headerCls: 'bg-orange-500/10 text-orange-300' },
 }
-/** Returns config for any category — custom ones get a generic teal style. */
+/** Returns config for any category — custom ones get a calm neutral gray style. */
 export function getCatCfg(cat: string) {
-  return DEFAULT_CAT_CFG[cat] ?? { color: '#2DD4BF', activeCls: 'bg-teal-500/10 border-teal-400/70 text-teal-300', headerCls: 'bg-teal-500/10 text-teal-300' }
+  return DEFAULT_CAT_CFG[cat] ?? { color: '#94A3B8', activeCls: 'bg-slate-500/10 border-slate-400/60 text-slate-300', headerCls: 'bg-slate-500/10 text-slate-300' }
 }
 
 export const DEFAULT_TASK_CATEGORIES: string[] = ['Task', 'Game', 'Stall']

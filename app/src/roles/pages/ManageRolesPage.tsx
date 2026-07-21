@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
 import { fetchMembers }           from '@/members/services/fetchMembers'
 import { updateMemberRole }       from '@/members/services/updateMemberRole'
 import { updateMemberCommittee }  from '@/members/services/updateMemberCommittee'
@@ -9,12 +8,12 @@ import { ROLE_LABEL, ROLE_COLOR, ALL_ROLES } from '@/roles/config/roleLabels'
 import type { Member, MemberRole, Committee } from '@/members/types/Member'
 import { PALETTE } from '@/config/theme'
 import { AuroraPage } from '@/shared/components/AuroraPage'
+import { HomeButton } from '@/shared/components/HomeButton'
 import { toast, errorMessage } from '@/shared/toast/toast'
 
 const NEEDS_COMMITTEE: MemberRole[] = ['subcom', 'executive']
 
 export default function ManageRolesPage() {
-  const navigate = useNavigate()
   const [members, setMembers] = useState<Member[]>([])
   const [loading, setLoading] = useState(true)
   const [saving, setSaving]   = useState<string | null>(null)
@@ -58,8 +57,7 @@ export default function ManageRolesPage() {
       {/* Fixed header — navbar + search stay pinned while the list scrolls */}
       <div className="shrink-0" style={{ background: PALETTE.navbarGlass, backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)', borderBottom: `1px solid ${PALETTE.border}` }}>
         <nav className="min-h-[68px] pt-[env(safe-area-inset-top)] px-4 md:px-6 flex items-center gap-3">
-          <button onClick={() => navigate('/')} style={{ color: PALETTE.muted, background: 'transparent' }}
-            className="text-sm font-semibold border-none cursor-pointer hover:text-green-400 transition-colors p-0 shrink-0">← Home</button>
+          <HomeButton />
           <div className="w-px h-5 shrink-0" style={{ background: PALETTE.border }} />
           <span style={{ color: PALETTE.dark }} className="font-extrabold text-lg md:text-xl">Manage Roles</span>
         </nav>

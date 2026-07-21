@@ -2,9 +2,13 @@ import ReactDOM from 'react-dom/client'
 import App from './App.tsx'
 import './index.css'
 import { prefetchPublicEvents } from '@/events/services/publicEventsBootstrap'
+import { installTopOverscrollLock } from '@/shared/utils/lockTopOverscroll'
 
 // Start / adopt the early events fetch — shared via PublicEventsProvider
 void prefetchPublicEvents()
+
+// Restrict elastic overscroll at the top of every page (bottom bounce stays).
+installTopOverscrollLock()
 
 ReactDOM.createRoot(document.getElementById('root')!).render(<App />)
 
