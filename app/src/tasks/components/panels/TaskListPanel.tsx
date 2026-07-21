@@ -34,7 +34,7 @@ export function TaskListPanel({ tasks, loading, overTask, allCategories, eventId
   const hasSelected = !!selectedMemberId
 
   return (
-    <main className={`flex flex-col overflow-hidden min-w-0 ${mobile ? 'bg-[#0B0E15] flex-1 min-h-0 w-full' : 'bg-transparent hidden lg:flex flex-1'}`}>
+    <main className={`flex flex-col overflow-hidden min-w-0 bg-transparent ${mobile ? 'flex-1 min-h-0 w-full' : 'hidden lg:flex flex-1'}`}>
       {!mobile && (
         <header className="h-14 px-7 bg-[#0B0E15] border-b border-[#1D2129] flex items-center gap-3 shrink-0">
           <div className="w-1 h-5 bg-[#22C55E] rounded-sm" />
