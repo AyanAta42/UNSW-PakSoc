@@ -14,7 +14,9 @@ html {
   scroll-behavior: smooth;
   overflow-x: hidden;
   max-width: 100%;
-  overscroll-behavior-x: none;
+  /* Lock BOTH axes: no horizontal pan, no vertical rubber-band. The elastic
+     top bounce is what drags the sticky nav down on an overscroll pull. */
+  overscroll-behavior: none;
 }
 
 /* Overlay open — freeze the page behind the sheet so drag gestures can't move it */
@@ -23,14 +25,13 @@ html {
   overflow: hidden;
 }
 
-/* Installed PWA only — keep the vertical rubber-band bounce (feels native on
-   iOS/Android) but contain it so an overscroll never chains into the
-   browser's own pull-to-refresh/reload gesture. Horizontal stays locked via
-   overscroll-behavior-x: none above. */
+/* Installed PWA — fully lock the vertical rubber-band so the sticky top nav can
+   never be dragged down on an overscroll pull. `none` (not `contain`) removes
+   the elastic bounce itself, not merely scroll-chaining. */
 @media (display-mode: standalone), (display-mode: fullscreen) {
   html,
   body {
-    overscroll-behavior-y: contain;
+    overscroll-behavior-y: none;
   }
 }
 
@@ -38,7 +39,7 @@ body {
   margin: 0;
   overflow-x: hidden;
   max-width: 100%;
-  overscroll-behavior-x: none;
+  overscroll-behavior: none;
   padding-left: env(safe-area-inset-left);
   padding-right: env(safe-area-inset-right);
   padding-bottom: env(safe-area-inset-bottom);

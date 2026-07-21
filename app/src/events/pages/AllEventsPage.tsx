@@ -65,7 +65,7 @@ export default function AllEventsPage() {
     <AuroraPage contentClassName="flex h-[100dvh] flex-col overflow-hidden">
       {/* Fixed navbar */}
       <nav style={{ background: PALETTE.navbarGlass, backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)', borderBottom: `1px solid ${PALETTE.border}` }}
-        className="shrink-0 min-h-[68px] pt-[env(safe-area-inset-top)] flex items-center px-4 md:px-6 gap-3">
+        className="shrink-0 min-h-[calc(68px_+_env(safe-area-inset-top))] pt-[env(safe-area-inset-top)] flex items-center px-4 md:px-6 gap-3">
         <HomeButton />
         <div className="w-px h-5 shrink-0" style={{ background: PALETTE.border }} />
         <span style={{ color: PALETTE.dark }} className="font-extrabold text-lg md:text-xl">All Events</span>
