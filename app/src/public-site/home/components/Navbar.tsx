@@ -78,12 +78,13 @@ export function Navbar({ user, avatarUrl, avatarBroken, initial, onAvatarError, 
 
           {user ? (
             <div className="relative">
-              <button onClick={() => setMenuOpen(o => !o)} className="p-0 border-none bg-transparent cursor-pointer rounded-full">
+              <button onClick={() => setMenuOpen(o => !o)}
+                className="w-9 h-9 shrink-0 p-0 border-none bg-transparent cursor-pointer rounded-full flex items-center justify-center">
                 {avatarUrl && !avatarBroken
                   ? <img src={avatarUrl} alt="" referrerPolicy="no-referrer" onError={onAvatarError}
-                      className="w-9 h-9 rounded-full object-cover hover:opacity-90 transition-opacity ring-2 ring-inset ring-[#22C55E]/70" />
+                      className="w-9 h-9 rounded-full object-cover hover:opacity-90 transition-opacity ring-1 ring-inset ring-[#22C55E]" />
                   : <div style={{ ...GLASS_CHIP, color: PALETTE.secondary, borderRadius: '9999px' }}
-                      className="w-9 h-9 rounded-full flex items-center justify-center font-bold text-xs hover:bg-white/[0.08] transition-colors">
+                      className="w-9 h-9 rounded-full flex items-center justify-center font-bold text-xs hover:bg-white/[0.08] transition-colors ring-1 ring-inset ring-[#22C55E]">
                       {initial}
                     </div>
                 }
