@@ -57,11 +57,11 @@ export default function ManageRolesPage() {
     <AuroraPage contentClassName="flex h-[100dvh] flex-col overflow-hidden">
       {/* Fixed header — navbar + search stay pinned while the list scrolls */}
       <div className="shrink-0" style={{ background: PALETTE.navbarGlass, backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)', borderBottom: `1px solid ${PALETTE.border}` }}>
-        <nav className="min-h-16 pt-[env(safe-area-inset-top)] px-4 md:px-6 flex items-center gap-2.5">
+        <nav className="min-h-[68px] pt-[env(safe-area-inset-top)] px-4 md:px-6 flex items-center gap-3">
           <button onClick={() => navigate('/')} style={{ color: PALETTE.muted, background: 'transparent' }}
-            className="text-sm font-semibold border-none cursor-pointer hover:text-green-400 transition-colors p-0">← Home</button>
-          <div className="w-px h-4" style={{ background: PALETTE.border }} />
-          <span style={{ color: PALETTE.dark }} className="font-extrabold text-[15px]">Manage Roles</span>
+            className="text-sm font-semibold border-none cursor-pointer hover:text-green-400 transition-colors p-0 shrink-0">← Home</button>
+          <div className="w-px h-5 shrink-0" style={{ background: PALETTE.border }} />
+          <span style={{ color: PALETTE.dark }} className="font-extrabold text-lg md:text-xl">Manage Roles</span>
         </nav>
         <div className="px-4 pb-3">
           <div className="max-w-2xl mx-auto">

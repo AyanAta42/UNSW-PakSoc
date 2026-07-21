@@ -119,7 +119,7 @@ export function TaskListPanel({ tasks, loading, overTask, allCategories, eventId
                       {task.notes && <div className="mt-2 px-3 py-2 bg-white/[0.04] rounded-lg text-xs text-[#94A3B8] border-l-2 border-[#2E333D] leading-relaxed whitespace-pre-wrap break-words">{task.notes}</div>}
                       {mobile
                         ? <button type="button" onClick={() => onAssignClick?.(task.id)} className="mt-3 w-full py-2 rounded-lg text-xs font-bold border border-[#22C55E]/40 bg-green-500/10 text-[#4ADE80] cursor-pointer active:scale-[0.98] transition-transform">+ Assign</button>
-                        : <div className={`text-[11px] mt-1.5 transition-opacity ${isOver ? 'text-[#4ADE80] opacity-100' : 'text-[#64748B] opacity-0 group-hover:opacity-100'}`}>{doneHint || 'Â '}</div>
+                        : <div className={`text-[11px] mt-1.5 transition-opacity ${isOver ? 'text-[#4ADE80] opacity-100' : 'text-[#64748B] opacity-0 group-hover:opacity-100'}`}>{doneHint || ' '}</div>
                       }
                     </div>
                   )

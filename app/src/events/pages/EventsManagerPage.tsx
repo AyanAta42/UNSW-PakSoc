@@ -25,8 +25,8 @@ function EventSection({ title, color, events, canEdit, onAnnounce, onUnpublish, 
   return (
     <section className="mb-10">
       <div className="flex items-center gap-3 mb-5">
-        <div className="w-1 h-5 rounded-sm" style={{ background: color }} />
-        <h2 className="text-base font-extrabold m-0" style={{ color: PALETTE.dark }}>{title}</h2>
+        <div className="w-1 h-6 rounded-sm" style={{ background: color }} />
+        <h2 className="text-lg font-extrabold m-0" style={{ color: PALETTE.dark }}>{title}</h2>
         <span className="text-xs font-bold px-2.5 py-0.5 rounded-full"
           style={{ background: `${color}22`, color }}>{events.length}</span>
       </div>
@@ -96,13 +96,13 @@ export default function EventsManagerPage() {
   return (
     <AuroraPage>
       <nav style={{ background: PALETTE.navbarGlass, backdropFilter: 'blur(16px)', borderBottom: `1px solid ${PALETTE.border}` }}
-        className="sticky top-0 z-50 min-h-16 pt-[env(safe-area-inset-top)] flex items-center justify-between gap-2 px-4 md:px-6">
-        <div className="flex items-center gap-2.5 min-w-0">
+        className="sticky top-0 z-50 min-h-[68px] pt-[env(safe-area-inset-top)] flex items-center justify-between gap-2 px-4 md:px-6">
+        <div className="flex items-center gap-3 min-w-0">
           <button onClick={() => navigate('/')}
             style={{ color: PALETTE.muted, background: 'transparent' }}
             className="text-sm font-semibold border-none cursor-pointer hover:text-green-400 transition-colors shrink-0">← Home</button>
-          <div className="w-px h-4 shrink-0" style={{ background: PALETTE.border }} />
-          <span style={{ color: PALETTE.dark }} className="font-extrabold text-[15px] truncate">Events Manager</span>
+          <div className="w-px h-5 shrink-0" style={{ background: PALETTE.border }} />
+          <span style={{ color: PALETTE.dark }} className="font-extrabold text-lg md:text-xl truncate">Events Manager</span>
         </div>
         <div className="flex items-center gap-2 shrink-0">
           <HistoryButton onClick={() => setShowHistory(true)} label="View event history" />

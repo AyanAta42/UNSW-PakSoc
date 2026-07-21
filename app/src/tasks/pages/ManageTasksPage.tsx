@@ -78,8 +78,8 @@ export default function ManageTasksPage() {
           <button onClick={() => navigate('/events')} aria-label="Back to events"
             className="w-8 h-8 rounded-full bg-white/[0.06] border border-[#1D2129] flex items-center justify-center text-[#94A3B8] cursor-pointer active:bg-white/10 transition-colors shrink-0 text-sm font-bold"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4"><path d="M15 18l-6-6 6-6"/></svg></button>
           <div className="flex-1 min-w-0">
-            <h1 className="m-0 text-base font-extrabold text-[#F8FAFC] truncate">Manage Tasks</h1>
-            <p className="m-0 text-[10px] text-[#64748B]">{board.tasks.length} tasks</p>
+            <h1 className="m-0 text-lg font-extrabold text-[#F8FAFC] truncate">Manage Tasks</h1>
+            <p className="m-0 text-[11px] text-[#64748B]">{board.tasks.length} tasks</p>
           </div>
           <HistoryButton onClick={() => setShowHistory(true)} label="View task history for this event" />
         </header>

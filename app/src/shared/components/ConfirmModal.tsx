@@ -17,7 +17,7 @@ export function ConfirmModal({ title, message, warning, confirmLabel = 'Confirm'
         className="motion-modal w-full max-w-sm p-6 flex flex-col gap-4" onClick={e => e.stopPropagation()}>
 
         <div className="flex flex-col gap-1.5">
-          <h3 className="m-0 text-[15px] font-extrabold" style={{ color: PALETTE.dark }}>{title}</h3>
+          <h3 className="m-0 text-base font-extrabold" style={{ color: PALETTE.dark }}>{title}</h3>
           <p className="m-0 text-sm leading-relaxed" style={{ color: PALETTE.muted }}>{message}</p>
         </div>
 

@@ -21,10 +21,31 @@ interface Props {
 
 const inp = { border: `1px solid ${PALETTE.border}`, color: PALETTE.dark, background: PALETTE.input, borderRadius: 12, colorScheme: 'dark' } as const
 
-function Label({ icon, children }: { icon: string; children: React.ReactNode }) {
+/** Compact professional line icons for field labels (replaces emoji). */
+function Ic({ path }: { path: React.ReactNode }) {
+  return (
+    <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor"
+      strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden className="shrink-0">
+      {path}
+    </svg>
+  )
+}
+
+const ICON = {
+  name:     <><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z" /><line x1="7" y1="7" x2="7.01" y2="7" /></>,
+  location: <><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" /><circle cx="12" cy="10" r="3" /></>,
+  date:     <><rect x="3" y="4" width="18" height="18" rx="2" /><path d="M16 2v4M8 2v4M3 10h18" /></>,
+  price:    <><line x1="12" y1="2" x2="12" y2="22" /><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" /></>,
+  link:     <><path d="M10 13a5 5 0 0 0 7.07 0l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" /><path d="M14 11a5 5 0 0 0-7.07 0l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" /></>,
+  timeline: <><line x1="8" y1="6" x2="21" y2="6" /><line x1="8" y1="12" x2="21" y2="12" /><line x1="8" y1="18" x2="21" y2="18" /><line x1="3" y1="6" x2="3.01" y2="6" /><line x1="3" y1="12" x2="3.01" y2="12" /><line x1="3" y1="18" x2="3.01" y2="18" /></>,
+  image:    <><rect x="3" y="3" width="18" height="18" rx="2" /><circle cx="8.5" cy="8.5" r="1.5" /><path d="M21 15l-5-5L5 21" /></>,
+  clock:    <><circle cx="12" cy="12" r="9" /><path d="M12 7v5l3 2" /></>,
+} as const
+
+function Label({ icon, children }: { icon: React.ReactNode; children: React.ReactNode }) {
   return (
     <label className="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider mb-1.5" style={{ color: PALETTE.muted }}>
-      <span aria-hidden className="text-[13px] leading-none">{icon}</span>{children}
+      <Ic path={icon} />{children}
     </label>
   )
 }
@@ -123,12 +144,12 @@ export function AddEditEventModal({ onClose, onCreated, onUpdated, event }: Prop
 
         <div ref={scrollRef} className="p-5 sm:p-6 flex flex-col gap-5 overflow-y-auto overscroll-contain">
           {/* Name */}
-          <div><Label icon="✨">Event Name</Label>
+          <div><Label icon={ICON.name}>Event Name</Label>
             <input value={name} onChange={e => setName(e.target.value)} placeholder="e.g. Eid Gala 2026" style={inp} className="w-full px-3.5 py-2.5 text-sm outline-none focus:ring-2 focus:ring-green-500/30" /></div>
 
           {/* Location */}
           <div>
-            <Label icon="📍">Location</Label>
+            <Label icon={ICON.location}>Location</Label>
             <div className="flex gap-2 items-center">
               <input value={location} onChange={e => setLocation(e.target.value)} placeholder="e.g. Roundhouse, UNSW" style={inp} className="flex-1 min-w-0 px-3.5 py-2.5 text-sm outline-none focus:ring-2 focus:ring-green-500/30" />
               <button type="button" onClick={() => location.trim() && setMapPreview(true)} disabled={!location.trim()}
@@ -142,37 +163,37 @@ export function AddEditEventModal({ onClose, onCreated, onUpdated, event }: Prop
           {/* When — date + times grouped in an accent panel */}
           <div className="p-4 flex flex-col gap-4"
             style={{ background: 'rgba(34,197,94,0.05)', border: '1px solid rgba(34,197,94,0.18)', borderRadius: 16 }}>
-            <div><Label icon="📅">Date</Label>
+            <div><Label icon={ICON.date}>Date</Label>
               <input type="date" value={eventDate} onChange={e => setEventDate(e.target.value)}
                 style={inp} className="w-full px-3.5 py-2.5 text-sm outline-none focus:ring-2 focus:ring-green-500/30 cursor-pointer" /></div>
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 min-[360px]:grid-cols-2 gap-3">
               <TimeField label="Starts" value={startTime} onChange={setStartTime} />
               <TimeField label="Ends"   value={endTime}   onChange={setEndTime} />
             </div>
             {startTime && endTime && (
-              <p className="m-0 text-xs font-semibold" style={{ color: '#86EFAC' }}>
-                🕐 {formatHM(startTime)} – {formatHM(endTime)}{crossesMidnight && ' (ends next day)'}
+              <p className="m-0 flex items-center gap-1.5 text-xs font-semibold" style={{ color: '#86EFAC' }}>
+                <Ic path={ICON.clock} />{formatHM(startTime)} – {formatHM(endTime)}{crossesMidnight && ' (ends next day)'}
               </p>
             )}
           </div>
 
           {/* Price */}
-          <div><Label icon="💵">Ticket Price (AUD)</Label>
+          <div><Label icon={ICON.price}>Ticket Price (AUD)</Label>
             <div className="relative"><span style={{ color: PALETTE.muted }} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-sm font-semibold">$</span>
               <input type="number" min="0" step="0.01" value={price} onChange={e => setPrice(e.target.value)} placeholder="0.00"
                 style={{ ...inp, paddingLeft: '1.75rem' }} className="w-full px-3.5 py-2.5 text-sm outline-none focus:ring-2 focus:ring-green-500/30" /></div>
             <p style={{ color: PALETTE.disabled }} className="text-[10px] mt-1">Set to 0 for a free event</p></div>
 
           {/* CTA Buttons */}
-          <div><Label icon="🔗">Action Buttons</Label>
+          <div><Label icon={ICON.link}>Action Buttons</Label>
             <CtaButtonsEditor buttons={buttons} onChange={setButtons} /></div>
 
           {/* Timeline */}
-          <div><Label icon="🗓️">Event Timeline</Label>
+          <div><Label icon={ICON.timeline}>Event Timeline</Label>
             <TimelineEditor items={timeline} onChange={setTimeline} /></div>
 
           {/* Image */}
-          <div><Label icon="🖼️">Event Image</Label>
+          <div><Label icon={ICON.image}>Event Image</Label>
             <ImageUploadZone preview={imagePreview} dragOver={dragOver} onFile={handleFile} onClear={() => { setImageFile(null); setImagePreview('') }} onDragOver={setDragOver} /></div>
         </div>
 

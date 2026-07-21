@@ -19,8 +19,8 @@ function EventSection({ title, color, events, onSelect }: {
   return (
     <section className="mb-10">
       <div className="flex items-center gap-3 mb-5">
-        <div className="w-1 h-5 rounded-sm" style={{ background: color }} />
-        <h2 className="text-base font-extrabold m-0" style={{ color: PALETTE.dark }}>{title}</h2>
+        <div className="w-1 h-6 rounded-sm" style={{ background: color }} />
+        <h2 className="text-lg font-extrabold m-0" style={{ color: PALETTE.dark }}>{title}</h2>
         <span className="text-xs font-bold px-2.5 py-0.5 rounded-full"
           style={{ background: `${color}22`, color }}>{events.length}</span>
       </div>
@@ -66,12 +66,12 @@ export default function AllEventsPage() {
     <AuroraPage contentClassName="flex h-[100dvh] flex-col overflow-hidden">
       {/* Fixed navbar */}
       <nav style={{ background: PALETTE.navbarGlass, backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)', borderBottom: `1px solid ${PALETTE.border}` }}
-        className="shrink-0 min-h-16 pt-[env(safe-area-inset-top)] flex items-center px-4 md:px-6 gap-2.5">
+        className="shrink-0 min-h-[68px] pt-[env(safe-area-inset-top)] flex items-center px-4 md:px-6 gap-3">
         <button onClick={() => navigate('/')}
           style={{ color: PALETTE.muted, background: 'transparent' }}
-          className="text-sm font-semibold border-none cursor-pointer hover:text-green-400 transition-colors">← Home</button>
-        <div className="w-px h-4" style={{ background: PALETTE.border }} />
-        <span style={{ color: PALETTE.dark }} className="font-extrabold text-[15px]">All Events</span>
+          className="text-sm font-semibold border-none cursor-pointer hover:text-green-400 transition-colors shrink-0">← Home</button>
+        <div className="w-px h-5 shrink-0" style={{ background: PALETTE.border }} />
+        <span style={{ color: PALETTE.dark }} className="font-extrabold text-lg md:text-xl">All Events</span>
       </nav>
 
       <div className="flex-1 min-h-0 w-full max-w-[1400px] mx-auto px-4 sm:px-6 md:px-8 py-6 flex gap-6 items-stretch">
