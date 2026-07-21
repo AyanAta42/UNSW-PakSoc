@@ -65,7 +65,10 @@ body {
    locked body. The aurora sits fixed behind (z-0) and never moves. */
 .home-scroll {
   -webkit-overflow-scrolling: touch;
-  overscroll-behavior-y: contain;
+  overflow-x: hidden;
+  /* Vertical elasticity only: the y axis keeps its rubber-band bounce (contain),
+     the x axis never bounces (none). Shorthand order is x then y. */
+  overscroll-behavior: none contain;
 }
 
 /* Hide scrollbars on phone — scrolling still works.

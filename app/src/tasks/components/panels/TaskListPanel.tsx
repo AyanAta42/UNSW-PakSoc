@@ -99,13 +99,19 @@ export function TaskListPanel({ tasks, loading, overTask, allCategories, eventId
                         </div>
                       )}
                       {task.assigned.length > 0 && (
-                        <div className="flex flex-wrap gap-1.5 mb-2" onClick={e => e.stopPropagation()}>
-                          {task.assigned.map(m => <AssignedChip key={m.id} member={m} onRemove={() => setUnassigning({ taskId: task.id, memberId: m.id, name: m.name })} />)}
+                        <div className="flex items-center gap-1.5 mb-2" onClick={e => e.stopPropagation()}>
+                          <div className={`flex gap-1.5 min-w-0 ${mobile ? 'flex-1 overflow-x-auto no-scrollbar' : 'flex-wrap'}`}>
+                            {task.assigned.map(m => <AssignedChip key={m.id} member={m} onRemove={() => setUnassigning({ taskId: task.id, memberId: m.id, name: m.name })} />)}
+                          </div>
+                          {mobile && (
+                            <button type="button" onClick={() => onAssignClick?.(task.id)} aria-label="Assign member"
+                              className="shrink-0 py-1 px-3 rounded-lg text-xs font-bold border border-[#22C55E]/40 bg-green-500/10 text-[#4ADE80] cursor-pointer active:scale-[0.98] transition-transform whitespace-nowrap">+ Assign</button>
+                          )}
                         </div>
                       )}
                       {task.notes && <div className="mt-2 px-3 py-2 bg-white/[0.04] rounded-lg text-xs text-[#94A3B8] border-l-2 border-[#2E333D] leading-relaxed whitespace-pre-wrap break-words">{task.notes}</div>}
                       {mobile
-                        ? <button type="button" onClick={() => onAssignClick?.(task.id)} className="mt-3 w-full py-2 rounded-lg text-xs font-bold border border-[#22C55E]/40 bg-green-500/10 text-[#4ADE80] cursor-pointer active:scale-[0.98] transition-transform">+ Assign</button>
+                        ? task.assigned.length === 0 && <button type="button" onClick={() => onAssignClick?.(task.id)} className="mt-3 w-full py-2 rounded-lg text-xs font-bold border border-[#22C55E]/40 bg-green-500/10 text-[#4ADE80] cursor-pointer active:scale-[0.98] transition-transform">+ Assign</button>
                         : <div className={`text-[11px] mt-1.5 transition-opacity ${isOver ? 'text-[#4ADE80] opacity-100' : 'text-[#64748B] opacity-0 group-hover:opacity-100'}`}>{doneHint || ' '}</div>
                       }
                     </div>

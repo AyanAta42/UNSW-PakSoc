@@ -11,7 +11,7 @@ export function AssignedChip({ member, onRemove }: Props) {
   const color = (member.committee ? COMM_CFG[member.committee]?.color : undefined) ?? '#4ADE80'
   return (
     <span
-      className="inline-flex items-center gap-1 rounded-md py-1 pl-2.5 pr-1 text-xs font-semibold"
+      className="inline-flex shrink-0 items-center gap-1 rounded-md py-1 pl-2.5 pr-1 text-xs font-semibold"
       style={{ background: `${color}14`, color, border: `1px solid ${color}30` }}
     >
       {member.name}
