@@ -14,25 +14,22 @@ import { AmbientBackground } from '@/shared/components/AmbientBackground'
 import { fetchEventTaskInteractions } from '@/interactions/services/fetchEventTaskInteractions'
 import type { Member }       from '@/members/types/Member'
 
-type PickerMode = 'task' | 'form' | null
+type PickerMode = 'form' | null
 
 export default function ManageTasksPage() {
   const navigate = useNavigate()
   const { eventId = '' } = useParams<{ eventId: string }>()
   const [addOpen,      setAddOpen]     = useState(false)
   const [pickerMode,   setPickerMode]  = useState<PickerMode>(null)
-  const [assignTaskId, setAssignTaskId] = useState<string | null>(null)
   const [showHistory,  setShowHistory] = useState(false)
   const [myTasksOnly,  setMyTasksOnly] = useState(false)
   const board   = useTaskBoard(eventId)
   const { user } = useAuth()
 
-  const assignTask  = board.tasks.find(t => t.id === assignTaskId)
-  const closePicker = () => { setPickerMode(null); setAssignTaskId(null) }
+  const closePicker = () => setPickerMode(null)
 
   function handleMemberPick(member: Member) {
-    if (pickerMode === 'task' && assignTaskId) { board.assignMemberToTask(assignTaskId, member.id); closePicker() }
-    else if (pickerMode === 'form') { board.setPreAssigned(p => p.some(a => a.id === member.id) ? p.filter(a => a.id !== member.id) : [...p, member]) }
+    if (pickerMode === 'form') board.setPreAssigned(p => p.some(a => a.id === member.id) ? p.filter(a => a.id !== member.id) : [...p, member])
   }
 
   /** Desktop: clicking a task while a member is selected assigns them. */
@@ -44,9 +41,10 @@ export default function ManageTasksPage() {
 
   const sharedPanelProps = {
     tasks: board.tasks, loading: board.loading, overTask: board.overTask, currentUserAuthId: user?.id,
-    allCategories: board.allCategories, eventId,
+    members: board.members, allCategories: board.allCategories, eventId,
     myTasksOnly, onMyTasksChange: setMyTasksOnly,
-    onRemoveTask: board.removeTask, onRemoveAssigned: board.removeAssigned, onEditTask: board.editTask,
+    onRemoveTask: board.removeTask, onRemoveAssigned: board.removeAssigned,
+    onAssignMember: board.assignMemberToTask, onEditTask: board.editTask,
   }
 
   return (
@@ -87,7 +85,7 @@ export default function ManageTasksPage() {
           <TaskFilterMenu myTasksOnly={myTasksOnly} onChange={setMyTasksOnly} showMine={!!user?.id} />
           <HistoryButton onClick={() => setShowHistory(true)} label="View task history for this event" />
         </header>
-        <TaskListPanel {...sharedPanelProps} mobile onAssignClick={id => { setAssignTaskId(id); setPickerMode('task') }} />
+        <TaskListPanel {...sharedPanelProps} mobile />
 
         {/* Floating "Add Task" — fixed bottom-right, phones only */}
         <button onClick={() => setAddOpen(true)} aria-label="Add task"
@@ -103,7 +101,6 @@ export default function ManageTasksPage() {
           preAssigned={board.preAssigned} setPreAssigned={board.setPreAssigned}
           notes={board.notes} setNotes={board.setNotes}
           onAddTask={board.addTask} onOpenAssigneePicker={() => setPickerMode('form')} />
-        <MemberPickerSheet open={pickerMode === 'task'} title={assignTask ? `Assign to "${assignTask.title}"` : 'Choose a member'} members={board.members} onClose={closePicker} onPick={handleMemberPick} />
         <MemberPickerSheet open={pickerMode === 'form'} title="Choose assignees" members={board.members} multi selectedIds={board.preAssigned.map(m => m.id)} onClose={closePicker} onPick={handleMemberPick} onDone={closePicker} />
       </div>
 

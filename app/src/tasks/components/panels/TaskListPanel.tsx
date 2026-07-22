@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import type { Task } from '@/tasks/types/Task'
+import type { Member } from '@/members/types/Member'
 import { getCatCfg } from '@/config/categoryConfig'
 import { AssignedChip }  from '@/tasks/components/assignment/AssignedChip'
 import { EditTaskModal } from '@/tasks/components/forms/EditTaskModal'
@@ -11,21 +12,25 @@ import { fetchEventTaskInteractions } from '@/interactions/services/fetchEventTa
 
 interface Props {
   tasks:             Task[];  loading:          boolean; overTask:      string | null
+  members:           Member[]
   allCategories:     string[]; eventId:         string
   mobile?:           boolean; currentUserAuthId?: string; selectedMemberId?: string | null
   myTasksOnly?:      boolean; onMyTasksChange?: (v: boolean) => void
   onRemoveTask:      (id: string) => void
   onRemoveAssigned:  (taskId: string, memberId: string) => void
+  onAssignMember:    (taskId: string, memberId: string) => void
   onEditTask:        (id: string, title: string, cat: string, notes: string, subs: string[]) => void
-  onAssignClick?:    (taskId: string) => void
   onTaskClick?:      (taskId: string) => void
 }
 
-export function TaskListPanel({ tasks, loading, overTask, allCategories, eventId, mobile, currentUserAuthId, selectedMemberId, myTasksOnly = false, onMyTasksChange, onRemoveTask, onRemoveAssigned, onEditTask, onAssignClick, onTaskClick }: Props) {
-  const [editingTask,   setEditingTask]   = useState<Task | null>(null)
+export function TaskListPanel({ tasks, loading, overTask, members, allCategories, eventId, mobile, currentUserAuthId, selectedMemberId, myTasksOnly = false, onMyTasksChange, onRemoveTask, onRemoveAssigned, onAssignMember, onEditTask, onTaskClick }: Props) {
+  const [editingTaskId, setEditingTaskId] = useState<string | null>(null)
   const [deletingTaskId, setDeletingTaskId] = useState<string | null>(null)
   const [unassigning,   setUnassigning]   = useState<{ taskId: string; memberId: string; name: string } | null>(null)
   const [showHistory,   setShowHistory]   = useState(false)
+
+  // Derive from the live tasks list so the edit modal's assignee list stays current
+  const editingTask = editingTaskId ? tasks.find(t => t.id === editingTaskId) ?? null : null
 
   const visibleTasks = myTasksOnly && currentUserAuthId
     ? tasks.filter(t => t.assigned.some(m => m.user_id === currentUserAuthId))
@@ -79,7 +84,7 @@ export function TaskListPanel({ tasks, loading, overTask, allCategories, eventId
                       onClick={() => !mobile && onTaskClick?.(task.id)}
                       className={`task-card group relative bg-[#0B0E15] rounded-xl p-4 select-none ${hasSelected && !mobile ? 'cursor-pointer hover:border-[#22C55E] hover:bg-[#0D1119]' : ''} ${isOver ? 'border-2 border-dashed border-[#22C55E] bg-[#22C55E]/[0.04]' : 'border border-[#1D2129] hover:border-[#2E333D]'}`}>
                       <div className="absolute top-3 right-3 flex items-center gap-1">
-                        <button onClick={e => { e.stopPropagation(); setEditingTask(task) }} aria-label="Edit task" className="h-6 px-1.5 inline-flex items-center justify-center text-[#94A3B8] hover:text-[#F8FAFC] bg-transparent border-none cursor-pointer text-[11px] font-semibold leading-none transition-colors">Edit</button>
+                        <button onClick={e => { e.stopPropagation(); setEditingTaskId(task.id) }} aria-label="Edit task" className="h-6 px-1.5 inline-flex items-center justify-center text-[#94A3B8] hover:text-[#F8FAFC] bg-transparent border-none cursor-pointer text-[11px] font-semibold leading-none transition-colors">Edit</button>
                         <button onClick={e => { e.stopPropagation(); setDeletingTaskId(task.id) }} aria-label="Delete task" className="h-6 w-6 inline-flex items-center justify-center text-lg text-[#64748B] hover:text-red-400 bg-transparent border-none cursor-pointer leading-none transition-colors">{'×'}</button>
                       </div>
                       <div className="flex items-center gap-2 pr-14 mb-2.5">
@@ -103,17 +108,10 @@ export function TaskListPanel({ tasks, loading, overTask, allCategories, eventId
                           <div className={`flex gap-1.5 min-w-0 ${mobile ? 'flex-1 overflow-x-auto no-scrollbar' : 'flex-wrap'}`}>
                             {task.assigned.map(m => <AssignedChip key={m.id} member={m} onRemove={() => setUnassigning({ taskId: task.id, memberId: m.id, name: m.name })} />)}
                           </div>
-                          {mobile && (
-                            <button type="button" onClick={() => onAssignClick?.(task.id)} aria-label="Assign member"
-                              className="shrink-0 py-1 px-3 rounded-lg text-xs font-bold border border-[#22C55E]/40 bg-green-500/10 text-[#4ADE80] cursor-pointer active:scale-[0.98] transition-transform whitespace-nowrap">+ Assign</button>
-                          )}
                         </div>
                       )}
                       {task.notes && <div className="mt-2 px-3 py-2 bg-white/[0.04] rounded-lg text-xs text-[#94A3B8] border-l-2 border-[#2E333D] leading-relaxed whitespace-pre-wrap break-words">{task.notes}</div>}
-                      {mobile
-                        ? task.assigned.length === 0 && <button type="button" onClick={() => onAssignClick?.(task.id)} className="mt-3 w-full py-2 rounded-lg text-xs font-bold border border-[#22C55E]/40 bg-green-500/10 text-[#4ADE80] cursor-pointer active:scale-[0.98] transition-transform">+ Assign</button>
-                        : <div className={`text-[11px] mt-1.5 transition-opacity ${isOver ? 'text-[#4ADE80] opacity-100' : 'text-[#64748B] opacity-0 group-hover:opacity-100'}`}>{doneHint || ' '}</div>
-                      }
+                      {!mobile && <div className={`text-[11px] mt-1.5 transition-opacity ${isOver ? 'text-[#4ADE80] opacity-100' : 'text-[#64748B] opacity-0 group-hover:opacity-100'}`}>{doneHint || ' '}</div>}
                     </div>
                   )
                 })}
@@ -123,8 +121,10 @@ export function TaskListPanel({ tasks, loading, overTask, allCategories, eventId
         })}
       </div>
       {editingTask && (
-        <EditTaskModal task={editingTask} allCategories={allCategories} onClose={() => setEditingTask(null)}
-          onSave={(id, title, cat, notes, subs) => { onEditTask(id, title, cat, notes, subs); setEditingTask(null) }} />
+        <EditTaskModal task={editingTask} members={members} allCategories={allCategories} mobile={mobile}
+          onClose={() => setEditingTaskId(null)}
+          onSave={(id, title, cat, notes, subs) => { onEditTask(id, title, cat, notes, subs); setEditingTaskId(null) }}
+          onAssignMember={onAssignMember} onUnassignMember={onRemoveAssigned} />
       )}
       {deletingTaskId && (
         <ConfirmModal

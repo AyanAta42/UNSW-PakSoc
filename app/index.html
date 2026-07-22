@@ -104,6 +104,59 @@
         #app-loader-word { -webkit-text-fill-color: #F8FAFC; color: #F8FAFC; }
         #app-loader { transition: opacity 0.12s linear; }
       }
+
+      /* iOS landscape guard — iOS ignores the manifest `orientation` field AND
+         the Screen Orientation API (both in Safari and the installed PWA), so a
+         portrait-first phone can still land in landscape. Since it can't be
+         locked, nudge the user back. Pure CSS so it works before any JS and
+         persists after the boot splash is removed. Scoped to phone-sized
+         landscape (short viewport) — tablets/desktop, where landscape is
+         legitimate, never see it. */
+      #orientation-guard { display: none; }
+      @media screen and (orientation: landscape) and (max-height: 500px) {
+        #orientation-guard {
+          position: fixed;
+          inset: 0;
+          z-index: 10000; /* above the app and the boot splash (9999) */
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          gap: 14px;
+          text-align: center;
+          padding: 24px calc(24px + env(safe-area-inset-right)) 24px calc(24px + env(safe-area-inset-left));
+          background:
+            radial-gradient(58vw 120vh at 12% -20%, rgba(34,197,94,0.14), transparent 68%) no-repeat,
+            radial-gradient(58vw 120vh at 88% -20%, rgba(139,92,246,0.14), transparent 68%) no-repeat #03040A;
+          font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+          color: #F8FAFC;
+        }
+        #orientation-guard-icon {
+          font-size: 40px;
+          line-height: 1;
+          animation: orientation-guard-rock 1.8s ease-in-out infinite;
+        }
+        #orientation-guard-title {
+          font-weight: 800;
+          font-size: 1.25rem;
+          letter-spacing: -0.01em;
+        }
+        #orientation-guard-sub {
+          font-size: 12px;
+          font-weight: 700;
+          letter-spacing: 0.28em;
+          text-transform: uppercase;
+          color: #22C55E;
+          opacity: 0.85;
+        }
+      }
+      @keyframes orientation-guard-rock {
+        0%, 100% { transform: rotate(-24deg); }
+        50%      { transform: rotate(0deg);   }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        #orientation-guard-icon { animation: none; }
+      }
     </style>
 
     <!-- Events API starts HERE — before React, fonts, or any other asset -->
@@ -131,6 +184,12 @@
         <div id="app-loader-word">PakSoc UNSW</div>
         <div id="app-loader-sub">Pakistani Society</div>
       </div>
+    </div>
+    <!-- iOS can't lock orientation; this guard (CSS-only) shows in phone landscape -->
+    <div id="orientation-guard" role="alert">
+      <div id="orientation-guard-icon" aria-hidden="true">📱</div>
+      <div id="orientation-guard-title">Please rotate your device</div>
+      <div id="orientation-guard-sub">PakSoc works in portrait</div>
     </div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
