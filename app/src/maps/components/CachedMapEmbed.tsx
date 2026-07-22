@@ -1,6 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
-
-const iframeCache = new Map<string, HTMLIFrameElement>()
+import { useEffect, useState } from 'react'
 
 interface Props {
   src:       string
@@ -19,67 +17,53 @@ function isStandalonePWA() {
     || (window.navigator as unknown as { standalone?: boolean }).standalone === true
 }
 
-function ensureIframe(cacheId: string, title: string) {
-  let iframe = iframeCache.get(cacheId)
-  if (!iframe) {
-    iframe = document.createElement('iframe')
-    iframe.width = '100%'; iframe.height = '100%'
-    iframe.style.border = '0'; iframe.style.display = 'block'
-    iframe.setAttribute('loading', 'lazy')
-    iframe.setAttribute('referrerPolicy', 'no-referrer-when-downgrade')
-    iframe.setAttribute('allowfullscreen', '')
-    iframeCache.set(cacheId, iframe)
-  }
-  iframe.title = title
-  return iframe
-}
-
-function setIframeSrc(iframe: HTMLIFrameElement, src: string) {
-  if (iframe.getAttribute('data-src') === src && iframe.src) return false
-  iframe.src = src; iframe.setAttribute('data-src', src); return true
-}
-
-/** Force Maps to reload — re-attaching a cached iframe can drop the place pin. */
-function reloadIframeSrc(iframe: HTMLIFrameElement, src: string) {
-  iframe.src = ''; iframe.src = src; iframe.setAttribute('data-src', src)
-}
-
-/** Reuses the same iframe DOM node across route changes so Google Maps doesn't reload. */
-export function CachedMapEmbed({ src, cacheId, title = 'Event location map', className, style, linkHref }: Props) {
-  const containerRef = useRef<HTMLDivElement>(null)
+/**
+ * Google Maps embed with a dark skeleton that covers the iframe until it fires `load`.
+ *
+ * Each mount renders a fresh iframe. We used to cache the iframe node and re-parent it
+ * across route changes to avoid reloads, but re-attaching a detached cross-origin iframe
+ * forces Chromium to reload its browsing context anyway — and in the installed desktop PWA
+ * that reload repaints blank white while still firing `load` (fading the skeleton away and
+ * exposing the blank). A fresh iframe is never re-parented, so it always paints.
+ *
+ * `cacheId` is kept in the props for call-site compatibility but is no longer used.
+ */
+export function CachedMapEmbed({ src, title = 'Event location map', className, style, linkHref }: Props) {
   const [loaded, setLoaded] = useState(false)
   const [overlayGone, setOverlayGone] = useState(false)
 
+  // Re-cover the frame whenever the destination changes so a new location can't
+  // flash the previous map (or a blank frame) while it reloads.
   useEffect(() => {
-    const container = containerRef.current
-    if (!container) return
-    const iframe   = ensureIframe(cacheId, title)
-    // When a tap layer owns the click, kill the iframe's own pointer events. On iOS a touch
-    // over an iframe can otherwise slip past a transparent overlay and hit Google's internal
-    // breakout links, which pop a blank window loading the embed URL at top level.
-    iframe.style.pointerEvents = linkHref ? 'none' : ''
-    const hadLoaded = iframe.getAttribute('data-src') === src && !!iframe.src
-    if (iframe.parentElement && iframe.parentElement !== container) iframe.parentElement.removeChild(iframe)
-    const reattached = iframe.parentElement !== container
-    if (reattached) container.appendChild(iframe)
-    const srcChanged = setIframeSrc(iframe, src)
-    if (reattached && hadLoaded && !srcChanged) reloadIframeSrc(iframe, src)
-
-    if (srcChanged || (reattached && hadLoaded)) iframe.removeAttribute('data-loaded')
-    const alreadyLoaded = iframe.getAttribute('data-loaded') === src
-    setLoaded(alreadyLoaded)
-    setOverlayGone(alreadyLoaded)
-    const onLoad = () => { iframe.setAttribute('data-loaded', src); setLoaded(true) }
-    iframe.addEventListener('load', onLoad)
-    return () => {
-      iframe.removeEventListener('load', onLoad)
-      if (iframe.parentElement === container) container.removeChild(iframe)
-    }
-  }, [src, cacheId, title, linkHref])
+    setLoaded(false)
+    setOverlayGone(false)
+  }, [src])
 
   return (
     <div className={className} style={{ position: 'relative', ...style }}>
-      <div ref={containerRef} className="w-full h-full" />
+      {/* key={src} remounts the iframe on location change so its load event (and the
+          skeleton cover) reset cleanly instead of reusing a half-navigated frame. */}
+      <iframe
+        key={src}
+        src={src}
+        title={title}
+        width="100%"
+        height="100%"
+        loading="lazy"
+        referrerPolicy="no-referrer-when-downgrade"
+        allowFullScreen
+        onLoad={() => setLoaded(true)}
+        style={{
+          border: 0,
+          display: 'block',
+          width: '100%',
+          height: '100%',
+          // When a tap layer owns the click, kill the iframe's own pointer events. On iOS a
+          // touch over an iframe can otherwise slip past a transparent overlay and hit Google's
+          // internal breakout links, which pop a blank window loading the embed URL at top level.
+          pointerEvents: linkHref ? 'none' : undefined,
+        }}
+      />
       {!overlayGone && (
         <div className="motion-skeleton" aria-hidden
           onTransitionEnd={() => setOverlayGone(true)}
