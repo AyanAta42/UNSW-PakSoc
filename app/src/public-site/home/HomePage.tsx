@@ -59,7 +59,7 @@ function isPhone(): boolean {
   return typeof window !== 'undefined' && window.matchMedia('(max-width: 1023px)').matches
 }
 
-export default function HomePage() {
+export default function HomePage({ active = true }: { active?: boolean }) {
   const navigate = useNavigate()
   const { user, avatarUrl: authAvatar } = useAuth()
   const { member } = useCurrentMember()
@@ -87,20 +87,24 @@ export default function HomePage() {
   // pads it). The global `body { padding-bottom: env(safe-area-inset-bottom) }`
   // would otherwise reserve a strip below the shell that the fixed aurora can't
   // reach — reading as a black seam at the bottom edge. Drop it while home is up.
+  // Home is kept mounted across the session (see App), so tie this shell-level
+  // class to whether home is the *visible* route, not merely mounted.
   useEffect(() => {
+    if (!active) return
     document.documentElement.classList.add('home-mounted')
     return () => document.documentElement.classList.remove('home-mounted')
-  }, [])
+  }, [active])
 
   const overlayOpen = !!sheetEvent || editOpen
   useEffect(() => {
+    if (!active) return
     document.body.style.overflow = overlayOpen ? 'hidden' : ''
     document.documentElement.classList.toggle('modal-open', overlayOpen)
     return () => {
       document.body.style.overflow = ''
       document.documentElement.classList.remove('modal-open')
     }
-  }, [overlayOpen])
+  }, [overlayOpen, active])
 
   const { phoneEvents, allPublic, banner, featured, now } = useMemo(() => {
     const now = new Date()
