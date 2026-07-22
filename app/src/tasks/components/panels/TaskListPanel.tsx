@@ -18,12 +18,12 @@ interface Props {
   myTasksOnly?:      boolean; onMyTasksChange?: (v: boolean) => void
   onRemoveTask:      (id: string) => void
   onRemoveAssigned:  (taskId: string, memberId: string) => void
-  onAssignMember:    (taskId: string, memberId: string) => void
+  onApplyAssignees:  (taskId: string, memberIds: string[]) => void
   onEditTask:        (id: string, title: string, cat: string, notes: string, subs: string[]) => void
   onTaskClick?:      (taskId: string) => void
 }
 
-export function TaskListPanel({ tasks, loading, overTask, members, allCategories, eventId, mobile, currentUserAuthId, selectedMemberId, myTasksOnly = false, onMyTasksChange, onRemoveTask, onRemoveAssigned, onAssignMember, onEditTask, onTaskClick }: Props) {
+export function TaskListPanel({ tasks, loading, overTask, members, allCategories, eventId, mobile, currentUserAuthId, selectedMemberId, myTasksOnly = false, onMyTasksChange, onRemoveTask, onRemoveAssigned, onApplyAssignees, onEditTask, onTaskClick }: Props) {
   const [editingTaskId, setEditingTaskId] = useState<string | null>(null)
   const [deletingTaskId, setDeletingTaskId] = useState<string | null>(null)
   const [unassigning,   setUnassigning]   = useState<{ taskId: string; memberId: string; name: string } | null>(null)
@@ -124,7 +124,7 @@ export function TaskListPanel({ tasks, loading, overTask, members, allCategories
         <EditTaskModal task={editingTask} members={members} allCategories={allCategories} mobile={mobile}
           onClose={() => setEditingTaskId(null)}
           onSave={(id, title, cat, notes, subs) => { onEditTask(id, title, cat, notes, subs); setEditingTaskId(null) }}
-          onAssignMember={onAssignMember} onUnassignMember={onRemoveAssigned} />
+          onUnassignMember={onRemoveAssigned} onApplyAssignees={onApplyAssignees} />
       )}
       {deletingTaskId && (
         <ConfirmModal

@@ -11,6 +11,7 @@ import { createTask }      from '@/tasks/services/createTask'
 import { updateTask }      from '@/tasks/services/updateTask'
 import { deleteTask }      from '@/tasks/services/deleteTask'
 import { unassignMember }  from '@/tasks/services/unassignMember'
+import { assignMember }    from '@/tasks/services/assignMember'
 import { useDragAssign }   from '@/tasks/hooks/useDragAssign'
 import type { DragAssignState } from '@/tasks/hooks/useDragAssign'
 import { useRealtimeTable } from '@/core/supabase/useRealtimeTable'
@@ -34,6 +35,13 @@ export interface TaskBoardState extends DragAssignState {
   removeTask:      (id: string) => void
   editTask:        (id: string, title: string, cat: string, notes: string, subs: string[]) => void
   removeAssigned:  (taskId: string, memberId: string) => void
+  applyAssignees:  (taskId: string, memberIds: string[]) => void
+}
+
+/** "Alice", "Alice & Bob", "Alice, Bob & Carol" */
+function nameList(names: string[]): string {
+  if (names.length <= 1) return names[0] ?? ''
+  return `${names.slice(0, -1).join(', ')} & ${names[names.length - 1]}`
 }
 
 export function useTaskBoard(eventId: string): TaskBoardState {
@@ -153,10 +161,39 @@ export function useTaskBoard(eventId: string): TaskBoardState {
     setTasks(p => p.map(t => t.id === taskId ? { ...t, assigned: t.assigned.filter(a => a.id !== mId) } : t))
     try {
       await unassignMember(taskId, mId)
-      toast.info('Member unassigned')
+      toast.info(`${memberName} unassigned`)
       void logInteraction('task.member_unassigned', 'task', taskId, eventId, `removed ${memberName} from "${task?.title ?? 'a task'}"`)
     } catch (e) { console.error(e); toast.error("Couldn't unassign member", errorMessage(e, 'Please try again.')) }
   }
 
-  return { members, tasks, loading, title, setTitle, cat, setCat, subtasks, setSubtasks, preAssigned, setPreAssigned, notes, setNotes, allCategories, selectedMemberId, selectMember, addCustomCategory, removeCustomCategory, addTask, editTask, removeTask, removeAssigned, ...drag }
+  // Applies a whole set of assignee changes at once, emitting a single net toast at the end
+  // (used by the mobile assignee picker so tapping members doesn't fire a toast per tap).
+  async function applyAssignees(taskId: string, targetIds: string[]) {
+    const task = tasks.find(t => t.id === taskId)
+    if (!task) return
+    const currentIds = task.assigned.map(a => a.id)
+    const addMembers    = members.filter(m => targetIds.includes(m.id) && !currentIds.includes(m.id))
+    const removeMembers = task.assigned.filter(a => !targetIds.includes(a.id))
+    if (addMembers.length === 0 && removeMembers.length === 0) return
+
+    const removeIds = removeMembers.map(m => m.id)
+    setTasks(p => p.map(t => t.id !== taskId ? t : { ...t, assigned: [...t.assigned.filter(a => !removeIds.includes(a.id)), ...addMembers] }))
+    try {
+      await Promise.all([
+        ...addMembers.map(m => assignMember(taskId, m.id)),
+        ...removeMembers.map(m => unassignMember(taskId, m.id)),
+      ])
+      for (const m of addMembers)    void logInteraction('task.member_assigned',   'task', taskId, eventId, `assigned ${m.name} to "${task.title}"`)
+      for (const m of removeMembers) void logInteraction('task.member_unassigned', 'task', taskId, eventId, `removed ${m.name} from "${task.title}"`)
+      const parts: string[] = []
+      if (addMembers.length)    parts.push(`Assigned ${nameList(addMembers.map(m => m.name))}`)
+      if (removeMembers.length) parts.push(`Removed ${nameList(removeMembers.map(m => m.name))}`)
+      toast.success('Assignees updated', parts.join(' · '))
+    } catch (e) {
+      console.error(e); toast.error("Couldn't update assignees", errorMessage(e, 'Please try again.'))
+      fetchTasks(eventId).then(setTasks).catch(console.error) // reconcile after a partial failure
+    }
+  }
+
+  return { members, tasks, loading, title, setTitle, cat, setCat, subtasks, setSubtasks, preAssigned, setPreAssigned, notes, setNotes, allCategories, selectedMemberId, selectMember, addCustomCategory, removeCustomCategory, addTask, editTask, removeTask, removeAssigned, applyAssignees, ...drag }
 }

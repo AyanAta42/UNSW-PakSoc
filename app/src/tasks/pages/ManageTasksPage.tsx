@@ -44,7 +44,8 @@ export default function ManageTasksPage() {
     members: board.members, allCategories: board.allCategories, eventId,
     myTasksOnly, onMyTasksChange: setMyTasksOnly,
     onRemoveTask: board.removeTask, onRemoveAssigned: board.removeAssigned,
-    onAssignMember: board.assignMemberToTask, onEditTask: board.editTask,
+    onEditTask: board.editTask,
+    onApplyAssignees: board.applyAssignees,
   }
 
   return (

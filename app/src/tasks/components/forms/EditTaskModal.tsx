@@ -13,17 +13,23 @@ interface Props {
   mobile?:       boolean
   onClose:       () => void
   onSave:        (id: string, title: string, cat: string, notes: string, subtasks: string[]) => void
-  onAssignMember:   (taskId: string, memberId: string) => void
   onUnassignMember: (taskId: string, memberId: string) => void
+  onApplyAssignees: (taskId: string, memberIds: string[]) => void
 }
 
-export function EditTaskModal({ task, members, allCategories, mobile, onClose, onSave, onAssignMember, onUnassignMember }: Props) {
+export function EditTaskModal({ task, members, allCategories, mobile, onClose, onSave, onUnassignMember, onApplyAssignees }: Props) {
   const [title, setTitle] = useState(task.title)
   const [cat,   setCat]   = useState(task.category)
   const [notes, setNotes] = useState(task.notes)
   const [subs,  setSubs]  = useState<string[]>(task.subtasks.map(s => s.title).concat(['']))
   const [pickerOpen, setPickerOpen] = useState(false)
+  // Draft assignee selection while the picker is open — nothing is committed (or announced) until Done.
+  const [draftAssignees, setDraftAssignees] = useState<string[]>([])
   const subInputs = useRef<(HTMLInputElement | null)[]>([])
+
+  function openPicker() { setDraftAssignees(task.assigned.map(m => m.id)); setPickerOpen(true) }
+  function toggleDraft(id: string) { setDraftAssignees(prev => prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]) }
+  function commitAssignees() { onApplyAssignees(task.id, draftAssignees); setPickerOpen(false) }
 
   /** Enter adds a new subtask below the current one and focuses it. */
   function subKeyDown(e: KeyboardEvent<HTMLInputElement>, i: number) {
@@ -87,7 +93,7 @@ export function EditTaskModal({ task, members, allCategories, mobile, onClose, o
                     {task.assigned.map(m => <AssignedChip key={m.id} member={m} onRemove={() => onUnassignMember(task.id, m.id)} />)}
                   </div>
                 )}
-                <button type="button" onClick={() => setPickerOpen(true)} className="w-full py-2.5 rounded-lg text-xs font-bold border border-dashed border-[#2E333D] bg-transparent text-[#94A3B8] cursor-pointer active:scale-[0.98] transition-transform">
+                <button type="button" onClick={openPicker} className="w-full py-2.5 rounded-lg text-xs font-bold border border-dashed border-[#2E333D] bg-transparent text-[#94A3B8] cursor-pointer active:scale-[0.98] transition-transform">
                   {task.assigned.length > 0 ? 'Edit assignees →' : '+ Choose assignees'}
                 </button>
               </div>
@@ -108,10 +114,10 @@ export function EditTaskModal({ task, members, allCategories, mobile, onClose, o
             title="Choose assignees"
             members={members}
             multi
-            selectedIds={task.assigned.map(m => m.id)}
+            selectedIds={draftAssignees}
             onClose={() => setPickerOpen(false)}
-            onPick={m => task.assigned.some(a => a.id === m.id) ? onUnassignMember(task.id, m.id) : onAssignMember(task.id, m.id)}
-            onDone={() => setPickerOpen(false)} />
+            onPick={m => toggleDraft(m.id)}
+            onDone={commitAssignees} />
         )}
       </div>
     </div>
