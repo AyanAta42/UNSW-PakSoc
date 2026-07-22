@@ -33,6 +33,17 @@ html {
   body {
     overscroll-behavior-y: none;
   }
+
+  /* The home shell is `100dvh + env(safe-area-inset-bottom)` so its background
+     reaches edge-to-edge behind the bottom system bar (home indicator / nav bar).
+     That makes it a hair taller than the layout viewport, so lock the document on
+     the home route to stop that bottom strip being dragged into view. The inner
+     `.home-scroll` region keeps its own scroll + rubber-band. Non-home routes are
+     untouched and keep normal document scroll. */
+  html.home-mounted,
+  html.home-mounted body {
+    overflow: hidden;
+  }
 }
 
 body {

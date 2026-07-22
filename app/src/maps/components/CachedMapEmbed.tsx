@@ -8,6 +8,15 @@ interface Props {
   title?:    string
   className?: string
   style?:    React.CSSProperties
+  /** When set, the whole map becomes a tap target that opens this URL (only after the map loads). */
+  linkHref?: string
+}
+
+/** True inside an installed PWA (standalone display), where target="_blank" leaves a stray blank window. */
+function isStandalonePWA() {
+  if (typeof window === 'undefined') return false
+  return window.matchMedia?.('(display-mode: standalone)').matches
+    || (window.navigator as unknown as { standalone?: boolean }).standalone === true
 }
 
 function ensureIframe(cacheId: string, title: string) {
@@ -36,7 +45,7 @@ function reloadIframeSrc(iframe: HTMLIFrameElement, src: string) {
 }
 
 /** Reuses the same iframe DOM node across route changes so Google Maps doesn't reload. */
-export function CachedMapEmbed({ src, cacheId, title = 'Event location map', className, style }: Props) {
+export function CachedMapEmbed({ src, cacheId, title = 'Event location map', className, style, linkHref }: Props) {
   const containerRef = useRef<HTMLDivElement>(null)
   const [loaded, setLoaded] = useState(false)
   const [overlayGone, setOverlayGone] = useState(false)
@@ -72,6 +81,21 @@ export function CachedMapEmbed({ src, cacheId, title = 'Event location map', cla
           onTransitionEnd={() => setOverlayGone(true)}
           style={{ position: 'absolute', inset: 0, opacity: loaded ? 0 : 1, transition: 'opacity 450ms ease', pointerEvents: 'none' }} />
       )}
+      {linkHref && (
+        // Full-cover tap layer: swallows clicks until the map has loaded (so an early tap
+        // can't hit a half-loaded Google frame), then opens Maps. In an installed PWA it
+        // navigates the same window so the OS hands off to the Maps app without leaving a
+        // stray blank window behind.
+        <a
+          href={loaded ? linkHref : undefined}
+          target={loaded && !isStandalonePWA() ? '_blank' : undefined}
+          rel="noopener noreferrer"
+          aria-label="Open in Google Maps"
+          aria-disabled={!loaded}
+          onClick={e => { if (!loaded) e.preventDefault() }}
+          style={{ position: 'absolute', inset: 0, cursor: loaded ? 'pointer' : 'default' }}
+        />
+      )}
     </div>
   )
 }
@@ -80,4 +104,10 @@ export function CachedMapEmbed({ src, cacheId, title = 'Event location map', cla
 export function mapEmbedSrc(location?: string) {
   const query = encodeURIComponent((location || 'UNSW Sydney') + ', Kensington NSW Australia')
   return `https://www.google.com/maps?q=${query}&hl=en&z=16&output=embed`
+}
+
+/** Universal Maps link that deep-links to the native Maps app on mobile when tapped. */
+export function mapLinkUrl(location?: string) {
+  const query = encodeURIComponent((location || 'UNSW Sydney') + ', Kensington NSW Australia')
+  return `https://www.google.com/maps/search/?api=1&query=${query}`
 }

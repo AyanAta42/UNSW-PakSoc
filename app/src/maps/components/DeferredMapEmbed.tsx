@@ -7,6 +7,8 @@ interface Props {
   title?: string
   className?: string
   style?: React.CSSProperties
+  /** When set, the whole map becomes a tap target that opens this URL (only after the map loads). */
+  linkHref?: string
   /** Delay before mounting the heavy Maps iframe so the parent modal paints first. */
   delayMs?: number
 }
@@ -15,7 +17,7 @@ interface Props {
  * Renders a lightweight placeholder first, then mounts CachedMapEmbed after a
  * short delay so sheet/modal open animations stay smooth.
  */
-export function DeferredMapEmbed({ src, cacheId, title, className, style, delayMs = 450 }: Props) {
+export function DeferredMapEmbed({ src, cacheId, title, className, style, linkHref, delayMs = 450 }: Props) {
   const [ready, setReady] = useState(false)
 
   useEffect(() => {
@@ -45,5 +47,5 @@ export function DeferredMapEmbed({ src, cacheId, title, className, style, delayM
     return <div className={['motion-skeleton', className].filter(Boolean).join(' ')} style={style} aria-hidden />
   }
 
-  return <CachedMapEmbed src={src} cacheId={cacheId} title={title} className={className} style={style} />
+  return <CachedMapEmbed src={src} cacheId={cacheId} title={title} className={className} style={style} linkHref={linkHref} />
 }

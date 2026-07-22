@@ -1,6 +1,6 @@
 import type { DbEvent } from '@/events/types/Event'
 import { DeferredMapEmbed } from '@/maps/components/DeferredMapEmbed'
-import { mapEmbedSrc } from '@/maps/components/CachedMapEmbed'
+import { mapEmbedSrc, mapLinkUrl } from '@/maps/components/CachedMapEmbed'
 import { EventDetailContent }          from './EventDetailContent'
 import { getEventButtons, getCtaVariant }             from '@/events/utils/getEventButtons'
 import { EventCtaButton }              from '@/events/components/EventCtaButton'
@@ -60,7 +60,7 @@ export function MobileEventSheet({ event, now, onClose, mapCacheId = 'home-map-s
             <div>
               <div style={{ color: PALETTE.muted }} className="text-[10px] font-bold uppercase tracking-widest mb-2.5">Location</div>
               <div style={{ height: 200, borderRadius: 16, border: `1px solid ${PALETTE.border}`, overflow: 'hidden', background: PALETTE.card }}>
-                <DeferredMapEmbed cacheId={mapCacheId} src={mapEmbedSrc(event.location)} title="Event location map" className="w-full h-full" delayMs={280} />
+                <DeferredMapEmbed cacheId={mapCacheId} src={mapEmbedSrc(event.location)} linkHref={mapLinkUrl(event.location)} title="Event location map" className="w-full h-full" delayMs={280} />
               </div>
               <div style={{ color: PALETTE.muted }} className="text-xs mt-2 flex items-center gap-1.5">
                 <PinIcon color={ACCENT} />{event.location}

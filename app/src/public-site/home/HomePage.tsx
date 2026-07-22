@@ -132,8 +132,17 @@ export default function HomePage() {
 
   return (
     <div
-      className="home-appshell relative flex h-[100dvh] flex-col overflow-hidden"
+      className="home-appshell relative flex flex-col overflow-hidden"
       style={{
+        // Full screen height EXTENDED by the bottom safe-area inset so the shell
+        // (and its background) paints edge-to-edge behind the home indicator /
+        // Android nav bar. On some installed-PWA engines `100dvh` stops at the TOP
+        // of that system bar, leaving a bare dark strip there and stranding the
+        // footer above it. The +inset makes the background reach the true bottom.
+        // In a browser tab the `html.home-mounted .home-appshell` rule (index.css)
+        // overrides this to `auto` for document-scroll, so this only affects the
+        // installed app.
+        height: 'calc(100dvh + env(safe-area-inset-bottom, 0px))',
         // Same static aurora tint as the html shell — the animated layers fade
         // in over it, so the background never pops
         background: PAGE_BG,
