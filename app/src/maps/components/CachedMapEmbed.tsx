@@ -83,7 +83,7 @@ export function CachedMapEmbed({ src, cacheId, title = 'Event location map', cla
       {!overlayGone && (
         <div className="motion-skeleton" aria-hidden
           onTransitionEnd={() => setOverlayGone(true)}
-          style={{ position: 'absolute', inset: 0, opacity: loaded ? 0 : 1, transition: 'opacity 450ms ease', pointerEvents: 'none' }} />
+          style={{ position: 'absolute', inset: 0, opacity: loaded ? 0 : 1, transition: 'opacity 220ms ease', pointerEvents: 'none' }} />
       )}
       {linkHref && (
         // Full-cover tap layer: swallows clicks until the map has loaded (so an early tap

@@ -2,7 +2,8 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { ACCENT, PALETTE } from '@/config/theme'
 import { usePermissions } from '@/roles/hooks/usePermissions'
 import { useRealtimeTable } from '@/core/supabase/useRealtimeTable'
-import { fetchSocialPosts, refreshSocialPosts, IG_USERNAME, WALL_SIZE, type SocialPost } from '../services/socialPosts'
+import { fetchSocialPosts, refreshSocialPosts, getCachedSocialPosts, IG_USERNAME, WALL_SIZE, type SocialPost } from '../services/socialPosts'
+import { isImageReady, markImageReady, warmImages } from '@/shared/utils/imageCache'
 import { toast, errorMessage } from '@/shared/toast/toast'
 
 const PLACEHOLDERS = [
@@ -61,15 +62,18 @@ function CardSkeleton() {
 }
 
 function WallCard({ post }: { post: SocialPost }) {
-  const [imgLoaded, setImgLoaded] = useState(false)
+  // Seed from the session cache: if this thumbnail already loaded once, start it
+  // fully visible so remounts (route changes) don't replay the fade from black.
+  const [imgLoaded, setImgLoaded] = useState(() => isImageReady(post.thumbnail_url))
+  const markLoaded = () => { markImageReady(post.thumbnail_url); setImgLoaded(true) }
   return (
     <a href={post.permalink} target="_blank" rel="noopener noreferrer"
       style={{ border: `1px solid ${PALETTE.border}`, borderRadius: 14, minWidth: 150, aspectRatio: '3/4', background: '#0A0A0A' }}
       className="motion-social-card relative overflow-hidden cursor-pointer shrink-0 no-underline">
       {!imgLoaded && <div className="motion-skeleton" aria-hidden style={{ position: 'absolute', inset: 0 }} />}
       <img src={post.thumbnail_url} alt={post.caption || 'Instagram post'} loading="lazy"
-        ref={el => { if (el?.complete && el.naturalWidth > 0) setImgLoaded(true) }}
-        onLoad={() => setImgLoaded(true)}
+        ref={el => { if (el?.complete && el.naturalWidth > 0) markLoaded() }}
+        onLoad={markLoaded}
         className="absolute inset-0 w-full h-full object-cover transition-opacity duration-500"
         style={{ opacity: imgLoaded ? 1 : 0 }} />
       {post.media_type === 'VIDEO' && <ReelBadge />}
@@ -80,8 +84,10 @@ function WallCard({ post }: { post: SocialPost }) {
 
 export function SocialWall() {
   const { isAtLeast } = usePermissions()
-  const [posts, setPosts] = useState<SocialPost[]>([])
-  const [loading, setLoading] = useState(true)
+  // Seed from the session cache so a return visit paints the wall on the first
+  // frame instead of showing skeletons while it refetches.
+  const [posts, setPosts] = useState<SocialPost[]>(() => getCachedSocialPosts() ?? [])
+  const [loading, setLoading] = useState(() => !getCachedSocialPosts())
   const [refreshing, setRefreshing] = useState<number | null>(null)
   const [error, setError] = useState<string | null>(null)
   const scrollerRef = useRef<HTMLDivElement>(null)
@@ -108,7 +114,12 @@ export function SocialWall() {
     el.scrollBy({ left: (dir === 'left' ? -1 : 1) * el.clientWidth * 0.8, behavior: 'smooth' })
   }
 
-  // Served from Supabase only — Instagram is never hit on page load
+  // Warm every thumbnail whenever the list changes, so images stay decoded and
+  // paint instantly on the next remount.
+  useEffect(() => { warmImages(posts.map(p => p.thumbnail_url)) }, [posts])
+
+  // Served from Supabase only — Instagram is never hit on page load. Skip the
+  // fetch entirely when the session cache already has the wall.
   useEffect(() => {
     let alive = true
     fetchSocialPosts()

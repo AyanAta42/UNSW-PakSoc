@@ -32,6 +32,15 @@ export const IG_USERNAME = (import.meta.env.VITE_IG_USERNAME as string) || 'unsw
 
 export const WALL_SIZE = 10
 
+// Session cache so navigating back to Home paints the wall instantly instead of
+// re-fetching and flashing skeletons every time the page remounts.
+let cachedPosts: SocialPost[] | null = null
+
+/** Last fetched posts, or null if the wall hasn't loaded yet this session. */
+export function getCachedSocialPosts(): SocialPost[] | null {
+  return cachedPosts
+}
+
 /** Everyone reads from Supabase — Instagram is only hit via refreshSocialPosts(). */
 export async function fetchSocialPosts(): Promise<SocialPost[]> {
   const supabase = await db()
@@ -41,7 +50,8 @@ export async function fetchSocialPosts(): Promise<SocialPost[]> {
     .order('posted_at', { ascending: false })
     .limit(WALL_SIZE)
   if (error) throw error
-  return (data ?? []) as SocialPost[]
+  cachedPosts = (data ?? []) as SocialPost[]
+  return cachedPosts
 }
 
 /**

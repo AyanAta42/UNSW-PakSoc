@@ -20,7 +20,7 @@ export function Footer() {
       </div>
       <a href={ARC_MEMBERSHIP_URL} target="_blank" rel="noopener noreferrer"
         style={{ color: ACCENT }} className="text-sm font-semibold no-underline hover:opacity-70 transition-opacity">
-        Become a Member →
+        Join us on Rubric →
       </a>
       <div style={{ color: PALETTE.disabled }} className="text-xs">
         &copy; {new Date().getFullYear()} PakSoc UNSW · Pakistani Society, University of New South Wales

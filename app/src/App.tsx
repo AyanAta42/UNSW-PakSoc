@@ -1,5 +1,6 @@
-import { lazy, Suspense } from 'react'
+import { lazy, Suspense, useEffect } from 'react'
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
+import { preconnectMaps } from '@/maps/preconnectMaps'
 import { AuthProvider } from '@/auth/context/AuthContext'
 import { CurrentMemberProvider } from '@/roles/context/CurrentMemberContext'
 import { PublicEventsProvider } from '@/events/context/PublicEventsContext'
@@ -17,6 +18,15 @@ const ManageRolesPage = lazy(() => import('@/roles/pages/ManageRolesPage'))
 const ManageTasksPage = lazy(() => import('@/tasks/pages/ManageTasksPage'))
 
 function App() {
+  // Warm the connection to Google Maps hosts once the app is idle, so the first
+  // map embed loads noticeably faster without competing with initial paint.
+  useEffect(() => {
+    const w = window as Window & { requestIdleCallback?: (cb: () => void) => number }
+    const id = w.requestIdleCallback?.(preconnectMaps)
+    const t = id === undefined ? setTimeout(preconnectMaps, 2000) : undefined
+    return () => { if (t) clearTimeout(t) }
+  }, [])
+
   return (
     <BrowserRouter>
       <AuthProvider>

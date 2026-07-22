@@ -7,6 +7,8 @@ import {
 } from '@/events/services/publicEventsBootstrap'
 import { useRealtimeTable } from '@/core/supabase/useRealtimeTable'
 import { applyEventChange } from '@/events/utils/applyEventChange'
+import { eventImageUrl } from '@/events/utils/eventImageUrl'
+import { warmImages } from '@/shared/utils/imageCache'
 
 interface PublicEventsCtx {
   events: DbEvent[]
@@ -52,6 +54,10 @@ export function PublicEventsProvider({ children }: { children: React.ReactNode }
     ready,
     change => setEvents(prev => applyEventChange(prev, change, true)),
   )
+
+  // Keep every event poster decoded and in memory so route changes repaint them
+  // instantly instead of flashing empty while the browser re-fetches/re-decodes.
+  useEffect(() => { warmImages(events.map(eventImageUrl)) }, [events])
 
   const value = useMemo(() => ({ events, loading, ready }), [events, loading, ready])
 
