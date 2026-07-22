@@ -159,13 +159,13 @@ export function SocialWall() {
 
   return (
     <>
-      <div className="flex items-center gap-3 -mt-3 mb-4">
-        <div style={{ color: PALETTE.muted }} className="text-xs">Latest from @{IG_USERNAME}</div>
+      <div className="flex items-center justify-between flex-nowrap gap-3 -mt-3 mb-4">
+        <div style={{ color: PALETTE.muted }} className="text-xs truncate min-w-0">Latest from @{IG_USERNAME}</div>
         {/* TEMPORARY: exec/president-only manual sync — pulls IG posts into Supabase */}
         {isAtLeast('executive') && (
           <button onClick={() => setConfirmOpen(true)} disabled={refreshing}
             style={{ color: ACCENT, border: `1px solid ${PALETTE.border}`, background: 'transparent', borderRadius: 8 }}
-            className="text-[10px] font-semibold px-2 py-1 cursor-pointer hover:opacity-80 disabled:opacity-50">
+            className="shrink-0 whitespace-nowrap text-[10px] font-semibold px-2 py-1 cursor-pointer hover:opacity-80 disabled:opacity-50">
             {refreshing ? 'Fetching…' : '↻ Fetch latest'}
           </button>
         )}
@@ -183,15 +183,15 @@ export function SocialWall() {
               @{IG_USERNAME} and stores any posts that aren't in the database yet —
               only the missing reels are added.
             </p>
-            <div className="flex justify-end gap-2">
+            <div className="flex flex-row flex-nowrap justify-end gap-2">
               <button onClick={() => setConfirmOpen(false)}
                 style={{ color: PALETTE.dark, border: `1px solid ${PALETTE.border}`, background: 'transparent', borderRadius: 8 }}
-                className="text-xs font-semibold px-3 py-1.5 cursor-pointer hover:opacity-80">
+                className="shrink-0 whitespace-nowrap text-xs font-semibold px-3 py-1.5 cursor-pointer hover:opacity-80">
                 Cancel
               </button>
               <button onClick={handleFetchLatest}
                 style={{ color: PALETTE.dark, background: ACCENT, borderRadius: 8 }}
-                className="text-xs font-semibold px-3 py-1.5 cursor-pointer hover:opacity-90">
+                className="shrink-0 whitespace-nowrap text-xs font-semibold px-3 py-1.5 cursor-pointer hover:opacity-90">
                 Fetch latest
               </button>
             </div>
