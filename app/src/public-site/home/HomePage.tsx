@@ -137,7 +137,7 @@ export default function HomePage() {
       {/* Elastic scroll region — the ONLY surface that rubber-bands. The navbar
           rides at the top of this flow and scrolls away with the content (not
           pinned); the footer sits at the end; the aurora is fixed behind. */}
-      <main className={`home-scroll relative z-10 flex flex-col flex-1 min-h-0 no-scrollbar ${overlayOpen ? 'overflow-hidden' : 'overflow-y-auto'}`}>
+      <main data-native-overscroll className={`home-scroll relative z-10 flex flex-col flex-1 min-h-0 no-scrollbar ${overlayOpen ? 'overflow-hidden' : 'overflow-y-auto'}`}>
       <Navbar
         user={user}
         avatarUrl={avatarUrl}

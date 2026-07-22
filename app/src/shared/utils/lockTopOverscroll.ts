@@ -26,6 +26,10 @@ export function installTopOverscrollLock(): void {
     while (el && el !== document.body && el !== document.documentElement) {
       const cs = getComputedStyle(el)
       if (cs.position === 'fixed') return null // inside an overlay — leave its gestures untouched
+      // Opt-out: a scroller can keep its native top rubber-band via
+      // `data-native-overscroll` (e.g. the home app-shell, whose nav now scrolls
+      // away in-flow, so there's nothing left for the top pull to drag).
+      if (el instanceof HTMLElement && el.dataset.nativeOverscroll !== undefined) return null
       const oy = cs.overflowY
       if ((oy === 'auto' || oy === 'scroll') && el.scrollHeight > el.clientHeight) return el
       el = el.parentElement
