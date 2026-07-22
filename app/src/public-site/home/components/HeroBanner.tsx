@@ -22,7 +22,6 @@ export function HeroBanner({ banner, loading }: Props) {
   const bgRef = useRef<HTMLDivElement>(null)
   const glowRef = useRef<HTMLDivElement>(null)
   const contentRef = useRef<HTMLDivElement>(null)
-  const ctaRef = useRef<HTMLDivElement>(null)
   const layersRef = useRef<ParallaxLayer[]>([])
   const titleRef = useRef<HTMLHeadingElement>(null)
   const [trailReady, setTrailReady] = useState(false)
@@ -49,7 +48,6 @@ export function HeroBanner({ banner, loading }: Props) {
     { depth: BG_DEPTH, el: bgRef.current },
     { depth: GLOW_DEPTH, el: glowRef.current },
     { depth: CONTENT_DEPTH, el: contentRef.current },
-    { depth: CONTENT_DEPTH, el: ctaRef.current },
   ]
   useParallaxLayers(heroRef, layersRef)
 
@@ -129,8 +127,12 @@ export function HeroBanner({ banner, loading }: Props) {
                 className="hero-title-text m-0 whitespace-nowrap max-w-[87%] md:max-w-[560px] text-[34px] leading-[1.2] md:text-[54px] md:leading-[1.15] pr-1">
                 {banner.name}
               </h1>
-              <div className="flex items-center gap-3 md:gap-4 mt-3.5 md:mt-4 w-fit">
-                <div className="flex gap-2.5 w-fit">
+
+              {/* Timer + CTAs share one wrapping row: the buttons sit beside the
+                  countdown while they fit on a single line, and drop to their own
+                  full row underneath the moment the two labels can't. */}
+              <div className="flex flex-wrap items-end gap-x-4 gap-y-3 mt-3.5 md:mt-4">
+                <div className="flex gap-2.5 shrink-0">
                   {(['days','hrs','mins','secs'] as const).map((k, i) => {
                     const val = [cd.days, cd.hrs, cd.mins, cd.secs][i]
                     const digits = String(Math.max(0, val)).padStart(2, '0').slice(-2)
@@ -148,33 +150,19 @@ export function HeroBanner({ banner, loading }: Props) {
                     )
                   })}
                 </div>
+
+                {btns.length > 0 && (
+                  <div className="flex gap-2 md:gap-2.5 items-stretch flex-1 max-w-full md:max-w-[460px] motion-hero-actions">
+                    {btns.map((b, i) => {
+                      const variant = getCtaVariant(i, btns.length)
+                      return (
+                        <EventCtaButton key={i} label={b.label} url={b.url} variant={variant}
+                          className={`${variant === 'primary' ? 'flex-[1.15]' : 'flex-1'} px-3 py-2 text-sm whitespace-nowrap text-center`} />
+                      )
+                    })}
+                  </div>
+                )}
               </div>
-            </div>
-          )}
-
-          {!loading && btns.length > 0 && (
-            <div className="md:hidden flex gap-2 mt-3 w-full shrink-0 motion-hero-actions">
-              {btns.map((b, i) => {
-                const variant = getCtaVariant(i, btns.length)
-                return (
-                  <EventCtaButton key={i} label={b.label} url={b.url} variant={variant}
-                    className={`${variant === 'primary' ? 'flex-[1.18]' : 'flex-1'} px-2 py-2.5 text-xs min-w-0`} />
-                )
-              })}
-            </div>
-          )}
-        </div>
-
-        <div ref={ctaRef} className="hidden md:flex relative z-10 w-[40%] lg:w-[44%] shrink-0 flex-col justify-end items-stretch p-5 lg:p-6 motion-parallax-layer">
-          {!loading && btns.length > 0 && (
-            <div className="flex flex-nowrap gap-2.5 lg:gap-3 w-full items-stretch motion-hero-actions">
-              {btns.map((b, i) => {
-                const variant = getCtaVariant(i, btns.length)
-                return (
-                  <EventCtaButton key={i} label={b.label} url={b.url} variant={variant}
-                    className={`${variant === 'primary' ? 'flex-[1.2]' : 'flex-1'} min-w-0 px-3 lg:px-4 py-2.5 text-sm text-center` } />
-                )
-              })}
             </div>
           )}
         </div>
