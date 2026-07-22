@@ -35,7 +35,7 @@ export function HistoryPanel({ title, onClose, fetcher, emptyMessage = 'No activ
         className="motion-panel absolute top-0 right-0 h-full w-full max-w-sm flex flex-col"
         style={{ background: PALETTE.modal, borderLeft: `1px solid ${PALETTE.border}`, boxShadow: PALETTE.shadowLg }}>
 
-        <div className="px-5 py-4 flex items-center justify-between shrink-0" style={{ borderBottom: `1px solid ${PALETTE.border}` }}>
+        <div className="px-5 pt-[calc(env(safe-area-inset-top)+1rem)] pb-4 flex items-center justify-between shrink-0" style={{ borderBottom: `1px solid ${PALETTE.border}` }}>
           <div className="flex items-center gap-2.5">
             <span style={{ color: ACCENT }}><HistoryIcon size={17} /></span>
             <h2 className="m-0 text-[15px] font-extrabold" style={{ color: PALETTE.dark }}>{title}</h2>
@@ -45,7 +45,7 @@ export function HistoryPanel({ title, onClose, fetcher, emptyMessage = 'No activ
             className="w-8 h-8 flex items-center justify-center text-lg cursor-pointer hover:border-white/30 transition-colors shrink-0">×</button>
         </div>
 
-        <div className="flex-1 overflow-y-auto no-scrollbar px-5 py-5">
+        <div className="flex-1 overflow-y-auto no-scrollbar px-5 pt-5 pb-[max(1.25rem,env(safe-area-inset-bottom))]">
           {loading && (
             <div className="flex flex-col gap-3">
               {[1, 2, 3, 4].map(i => <div key={i} className="motion-skeleton h-14" style={{ borderRadius: 14, border: `1px solid ${PALETTE.border}` }} />)}

@@ -81,6 +81,15 @@ export default function HomePage() {
 
   useEffect(() => { setAvatarBroken(false) }, [avatarUrl])
 
+  // Home is a full-bleed shell that paints its own safe-area bottom (the footer
+  // pads it). The global `body { padding-bottom: env(safe-area-inset-bottom) }`
+  // would otherwise reserve a strip below the shell that the fixed aurora can't
+  // reach — reading as a black seam at the bottom edge. Drop it while home is up.
+  useEffect(() => {
+    document.documentElement.classList.add('home-shell')
+    return () => document.documentElement.classList.remove('home-shell')
+  }, [])
+
   const overlayOpen = !!sheetEvent || editOpen
   useEffect(() => {
     document.body.style.overflow = overlayOpen ? 'hidden' : ''
@@ -123,7 +132,7 @@ export default function HomePage() {
 
   return (
     <div
-      className="relative flex h-[100dvh] flex-col overflow-hidden mb-[calc(-1_*_env(safe-area-inset-bottom))]"
+      className="relative flex h-[100dvh] flex-col overflow-hidden"
       style={{
         // Same static aurora tint as the html shell — the animated layers fade
         // in over it, so the background never pops

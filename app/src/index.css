@@ -45,6 +45,12 @@ body {
   padding-bottom: env(safe-area-inset-bottom);
 }
 
+/* Home is a full-bleed app shell (100dvh) that pads the bottom safe area inside
+   its own footer. The body's bottom reservation would only leave a bare strip
+   under the fixed aurora — a black seam at the very bottom edge — so drop it
+   while the home shell is mounted (class toggled in HomePage). */
+html.home-shell body { padding-bottom: 0; }
+
 /* Reusable: hide a scrollable element's scrollbar while keeping scroll enabled. */
 .no-scrollbar {
   scrollbar-width: none;
