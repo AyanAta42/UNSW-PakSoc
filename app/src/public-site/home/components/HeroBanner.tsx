@@ -165,14 +165,14 @@ export function HeroBanner({ banner, loading }: Props) {
           )}
         </div>
 
-        <div ref={ctaRef} className="hidden md:flex relative z-10 w-[42%] shrink-0 flex-col justify-end items-end p-7 motion-parallax-layer">
+        <div ref={ctaRef} className="hidden md:flex relative z-10 w-[38%] lg:w-[42%] shrink-0 flex-col justify-end items-end p-5 lg:p-6 motion-parallax-layer">
           {!loading && btns.length > 0 && (
-            <div className="flex gap-3 items-stretch motion-hero-actions">
+            <div className="flex flex-wrap gap-2.5 lg:gap-3 justify-end items-end motion-hero-actions">
               {btns.map((b, i) => {
                 const variant = getCtaVariant(i, btns.length)
                 return (
                   <EventCtaButton key={i} label={b.label} url={b.url} variant={variant}
-                    className={`${variant === 'primary' ? 'px-7' : 'px-5'} py-2.5 text-sm whitespace-nowrap`} />
+                    className={`${variant === 'primary' ? 'px-5 lg:px-6' : 'px-4 lg:px-5'} py-2.5 text-sm whitespace-nowrap`} />
                 )
               })}
             </div>

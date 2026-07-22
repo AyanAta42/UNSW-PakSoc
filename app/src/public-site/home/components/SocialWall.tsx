@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { ACCENT, PALETTE } from '@/config/theme'
 import { usePermissions } from '@/roles/hooks/usePermissions'
 import { useRealtimeTable } from '@/core/supabase/useRealtimeTable'
-import { fetchSocialPosts, refreshSocialPosts, getCachedSocialPosts, IG_USERNAME, WALL_SIZE, type SocialPost } from '../services/socialPosts'
+import { fetchSocialPosts, syncSocialPosts, getCachedSocialPosts, IG_USERNAME, type SocialPost } from '../services/socialPosts'
 import { isImageReady, markImageReady, warmImages } from '@/shared/utils/imageCache'
 import { toast, errorMessage } from '@/shared/toast/toast'
 
@@ -88,7 +88,8 @@ export function SocialWall() {
   // frame instead of showing skeletons while it refetches.
   const [posts, setPosts] = useState<SocialPost[]>(() => getCachedSocialPosts() ?? [])
   const [loading, setLoading] = useState(() => !getCachedSocialPosts())
-  const [refreshing, setRefreshing] = useState<number | null>(null)
+  const [refreshing, setRefreshing] = useState(false)
+  const [confirmOpen, setConfirmOpen] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const scrollerRef = useRef<HTMLDivElement>(null)
   const [canLeft, setCanLeft] = useState(false)
@@ -134,18 +135,25 @@ export function SocialWall() {
     fetchSocialPosts().then(setPosts).catch(() => {})
   })
 
-  async function handleRefetch(count: number) {
-    setRefreshing(count)
+  async function handleFetchLatest() {
+    setConfirmOpen(false)
+    setRefreshing(true)
     setError(null)
     try {
-      await refreshSocialPosts(count)
+      const { added } = await syncSocialPosts()
       setPosts(await fetchSocialPosts())
-      toast.success(count === 1 ? 'Latest post fetched' : 'Reels fetched')
+      toast.success(
+        added === 0
+          ? 'Already up to date'
+          : added === 1
+          ? '1 new reel added'
+          : `${added} new reels added`,
+      )
     } catch (e) {
-      setError(e instanceof Error ? e.message : 'Refetch failed')
+      setError(e instanceof Error ? e.message : 'Fetch failed')
       toast.error("Couldn't fetch reels", errorMessage(e, 'Please try again.'))
     } finally {
-      setRefreshing(null)
+      setRefreshing(false)
     }
   }
 
@@ -153,22 +161,43 @@ export function SocialWall() {
     <>
       <div className="flex items-center gap-3 -mt-3 mb-4">
         <div style={{ color: PALETTE.muted }} className="text-xs">Latest from @{IG_USERNAME}</div>
-        {/* TEMPORARY: exec/president-only manual refetch — pulls IG posts into Supabase */}
+        {/* TEMPORARY: exec/president-only manual sync — pulls IG posts into Supabase */}
         {isAtLeast('executive') && (
-          <>
-            <button onClick={() => handleRefetch(1)} disabled={refreshing !== null}
-              style={{ color: ACCENT, border: `1px solid ${PALETTE.border}`, background: 'transparent', borderRadius: 8 }}
-              className="text-[10px] font-semibold px-2 py-1 cursor-pointer hover:opacity-80 disabled:opacity-50">
-              {refreshing === 1 ? 'Fetching…' : '↻ Latest post'}
-            </button>
-            <button onClick={() => handleRefetch(WALL_SIZE)} disabled={refreshing !== null}
-              style={{ color: ACCENT, border: `1px solid ${PALETTE.border}`, background: 'transparent', borderRadius: 8 }}
-              className="text-[10px] font-semibold px-2 py-1 cursor-pointer hover:opacity-80 disabled:opacity-50">
-              {refreshing === WALL_SIZE ? 'Fetching…' : `↻ Last ${WALL_SIZE} posts`}
-            </button>
-          </>
+          <button onClick={() => setConfirmOpen(true)} disabled={refreshing}
+            style={{ color: ACCENT, border: `1px solid ${PALETTE.border}`, background: 'transparent', borderRadius: 8 }}
+            className="text-[10px] font-semibold px-2 py-1 cursor-pointer hover:opacity-80 disabled:opacity-50">
+            {refreshing ? 'Fetching…' : '↻ Fetch latest'}
+          </button>
         )}
       </div>
+
+      {confirmOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4"
+          style={{ background: 'rgba(0,0,0,0.6)' }} onClick={() => setConfirmOpen(false)}>
+          <div onClick={e => e.stopPropagation()} role="dialog" aria-modal="true"
+            style={{ background: PALETTE.modal, border: `1px solid ${PALETTE.border}`, borderRadius: 16, maxWidth: 360 }}
+            className="w-full p-5">
+            <h3 className="m-0 mb-2 text-base font-semibold" style={{ color: PALETTE.dark }}>Fetch latest posts</h3>
+            <p className="m-0 mb-5 text-xs leading-relaxed" style={{ color: PALETTE.muted }}>
+              Use this after a new reel has been posted on Instagram. It checks
+              @{IG_USERNAME} and stores any posts that aren't in the database yet —
+              only the missing reels are added.
+            </p>
+            <div className="flex justify-end gap-2">
+              <button onClick={() => setConfirmOpen(false)}
+                style={{ color: PALETTE.dark, border: `1px solid ${PALETTE.border}`, background: 'transparent', borderRadius: 8 }}
+                className="text-xs font-semibold px-3 py-1.5 cursor-pointer hover:opacity-80">
+                Cancel
+              </button>
+              <button onClick={handleFetchLatest}
+                style={{ color: PALETTE.dark, background: ACCENT, borderRadius: 8 }}
+                className="text-xs font-semibold px-3 py-1.5 cursor-pointer hover:opacity-90">
+                Fetch latest
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
       {error && <p className="text-xs -mt-2 mb-3" style={{ color: '#EF4444' }}>{error}</p>}
 
       {/* pt/px + negative margins give hover-scaled cards headroom inside the scrollport */}

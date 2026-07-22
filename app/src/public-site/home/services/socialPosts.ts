@@ -86,12 +86,11 @@ async function mirrorPost(supabase: SupabaseClient, media: IgMedia): Promise<Soc
   }
 }
 
-/** Pulls the latest `count` reels/posts from Instagram and upserts them into Supabase. */
-export async function refreshSocialPosts(count: number): Promise<SocialPost[]> {
+/** Reads the latest `count` media items for the target account (metadata only). */
+async function fetchIgMedia(count: number): Promise<IgMedia[]> {
   const token = import.meta.env.VITE_IG_ACCESS_TOKEN as string | undefined
   const igUserId = import.meta.env.VITE_IG_USER_ID as string | undefined
   if (!token || !igUserId) throw new Error('Missing VITE_IG_ACCESS_TOKEN / VITE_IG_USER_ID in app/.env')
-  const supabase = await db()
 
   // Business Discovery: our own IG account (VITE_IG_USER_ID) reads the public
   // media of the target professional account (VITE_IG_USERNAME)
@@ -105,10 +104,35 @@ export async function refreshSocialPosts(count: number): Promise<SocialPost[]> {
 
   const medias: IgMedia[] = json?.business_discovery?.media?.data ?? []
   if (medias.length === 0) throw new Error(`No posts found for @${IG_USERNAME}`)
+  return medias
+}
+
+export interface SyncResult {
+  /** Number of new posts mirrored and inserted this run. */
+  added: number
+}
+
+/**
+ * Pulls the latest posts from Instagram and stores only the ones missing from
+ * Supabase — figures out which reels haven't been added yet and mirrors just those.
+ */
+export async function syncSocialPosts(): Promise<SyncResult> {
+  const supabase = await db()
+  const medias = await fetchIgMedia(WALL_SIZE)
+
+  // Skip anything already stored: only the missing reels get mirrored/uploaded.
+  const { data: existing, error: existingError } = await supabase
+    .from('social_posts')
+    .select('id')
+    .in('id', medias.map(m => m.id))
+  if (existingError) throw existingError
+  const existingIds = new Set((existing ?? []).map(r => r.id as string))
+  const missing = medias.filter(m => !existingIds.has(m.id))
+  if (missing.length === 0) return { added: 0 }
 
   // Mirror in parallel; a single bad item (e.g. copyrighted media with no URL)
   // shouldn't sink the whole batch
-  const settled = await Promise.allSettled(medias.map(m => mirrorPost(supabase, m)))
+  const settled = await Promise.allSettled(missing.map(m => mirrorPost(supabase, m)))
   const posts = settled
     .filter((r): r is PromiseFulfilledResult<SocialPost> => r.status === 'fulfilled')
     .map(r => r.value)
@@ -122,5 +146,5 @@ export async function refreshSocialPosts(count: number): Promise<SocialPost[]> {
     .from('social_posts')
     .upsert(posts.map(p => ({ ...p, fetched_at })))
   if (error) throw error
-  return posts
+  return { added: posts.length }
 }
