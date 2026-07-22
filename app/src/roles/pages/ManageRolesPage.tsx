@@ -21,6 +21,26 @@ export default function ManageRolesPage() {
 
   useEffect(() => { fetchMembers().then(setMembers).catch(console.error).finally(() => setLoading(false)) }, [])
 
+  // Pin the header (navbar + search) on EVERY device. The `h-[100dvh]` shell below
+  // already keeps the header out of the list's scroll region, but on notched phones
+  // the global `body { padding-bottom: env(safe-area-inset-bottom) }` makes the
+  // document a hair taller than the viewport — enough that the whole shell (header
+  // included) could be dragged up on a scroll/overscroll. Lock document scroll while
+  // this page is mounted so the inner list is the ONLY scroll surface and the header
+  // can never move. Mirrors the home-route lock in index.css.
+  useEffect(() => {
+    const html = document.documentElement, body = document.body
+    const prev = { html: html.style.overflow, body: body.style.overflow, pad: body.style.paddingBottom }
+    html.style.overflow = 'hidden'
+    body.style.overflow = 'hidden'
+    body.style.paddingBottom = '0'
+    return () => {
+      html.style.overflow = prev.html
+      body.style.overflow = prev.body
+      body.style.paddingBottom = prev.pad
+    }
+  }, [])
+
   // Live updates: role/committee changes and new sign-ups appear without refresh
   useRealtimeTable('members', () => { fetchMembers().then(setMembers).catch(console.error) }, !loading)
 
@@ -69,9 +89,9 @@ export default function ManageRolesPage() {
           </div>
         </div>
       </div>
-      {/* Scrollable member list */}
+      {/* Scrollable member list — the ONLY scroll surface (document is locked above) */}
       <div className="flex-1 min-h-0 overflow-y-auto">
-        <div className="max-w-2xl mx-auto px-4 py-6">
+        <div className="max-w-2xl mx-auto px-4 pt-6 pb-[calc(1.5rem+env(safe-area-inset-bottom))]">
         {loading && [1,2,3,4].map(i => <div key={i} className="motion-skeleton h-14 mb-3" style={{ borderRadius: PALETTE.radiusInput, border: `1px solid ${PALETTE.border}` }} />)}
         {!loading && members.length === 0 && <div style={{ color: PALETTE.muted }} className="text-sm text-center py-16">No members yet. Users appear here after they log in.</div>}
         {!loading && Object.entries(grouped).map(([role, ms]) => (
