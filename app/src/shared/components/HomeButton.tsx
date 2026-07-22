@@ -1,4 +1,4 @@
-import { useNavigate } from 'react-router-dom'
+import { useAppNavigate as useNavigate } from '@/shared/router/useAppNavigate'
 import { PALETTE } from '@/config/theme'
 
 /** Circular home-icon nav button — replaces the old "← Home" text link. */

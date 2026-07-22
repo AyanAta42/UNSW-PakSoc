@@ -1,5 +1,6 @@
 import { useState } from 'react'
-import { useNavigate, useParams } from 'react-router-dom'
+import { useParams } from 'react-router-dom'
+import { useAppNavigate as useNavigate } from '@/shared/router/useAppNavigate'
 import { useTaskBoard }      from '@/tasks/hooks/useTaskBoard'
 import { useAuth }           from '@/auth/hooks/useAuth'
 import { RosterPanel }       from '@/tasks/components/panels/RosterPanel'

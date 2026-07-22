@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useAppNavigate as useNavigate } from '@/shared/router/useAppNavigate'
 import { supabase } from '@/core/supabase/client'
 import { AuroraPage } from '@/shared/components/AuroraPage'
 import { toast } from '@/shared/toast/toast'

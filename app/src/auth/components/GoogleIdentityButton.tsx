@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useAppNavigate as useNavigate } from '@/shared/router/useAppNavigate'
 import { GoogleSignInButton } from './GoogleSignInButton'
 import { signInWithGoogle } from '@/auth/services/signInWithGoogle'
 import { toast } from '@/shared/toast/toast'

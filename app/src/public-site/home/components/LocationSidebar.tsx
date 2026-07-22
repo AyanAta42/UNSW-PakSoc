@@ -16,19 +16,40 @@ export function LocationSidebar({ mapEvent, featured, now }: Props) {
   // scroll the sidebar at a different rate: the height gap is fed back in
   // proportionally to page scroll, so its bottom lands level with the social
   // wall's bottom exactly when the wall's bottom reaches the viewport.
+  //
+  // The scroll surface differs by build: a plain browser tab scrolls the
+  // DOCUMENT (index.css unlocks `html.home-mounted` and drops `.home-scroll`
+  // to `overflow: visible`), while the installed app locks the document and
+  // scrolls INSIDE the `.home-scroll` container. Driving off `window.scrollY`
+  // alone silently no-ops in the installed app (window never scrolls), which
+  // left the sidebar's bottom un-aligned there. Resolve the real scroller.
   useEffect(() => {
     const el = ref.current
     const parent = el?.parentElement
     const left = parent?.previousElementSibling as HTMLElement | null
     if (!el || !parent || !left) return
+
+    // `.home-scroll` is the container scroller only when it actually scrolls;
+    // in a browser tab it's `overflow: visible`, so fall back to the document.
+    const host = el.closest('.home-scroll') as HTMLElement | null
+    const useContainer = !!host && /(auto|scroll)/.test(getComputedStyle(host).overflowY)
+    const scroller = useContainer
+      ? host!
+      : ((document.scrollingElement as HTMLElement) ?? document.documentElement)
+    const scrollTarget: Window | HTMLElement = useContainer ? host! : window
+
     let raf = 0
     const apply = () => {
       raf = 0
       const slack = left.offsetHeight - el.offsetHeight
-      const leftTop = left.getBoundingClientRect().top + window.scrollY
-      const end = leftTop + left.offsetHeight - window.innerHeight
-      if (slack === 0 || end <= 0) { el.style.transform = ''; return }
-      const progress = Math.min(1, Math.max(0, window.scrollY / end))
+      const viewport = useContainer ? scroller.clientHeight : window.innerHeight
+      const scrollTop = useContainer ? scroller.scrollTop : window.scrollY
+      // Left column's top in the scroller's own scroll-space (0 for the document).
+      const originTop = useContainer ? scroller.getBoundingClientRect().top : 0
+      const leftTop = left.getBoundingClientRect().top - originTop + scrollTop
+      const end = leftTop + left.offsetHeight - viewport
+      if (slack <= 0 || end <= 0) { el.style.transform = ''; return }
+      const progress = Math.min(1, Math.max(0, scrollTop / end))
       el.style.transform = `translate3d(0, ${(progress * slack).toFixed(1)}px, 0)`
     }
     const schedule = () => { if (!raf) raf = requestAnimationFrame(apply) }
@@ -36,12 +57,12 @@ export function LocationSidebar({ mapEvent, featured, now }: Props) {
     const ro = new ResizeObserver(schedule)
     ro.observe(el)
     ro.observe(left)
-    window.addEventListener('scroll', schedule, { passive: true })
+    scrollTarget.addEventListener('scroll', schedule, { passive: true })
     window.addEventListener('resize', schedule)
     return () => {
       if (raf) cancelAnimationFrame(raf)
       ro.disconnect()
-      window.removeEventListener('scroll', schedule)
+      scrollTarget.removeEventListener('scroll', schedule)
       window.removeEventListener('resize', schedule)
       el.style.transform = ''
     }

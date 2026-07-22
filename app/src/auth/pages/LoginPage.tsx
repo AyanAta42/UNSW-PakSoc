@@ -1,5 +1,5 @@
 import { useState, type FormEvent } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useAppNavigate as useNavigate } from '@/shared/router/useAppNavigate'
 import { signInWithEmail }  from '@/auth/services/signInWithEmail'
 import { signUpWithEmail }  from '@/auth/services/signUpWithEmail'
 import { GoogleIdentityButton } from '@/auth/components/GoogleIdentityButton'

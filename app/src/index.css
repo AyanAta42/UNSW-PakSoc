@@ -757,7 +757,12 @@ html.home-mounted body { padding-bottom: 0; }
   overflow: hidden;
   pointer-events: none;
   contain: strict;
-  /* Blend in over the static shell tint instead of popping */
+}
+
+/* First visit only: blend in over the static shell tint instead of popping.
+   Applied via useEnterOnce so a back/forward remount doesn't replay the whole
+   background fading up from nothing (see AmbientBackground). */
+.ambient-root.ambient-enter {
   animation: fadeIn 1.1s ease both;
 }
 
@@ -869,8 +874,25 @@ html.home-mounted body { padding-bottom: 0; }
   animation-play-state: paused !important;
 }
 
+/* ─── Route view transitions ───────────────────────────────────────────────── */
+/* Client-side route changes opt into the View Transitions API (see
+   useAppNavigate). React Router replays the same transition on browser
+   back/forward, so a swipe-back cross-fades into the fully-formed previous page
+   instead of hard-cutting while React re-renders it. Just a quick root fade. */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: 200ms;
+  animation-timing-function: var(--motion-ease, ease);
+}
+
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
+
+  /* `*` never matches the ::view-transition pseudo-tree — disable it explicitly. */
+  ::view-transition-old(root),
+  ::view-transition-new(root) {
+    animation: none !important;
+  }
 
   *,
   *::before,

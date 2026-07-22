@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useAppNavigate as useNavigate } from '@/shared/router/useAppNavigate'
 import type { User } from '@supabase/supabase-js'
 import { usePermissions } from '@/roles/hooks/usePermissions'
 import { UserDropdown }   from './UserDropdown'
@@ -45,11 +45,11 @@ export function Navbar({ user, avatarUrl, avatarBroken, initial, onAvatarError, 
           <img
             src="/logo.webp"
             alt="PakSoc UNSW"
-            width={52}
-            height={52}
+            width={40}
+            height={40}
             decoding="async"
             fetchPriority="high"
-            className="w-[52px] h-[52px] -mr-0.5 rounded-full object-cover shrink-0"
+            className="w-10 h-10 -mr-0.5 rounded-full object-cover shrink-0"
           />
           <div className="min-w-0">
             <div style={{ color: PALETTE.dark }} className="font-bold text-sm leading-tight truncate">PakSoc UNSW</div>

@@ -1,8 +1,10 @@
+import { useState } from 'react'
 import type { DbEvent } from '@/events/types/Event'
 import { dateParts }    from '@/events/utils/dateParts'
 import { eventImageUrl } from '@/events/utils/eventImageUrl'
 import { ACCENT, PALETTE } from '@/config/theme'
 import { ClockIcon, PinIcon } from '@/shared/components/MetaIcons'
+import { isImageReady, markImageReady } from '@/shared/utils/imageCache'
 
 interface Props { event: DbEvent; selected: boolean; now: Date; onClick: () => void }
 
@@ -10,6 +12,10 @@ export function PublicEventCard({ event: ev, selected, now, onClick }: Props) {
   const { month, day, time } = dateParts(ev.time, ev.end_time)
   const img   = eventImageUrl(ev)
   const ended = new Date(ev.time) <= now
+  // Seed from the session cache: if this poster has loaded once, start it fully
+  // visible so a route-change remount doesn't replay the fade from black.
+  const [imgReady, setImgReady] = useState(() => isImageReady(img))
+  const markReady = () => { markImageReady(img); setImgReady(true) }
 
   return (
     <div onClick={onClick}
@@ -21,17 +27,23 @@ export function PublicEventCard({ event: ev, selected, now, onClick }: Props) {
       }}
       className="motion-card overflow-hidden cursor-pointer flex flex-col min-w-0 w-full">
 
-      <div className="relative overflow-hidden" style={{ height: 120 }}>
+      <div className="relative overflow-hidden" style={{ height: 120, background: PALETTE.cardAlt }}>
         {img
-          ? <img
-              src={img}
-              alt={ev.name}
-              width={400}
-              height={120}
-              loading="lazy"
-              decoding="async"
-              className="motion-card-poster w-full h-full object-cover"
-            />
+          ? <>
+              {!imgReady && <div className="motion-skeleton absolute inset-0" aria-hidden />}
+              <img
+                src={img}
+                alt={ev.name}
+                width={400}
+                height={120}
+                loading="lazy"
+                decoding="async"
+                ref={el => { if (el?.complete && el.naturalWidth > 0) markReady() }}
+                onLoad={markReady}
+                className="motion-card-poster w-full h-full object-cover transition-opacity duration-300"
+                style={{ opacity: imgReady ? 1 : 0 }}
+              />
+            </>
           : <div className="motion-card-poster w-full h-full" style={{ background: `linear-gradient(135deg, ${PALETTE.cardAlt}, ${PALETTE.card})` }} />
         }
         <div className="absolute inset-0" style={{ background: 'linear-gradient(to top, rgba(0,0,0,0.65) 0%, transparent 50%)' }} />

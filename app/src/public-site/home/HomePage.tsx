@@ -10,7 +10,9 @@ import { EventCardSkeleton } from './components/EventCardSkeleton'
 import { Footer } from './components/Footer'
 import { SocialWall } from './components/SocialWall'
 import { MobileEventSheet } from './components/MobileEventSheet'
-import { useNavigate } from 'react-router-dom'
+import { useAppNavigate as useNavigate } from '@/shared/router/useAppNavigate'
+import { eventImageUrl } from '@/events/utils/eventImageUrl'
+import { warmImages } from '@/shared/utils/imageCache'
 import { ACCENT, PALETTE, PAGE_BG } from '@/config/theme'
 
 import { AmbientBackground } from '@/shared/components/AmbientBackground'
@@ -112,6 +114,10 @@ export default function HomePage() {
     const featured = allPublic.find(e => e.id === selectedId) ?? banner ?? allPublic[0] ?? null
     return { phoneEvents, allPublic, banner, featured, now }
   }, [events, selectedId])
+
+  // Keep every event poster decoded and warm, so cards paint their image
+  // instantly on a back/forward remount instead of flashing black.
+  useEffect(() => { warmImages(allPublic.map(eventImageUrl)) }, [allPublic])
 
   /** Phone: open the bottom sheet. Desktop: no popup — select and show in the sidebar. */
   function openEvent(ev: DbEvent) {

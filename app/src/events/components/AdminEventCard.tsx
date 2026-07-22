@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useAppNavigate as useNavigate } from '@/shared/router/useAppNavigate'
 import type { DbEvent } from '@/events/types/Event'
 import { eventImageUrl } from '@/events/utils/eventImageUrl'
 import { formatDate }    from '@/shared/utils/formatDate'

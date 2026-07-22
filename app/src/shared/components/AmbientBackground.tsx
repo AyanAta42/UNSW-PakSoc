@@ -1,5 +1,5 @@
 import { lazy, Suspense, useEffect, useState } from 'react'
-import { useAmbientPause } from '@/shared/motion'
+import { useAmbientPause, useEnterOnce } from '@/shared/motion'
 import { prefersReducedMotion } from '@/shared/motion'
 
 const DustCanvas = lazy(() => import('./DustCanvas').then(m => ({ default: m.DustCanvas })))
@@ -19,6 +19,9 @@ function isLiteDevice(): boolean {
  */
 export function AmbientBackground() {
   const [enhance, setEnhance] = useState(false)
+  // Fade the whole background in on the first visit only; on a back/forward
+  // remount it stays put instead of rebuilding from black.
+  const fadeInOnce = useEnterOnce('ambient')
   useAmbientPause()
 
   useEffect(() => {
@@ -45,7 +48,7 @@ export function AmbientBackground() {
 
   return (
     <>
-      <div aria-hidden className="ambient-root">
+      <div aria-hidden className={`ambient-root${fadeInOnce ? ' ambient-enter' : ''}`}>
         <div className="ambient-layer ambient-layer-a" />
         <div className="ambient-layer ambient-layer-b" />
         <div className="ambient-aurora" />

@@ -3,7 +3,7 @@ import type { DbEvent } from '@/events/types/Event'
 import { useCountdown }    from '@/shared/hooks/useCountdown'
 import { getEventButtons, getCtaVariant } from '@/events/utils/getEventButtons'
 import { EventCtaButton }  from '@/events/components/EventCtaButton'
-import { prefersReducedMotion, useParallaxLayers, type ParallaxLayer } from '@/shared/motion'
+import { prefersReducedMotion, useParallaxLayers, useEnterOnce, type ParallaxLayer } from '@/shared/motion'
 import { ACCENT, ACCENT_GLOW, PALETTE } from '@/config/theme'
 
 const HeroCelestialTrail = lazy(() =>
@@ -25,6 +25,9 @@ export function HeroBanner({ banner, loading }: Props) {
   const layersRef = useRef<ParallaxLayer[]>([])
   const titleRef = useRef<HTMLHeadingElement>(null)
   const [trailReady, setTrailReady] = useState(false)
+  // Only slide the hero in on the first visit this session — on a back/forward
+  // remount it should already be there, not re-animate from black.
+  const animateEnter = useEnterOnce('hero')
 
   // Shrink the headline font just enough that the full name fits on one line
   useLayoutEffect(() => {
@@ -75,7 +78,7 @@ export function HeroBanner({ banner, loading }: Props) {
 
   return (
     <div className="motion-glow motion-glow-hero px-3 pt-4 md:px-4 lg:p-0">
-      <div className="motion-hero-enter">
+      <div className={animateEnter ? 'motion-hero-enter' : undefined}>
       <div
         ref={heroRef}
         className="hero-clip overflow-hidden relative flex flex-col min-h-[220px] md:flex-row md:min-h-[250px] rounded-[18px] border"
