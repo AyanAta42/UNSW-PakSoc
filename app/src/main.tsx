@@ -25,10 +25,6 @@ if (loader) {
   })
 }
 
-// Portrait lock for the installed PWA (Android honors it; ignored elsewhere)
-const orientation = screen.orientation as { lock?: (o: string) => Promise<void> }
-orientation?.lock?.('portrait-primary').catch(() => {})
-
 // Register the service worker after first paint so it never delays the UI.
 // Precaches the app shell + images; subsequent opens are served entirely from cache.
 if (import.meta.env.PROD && 'serviceWorker' in navigator) {
