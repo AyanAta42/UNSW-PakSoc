@@ -1,6 +1,7 @@
 import ReactDOM from 'react-dom/client'
 import App from './App.tsx'
 import './index.css'
+import '@/shared/pwa/installPrompt' // capture `beforeinstallprompt` before it can fire
 import { prefetchPublicEvents } from '@/events/services/publicEventsBootstrap'
 import { installTopOverscrollLock } from '@/shared/utils/lockTopOverscroll'
 

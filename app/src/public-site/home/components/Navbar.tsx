@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import type { User } from '@supabase/supabase-js'
 import { usePermissions } from '@/roles/hooks/usePermissions'
 import { UserDropdown }   from './UserDropdown'
+import { InstallAppButton } from '@/shared/pwa/InstallAppButton'
 import { ACCENT, ACCENT_TEXT, GLASS_CHIP, GLASS_NAV, PALETTE } from '@/config/theme'
 import { toast } from '@/shared/toast/toast'
 
@@ -57,6 +58,7 @@ export function Navbar({ user, avatarUrl, avatarBroken, initial, onAvatarError, 
         </div>
 
         <div className="flex items-center gap-2 sm:gap-2.5 shrink-0 ml-auto">
+          <InstallAppButton />
           {can.viewEvents && (
             <button onClick={() => navigate('/events')} data-cta
               aria-label="Manage Events" title="Manage Events"
