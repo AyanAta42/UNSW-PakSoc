@@ -49,7 +49,7 @@ body {
    its own footer. The body's bottom reservation would only leave a bare strip
    under the fixed aurora — a black seam at the very bottom edge — so drop it
    while the home shell is mounted (class toggled in HomePage). */
-html.home-shell body { padding-bottom: 0; }
+html.home-mounted body { padding-bottom: 0; }
 
 /* Reusable: hide a scrollable element's scrollbar while keeping scroll enabled. */
 .no-scrollbar {
@@ -75,6 +75,52 @@ html.home-shell body { padding-bottom: 0; }
   /* Vertical elasticity only: the y axis keeps its rubber-band bounce (contain),
      the x axis never bounces (none). Shorthand order is x then y. */
   overscroll-behavior: none contain;
+}
+
+/* ─── Website (non-installed browser tab) — home route only ────────────────────
+   A nested overflow scroller does NOT reliably rubber-band at its top edge in a
+   plain browser tab, so the in-flow navbar felt rigid ("sticky") on an overscroll
+   pull. The installed PWA (display-mode: standalone) gets its elastic bounce from
+   the .home-scroll container and is deliberately left untouched here.
+
+   For the website we instead let the whole app-shell scroll on the DOCUMENT
+   itself — every browser rubber-bands its root document natively, so the navbar
+   rides that vertical bounce just like the PWA. The fixed aurora (bleeds 220px
+   past the viewport) covers the overscroll reveal.
+
+   Scoped to `html.home-mounted` (the class HomePage toggles on <html> while it
+   is mounted) so only the home route swaps to document-scroll; every other route
+   keeps the base overscroll locks and its own inner scrollers. */
+@media (display-mode: browser) {
+  html.home-mounted,
+  html.home-mounted body {
+    /* Re-enable the document's native vertical elastic bounce that the base rule
+       locks off; horizontal stays locked (overscroll-behavior-x untouched). */
+    overscroll-behavior-y: auto;
+    /* Keep the app-shell's chromeless look — no document scrollbar on desktop. */
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+
+  html.home-mounted::-webkit-scrollbar,
+  html.home-mounted body::-webkit-scrollbar {
+    display: none;
+    width: 0;
+    height: 0;
+  }
+
+  /* Grow with content and let the body own the scroll (+ its rubber-band). */
+  html.home-mounted .home-appshell {
+    height: auto !important;
+    min-height: 100dvh;
+    overflow: visible !important;
+  }
+
+  /* The middle region stops being its own scroller — content flows into the
+     document so there's a single, natively-elastic scroll surface. */
+  html.home-mounted .home-scroll {
+    overflow: visible !important;
+  }
 }
 
 /* Hide scrollbars on phone — scrolling still works.

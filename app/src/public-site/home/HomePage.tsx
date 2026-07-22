@@ -86,8 +86,8 @@ export default function HomePage() {
   // would otherwise reserve a strip below the shell that the fixed aurora can't
   // reach — reading as a black seam at the bottom edge. Drop it while home is up.
   useEffect(() => {
-    document.documentElement.classList.add('home-shell')
-    return () => document.documentElement.classList.remove('home-shell')
+    document.documentElement.classList.add('home-mounted')
+    return () => document.documentElement.classList.remove('home-mounted')
   }, [])
 
   const overlayOpen = !!sheetEvent || editOpen
@@ -132,7 +132,7 @@ export default function HomePage() {
 
   return (
     <div
-      className="relative flex h-[100dvh] flex-col overflow-hidden"
+      className="home-appshell relative flex h-[100dvh] flex-col overflow-hidden"
       style={{
         // Same static aurora tint as the html shell — the animated layers fade
         // in over it, so the background never pops
