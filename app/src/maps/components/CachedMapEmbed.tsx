@@ -54,6 +54,10 @@ export function CachedMapEmbed({ src, cacheId, title = 'Event location map', cla
     const container = containerRef.current
     if (!container) return
     const iframe   = ensureIframe(cacheId, title)
+    // When a tap layer owns the click, kill the iframe's own pointer events. On iOS a touch
+    // over an iframe can otherwise slip past a transparent overlay and hit Google's internal
+    // breakout links, which pop a blank window loading the embed URL at top level.
+    iframe.style.pointerEvents = linkHref ? 'none' : ''
     const hadLoaded = iframe.getAttribute('data-src') === src && !!iframe.src
     if (iframe.parentElement && iframe.parentElement !== container) iframe.parentElement.removeChild(iframe)
     const reattached = iframe.parentElement !== container
@@ -71,7 +75,7 @@ export function CachedMapEmbed({ src, cacheId, title = 'Event location map', cla
       iframe.removeEventListener('load', onLoad)
       if (iframe.parentElement === container) container.removeChild(iframe)
     }
-  }, [src, cacheId, title])
+  }, [src, cacheId, title, linkHref])
 
   return (
     <div className={className} style={{ position: 'relative', ...style }}>
