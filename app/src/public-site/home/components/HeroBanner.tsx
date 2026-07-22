@@ -152,12 +152,12 @@ export function HeroBanner({ banner, loading }: Props) {
                 </div>
 
                 {btns.length > 0 && (
-                  <div className="flex gap-2 md:gap-2.5 items-stretch flex-1 max-w-full md:max-w-[460px] motion-hero-actions">
+                  <div className="flex gap-2 md:gap-2.5 items-stretch w-full md:w-auto md:ml-auto motion-hero-actions">
                     {btns.map((b, i) => {
                       const variant = getCtaVariant(i, btns.length)
                       return (
                         <EventCtaButton key={i} label={b.label} url={b.url} variant={variant}
-                          className={`${variant === 'primary' ? 'flex-[1.15]' : 'flex-1'} px-3 py-2 text-sm whitespace-nowrap text-center`} />
+                          className={`flex-1 md:flex-none ${variant === 'primary' ? 'px-3 md:px-5' : 'px-3 md:px-4'} py-2 text-sm whitespace-nowrap text-center`} />
                       )
                     })}
                   </div>
