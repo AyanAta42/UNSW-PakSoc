@@ -3,13 +3,14 @@ import App from './App.tsx'
 import './index.css'
 import '@/shared/pwa/installPrompt' // capture `beforeinstallprompt` before it can fire
 import { prefetchPublicEvents } from '@/events/services/publicEventsBootstrap'
-import { installTopOverscrollLock } from '@/shared/utils/lockTopOverscroll'
+import { installTouchGestureLocks } from '@/shared/utils/lockTopOverscroll'
 
 // Start / adopt the early events fetch — shared via PublicEventsProvider
 void prefetchPublicEvents()
 
-// Restrict elastic overscroll at the top of every page (bottom bounce stays).
-installTopOverscrollLock()
+// Lock the top rubber-band (bottom bounce stays) and block the browser
+// swipe-left/right back/forward navigation gesture.
+installTouchGestureLocks()
 
 ReactDOM.createRoot(document.getElementById('root')!).render(<App />)
 
