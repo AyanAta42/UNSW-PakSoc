@@ -74,13 +74,11 @@ interface Step { icon: React.ReactNode; text: React.ReactNode }
 const IOS_STEPS: Step[] = [
   { icon: <ShareIcon />, text: <>Tap the <b>Share</b> button in your browser's toolbar.</> },
   { icon: <AddIcon />,   text: <>Scroll down and choose <b>Add to Home Screen</b>.</> },
-  { icon: <CheckIcon />, text: <>Tap <b>Add</b> — PakSoc lands on your home screen.</> },
 ]
 
 const FALLBACK_STEPS: Step[] = [
   { icon: <MenuIcon />,     text: <>Open your browser's menu <b>( ⋮ )</b>.</> },
   { icon: <DownloadIcon />, text: <>Tap <b>Install app</b> or <b>Add to Home screen</b>.</> },
-  { icon: <CheckIcon />,    text: <>Confirm <b>Install</b> — that's it, no warnings.</> },
 ]
 
 // Galaxy phones default to Samsung Internet, whose install is falsely flagged by
@@ -88,7 +86,6 @@ const FALLBACK_STEPS: Step[] = [
 const CHROME_STEPS: Step[] = [
   { icon: <BrowserIcon />,  text: <>Tap <b>Open in Chrome</b> below (or open the <b>Chrome</b> app on this page).</> },
   { icon: <DownloadIcon />, text: <>In Chrome, tap <b>( ⋮ )</b> → <b>Install app</b> / <b>Add to Home screen</b>.</> },
-  { icon: <CheckIcon />,    text: <>Confirm <b>Install</b> — no warning this time.</> },
 ]
 
 type SheetVariant = 'ios' | 'chrome' | 'fallback'
@@ -154,13 +151,13 @@ function InstallSheet({ variant, onClose }: { variant: SheetVariant; onClose: ()
 
         {isIOS && variant === 'ios' && (
           <p className="m-0 mt-4 text-xs leading-relaxed" style={{ color: PALETTE.disabled }}>
-            Opened from Instagram or another app? Tap <b>•••</b> → <b>Open in Browser</b> first, then follow the steps.
+            Opened from Instagram or another app? Tap <b>•••</b> → <b>Open in External Browser</b>.
           </p>
         )}
 
         {isChrome && (
           <p className="m-0 mt-4 text-xs leading-relaxed" style={{ color: PALETTE.disabled }}>
-            Rather not switch? PakSoc is completely safe — that warning is a known Samsung glitch, so
+            PakSoc is completely safe — that warning is a known Samsung glitch, so
             tapping <b>Install anyway</b> is fine too.
           </p>
         )}
