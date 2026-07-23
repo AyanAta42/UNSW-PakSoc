@@ -187,43 +187,6 @@ html.home-mounted body { padding-bottom: 0; }
   }
 }
 
-/* Keep native date/time controls inside their box. width/max-width are harmless
-   everywhere; box-sizing guards padding overflow. */
-input[type="date"],
-input[type="time"] {
-  box-sizing: border-box;
-  width: 100%;
-  min-width: 0;
-  max-width: 100%;
-}
-
-/* Mobile only: iOS Safari & Samsung Internet size these to their intrinsic
-   content width and ignore `width:100%`, so a field spills past the container's
-   right edge. `appearance:none` makes them obey the box. The native picker still
-   opens on tap, so no affordance is lost. Desktop keeps its calendar button. */
-@media (max-width: 767px) {
-  input[type="date"],
-  input[type="time"] {
-    -webkit-appearance: none;
-    -moz-appearance: none;
-    appearance: none;
-  }
-
-  /* The inner editable value carries its own intrinsic min-width — flatten it so
-     the control can shrink to the box instead of pushing past it. */
-  input[type="date"]::-webkit-date-and-time-value,
-  input[type="time"]::-webkit-date-and-time-value {
-    text-align: left;
-    min-width: 0;
-    margin: 0;
-  }
-
-  input[type="date"]::-webkit-datetime-edit,
-  input[type="time"]::-webkit-datetime-edit {
-    padding: 0;
-  }
-}
-
 /* ─── Motion tokens (calm, cohesive timing scale) ──────────────────────────── */
 :root {
   --motion-fast: 160ms;
