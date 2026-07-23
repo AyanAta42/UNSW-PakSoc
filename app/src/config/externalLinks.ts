@@ -2,5 +2,5 @@ export const REGISTER_TEAM_URL = 'https://docs.google.com/forms/d/e/1FAIpQLSf-oB
 export const TICKETS_URL       = 'https://campus.hellorubric.com/?eid=67422'
 export const INSTAGRAM_URL     = 'https://instagram.com/unswpaksoc'
 export const TIKTOK_URL        = 'https://tiktok.com/@unswpaksoc'
-export const FACEBOOK_URL      = 'https://facebook.com/unswpaksoc'
-export const ARC_MEMBERSHIP_URL = 'https://www.arc.unsw.edu.au/clubs/paksoc'
+export const FACEBOOK_URL      = 'https://www.facebook.com/PakSocUnsw/'
+export const ARC_MEMBERSHIP_URL = 'https://campus.hellorubric.com/?s=8022'

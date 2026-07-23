@@ -23,7 +23,7 @@ export function Footer() {
         Join us on Rubric →
       </a>
       <div style={{ color: PALETTE.disabled }} className="text-xs">
-        &copy; {new Date().getFullYear()} PakSoc UNSW · Pakistani Society, University of New South Wales
+        &copy; {new Date().getFullYear()} · Pakistani Society, University of New South Wales
       </div>
     </footer>
   )

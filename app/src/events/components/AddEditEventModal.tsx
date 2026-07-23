@@ -64,7 +64,7 @@ export function AddEditEventModal({ onClose, onCreated, onUpdated, event }: Prop
     event?.buttons?.length ? event.buttons : [...DEFAULT_BUTTONS]
   )
 
-  const [eventDate, setEventDate] = useState(parseIsoDate(event?.time))
+  const [eventDate, setEventDate] = useState(parseIsoDate(event?.time) || new Date().toLocaleDateString('en-CA'))
   const [startTime, setStartTime] = useState(start0)
   const [endTime,   setEndTime]   = useState(end0)
 
