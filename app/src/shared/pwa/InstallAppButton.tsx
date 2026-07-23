@@ -1,11 +1,9 @@
 import { useState } from 'react'
 import { createPortal } from 'react-dom'
 import { ACCENT, PALETTE } from '@/config/theme'
-import { toast } from '@/shared/toast/toast'
 import {
   androidNeedsChrome,
   chromeIntentUrl,
-  isAndroid,
   isIOS,
   isStandalone,
   promptInstall,
@@ -202,17 +200,12 @@ export function InstallAppButton() {
       setSheet('chrome')
       return
     }
-    // Chrome / desktop Chromium: this native prompt installs a real WebAPK — no
-    // Chrome-badge shortcut. Android's final confirm is labelled "Add to Home
-    // screen"; desktop just installs.
+    // Chrome / desktop Chromium: one tap of this native "Install" prompt lands a
+    // real WebAPK — no "Add to Home screen" step and no Chrome-badge shortcut.
+    // The `appinstalled` event fires the "App Installed" toast once it's done.
     if (canPrompt) {
       const outcome = await promptInstall()
-      if (outcome === 'accepted') {
-        if (isAndroid) toast.success('Click "Add to Home Screen"', 'Confirm it to finish adding PakSoc.')
-        else toast.success('Installing PakSoc…', 'Find it in your apps.')
-      } else if (outcome === 'unavailable') {
-        setSheet(isIOS ? 'ios' : 'fallback')
-      }
+      if (outcome === 'unavailable') setSheet(isIOS ? 'ios' : 'fallback')
       return
     }
     // iOS, or a browser that hasn't offered the prompt → guided instructions.

@@ -1,4 +1,5 @@
 import { useSyncExternalStore } from 'react'
+import { toast } from '@/shared/toast/toast'
 
 /**
  * PWA install orchestration.
@@ -55,6 +56,9 @@ if (typeof window !== 'undefined') {
   window.addEventListener('appinstalled', () => {
     deferred = null
     commit({ canPrompt: false, installed: true })
+    // Fires the instant the WebAPK/PWA is actually installed — the accurate
+    // moment to confirm it, with no "Add to Home screen" follow-up to chase.
+    toast.success('App Installed', 'PakSoc is ready on your home screen.')
   })
 }
 
