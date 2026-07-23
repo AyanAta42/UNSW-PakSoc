@@ -17,10 +17,10 @@ import { AuroraPage } from '@/shared/components/AuroraPage'
 import { HomeButton } from '@/shared/components/HomeButton'
 import { toast, errorMessage } from '@/shared/toast/toast'
 
-function EventSection({ title, color, events, canEdit, onAnnounce, onUnpublish, onEdit, onDelete }: {
+function EventSection({ title, color, events, canEdit, onAnnounce, onUnpublish, onEdit }: {
   title: string; color: string; events: DbEvent[]; canEdit: boolean
   onAnnounce: (id: string) => void; onUnpublish: (id: string) => void
-  onEdit: (ev: DbEvent) => void;    onDelete: (id: string) => void
+  onEdit: (ev: DbEvent) => void
 }) {
   return (
     <section className="mb-10">
@@ -32,7 +32,7 @@ function EventSection({ title, color, events, canEdit, onAnnounce, onUnpublish, 
       </div>
       <div className="grid grid-cols-[repeat(auto-fill,minmax(min(260px,100%),1fr))] gap-4">
         {events.map(ev => <AdminEventCard key={ev.id} event={ev} canEdit={canEdit}
-          onAnnounce={onAnnounce} onUnpublish={onUnpublish} onEdit={onEdit} onDelete={onDelete} />)}
+          onAnnounce={onAnnounce} onUnpublish={onUnpublish} onEdit={onEdit} />)}
       </div>
     </section>
   )
@@ -96,7 +96,7 @@ export default function EventsManagerPage() {
     } catch (e) { toast.error("Couldn't delete event", errorMessage(e, 'Please try again.')) }
   }
 
-  const sectionProps = { canEdit: can.editEvents, onAnnounce: announce, onUnpublish: unpublish, onEdit: setEditingEv, onDelete: handleDelete }
+  const sectionProps = { canEdit: can.editEvents, onAnnounce: announce, onUnpublish: unpublish, onEdit: setEditingEv }
 
   return (
     <AuroraPage contentClassName="flex h-[100dvh] flex-col overflow-hidden">
@@ -157,6 +157,7 @@ export default function EventsManagerPage() {
       {editingEv && <AddEditEventModal event={editingEv}
         onClose={() => setEditingEv(null)}
         onUpdated={updated => { setEvents(p => p.map(e => e.id === updated.id ? updated : e)); setEditingEv(null) }}
+        onDelete={id => { handleDelete(id); setEditingEv(null) }}
       />}
       {showHistory && (
         <HistoryPanel title="Event History" onClose={() => setShowHistory(false)}

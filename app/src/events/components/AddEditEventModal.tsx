@@ -12,12 +12,14 @@ import { DEFAULT_BUTTONS }   from '@/events/types/Event'
 import { ACCENT, ACCENT_TEXT, PALETTE } from '@/config/theme'
 import { useSheetSwipe }     from '@/shared/hooks/useSheetSwipe'
 import { toast, errorMessage } from '@/shared/toast/toast'
+import { ConfirmModal }      from '@/shared/components/ConfirmModal'
 
 interface Props {
   onClose:          () => void
   onCreated?:       (ev: DbEvent) => void
   onCreateSettled?: (tempId: string, ev: DbEvent | null) => void
   onUpdated?:       (ev: DbEvent) => void
+  onDelete?:        (id: string) => void
   event?:           DbEvent
 }
 
@@ -55,8 +57,9 @@ function Label({ icon, children }: { icon: React.ReactNode; children: React.Reac
   )
 }
 
-export function AddEditEventModal({ onClose, onCreated, onCreateSettled, onUpdated, event }: Props) {
+export function AddEditEventModal({ onClose, onCreated, onCreateSettled, onUpdated, onDelete, event }: Props) {
   const isEdit = !!event
+  const [confirmDelete, setConfirmDelete] = useState(false)
 
   const start0 = parseTimeHM(event?.time, '17:00')
   const end0   = event?.end_time ? parseTimeHM(event.end_time) : addHoursHM(start0, 2)
@@ -215,6 +218,16 @@ export function AddEditEventModal({ onClose, onCreated, onCreateSettled, onUpdat
           {/* Image */}
           <div><Label icon={ICON.image}>Event Image</Label>
             <ImageUploadZone preview={imagePreview} dragOver={dragOver} onFile={handleFile} onClear={() => { setImageFile(null); setImagePreview('') }} onDragOver={setDragOver} /></div>
+
+          {/* Delete — scrolls with the form instead of living in the fixed footer */}
+          {isEdit && event && onDelete && (
+            <button type="button" onClick={() => setConfirmDelete(true)}
+              style={{ border: '1px solid rgba(239,68,68,0.3)', color: '#F87171', background: 'transparent', borderRadius: 14 }}
+              className="w-full py-2.5 mt-1 text-sm font-semibold cursor-pointer hover:bg-red-500/10 hover:border-red-500/50 transition-colors inline-flex items-center justify-center gap-2">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4" aria-hidden><path d="M3 6h18" /><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" /><path d="M10 11v6" /><path d="M14 11v6" /></svg>
+              Delete Event
+            </button>
+          )}
         </div>
 
         <div className="px-5 sm:px-6 pt-3 pb-[max(1.25rem,env(safe-area-inset-bottom))] flex gap-3 shrink-0" style={{ borderTop: `1px solid ${PALETTE.border}` }}>
@@ -249,6 +262,16 @@ export function AddEditEventModal({ onClose, onCreated, onCreateSettled, onUpdat
             </div>
           </div>
         </div>
+      )}
+      {confirmDelete && event && (
+        <ConfirmModal
+          title="Delete event?"
+          message="This will permanently remove the event and all its tasks. This cannot be undone."
+          confirmLabel="Delete"
+          danger
+          onConfirm={() => onDelete?.(event.id)}
+          onCancel={() => setConfirmDelete(false)}
+        />
       )}
     </div>
   )

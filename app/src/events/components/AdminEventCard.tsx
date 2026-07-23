@@ -12,12 +12,11 @@ interface Props {
   onAnnounce:  (id: string) => void
   onUnpublish: (id: string) => void
   onEdit:      (ev: DbEvent) => void
-  onDelete:    (id: string) => void
 }
 
-type Pending = 'delete' | 'announce' | 'unpublish' | null
+type Pending = 'announce' | 'unpublish' | null
 
-export function AdminEventCard({ event: ev, canEdit = true, onAnnounce, onUnpublish, onEdit, onDelete }: Props) {
+export function AdminEventCard({ event: ev, canEdit = true, onAnnounce, onUnpublish, onEdit }: Props) {
   const navigate = useNavigate()
   const [pending, setPending] = useState<Pending>(null)
   const [hovered, setHovered] = useState(false)
@@ -26,14 +25,12 @@ export function AdminEventCard({ event: ev, canEdit = true, onAnnounce, onUnpubl
   const img     = eventImageUrl(ev)
 
   function confirm() {
-    if (pending === 'delete')    onDelete(ev.id)
     if (pending === 'announce')  onAnnounce(ev.id)
     if (pending === 'unpublish') onUnpublish(ev.id)
     setPending(null)
   }
 
   const modalProps: Record<NonNullable<Pending>, { title: string; message: string; confirmLabel: string; danger: boolean }> = {
-    delete:    { title: 'Delete event?',     message: 'This will permanently remove the event and all its tasks. This cannot be undone.',             confirmLabel: 'Delete',    danger: true  },
     announce:  { title: 'Announce event?',   message: 'This will make the event visible to everyone on the public site.',                             confirmLabel: 'Announce',  danger: false },
     unpublish: { title: 'Unpublish event?',  message: 'The event will be hidden from the public site. You can announce it again at any time.',        confirmLabel: 'Unpublish', danger: false },
   }
@@ -70,9 +67,6 @@ export function AdminEventCard({ event: ev, canEdit = true, onAnnounce, onUnpubl
               <button onClick={() => onEdit(ev)}
                 style={{ color: PALETTE.muted, background: 'transparent', borderRadius: 8 }}
                 className="border-none cursor-pointer text-xs px-2 py-1 hover:bg-white/5 hover:text-green-400 transition-all">Edit</button>
-              <button onClick={() => setPending('delete')}
-                style={{ color: PALETTE.muted, background: 'transparent', borderRadius: 8 }}
-                className="border-none cursor-pointer text-xs px-2 py-1 hover:bg-red-500/10 hover:text-red-400 transition-all">Delete</button>
             </div>
           )}
           <h3 className="text-sm font-bold m-0" style={{ color: PALETTE.dark }}>{ev.name}</h3>
