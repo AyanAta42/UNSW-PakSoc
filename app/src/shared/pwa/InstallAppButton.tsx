@@ -5,6 +5,7 @@ import {
   androidNeedsChrome,
   chromeIntentUrl,
   isIOS,
+  isMobile,
   isStandalone,
   promptInstall,
   useInstallState,
@@ -187,9 +188,10 @@ export function InstallAppButton() {
   const { canPrompt } = useInstallState()
   const [sheet, setSheet] = useState<SheetVariant | null>(null)
 
-  // Only hide once we're actually *running inside* the installed app. On the
-  // website the button always stays — signed in or not, already installed or not.
-  if (isStandalone()) return null
+  // Phones/tablets only — laptops and desktops have no install flow worth
+  // offering here. Also hide once we're actually *running inside* the
+  // installed app.
+  if (!isMobile || isStandalone()) return null
 
   async function handleClick() {
     // Android browsers other than Chrome (Samsung Internet, in-app webviews,

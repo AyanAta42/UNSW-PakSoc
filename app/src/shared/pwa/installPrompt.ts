@@ -109,6 +109,9 @@ const UA: string = typeof navigator !== 'undefined' ? navigator.userAgent || '' 
 /** Running on Android. */
 export const isAndroid: boolean = /Android/i.test(UA)
 
+/** Phone/tablet only — the install flow (and its button) has no laptop/desktop use case. */
+export const isMobile: boolean = isIOS || isAndroid
+
 /** Samsung's built-in browser — the Galaxy default; its WebAPK is Play-Protect-flagged. */
 export const isSamsungInternet: boolean = /SamsungBrowser/i.test(UA)
 
