@@ -2,7 +2,14 @@ import { useState } from 'react'
 import { createPortal } from 'react-dom'
 import { ACCENT, PALETTE } from '@/config/theme'
 import { toast } from '@/shared/toast/toast'
-import { isIOS, isStandalone, promptInstall, useInstallState } from './installPrompt'
+import {
+  androidNeedsChrome,
+  chromeIntentUrl,
+  isIOS,
+  isStandalone,
+  promptInstall,
+  useInstallState,
+} from './installPrompt'
 
 const DownloadIcon = () => (
   <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor"
@@ -44,6 +51,24 @@ const CheckIcon = () => (
   </svg>
 )
 
+// Concentric "browser" glyph — stands in for "open in Chrome" without shipping a
+// trademarked multi-colour logo.
+const BrowserIcon = () => (
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+    strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <circle cx="12" cy="12" r="9" />
+    <circle cx="12" cy="12" r="3.4" />
+    <path d="M12 8.6h8.2M9.1 13.5 5 20.5M14.9 13.5 19 20.5" />
+  </svg>
+)
+
+const OpenIcon = () => (
+  <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+    strokeWidth="2.1" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" className="shrink-0">
+    <path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5" />
+  </svg>
+)
+
 interface Step { icon: React.ReactNode; text: React.ReactNode }
 
 const IOS_STEPS: Step[] = [
@@ -58,8 +83,21 @@ const FALLBACK_STEPS: Step[] = [
   { icon: <CheckIcon />,    text: <>Confirm <b>Install</b> — that's it, no warnings.</> },
 ]
 
-function InstallSheet({ onClose }: { onClose: () => void }) {
-  const steps = isIOS ? IOS_STEPS : FALLBACK_STEPS
+// Galaxy phones default to Samsung Internet, whose install is falsely flagged by
+// Play Protect ("unsafe app / older version of Android"). Chrome installs clean.
+const CHROME_STEPS: Step[] = [
+  { icon: <BrowserIcon />,  text: <>Tap <b>Open in Chrome</b> below (or open the <b>Chrome</b> app on this page).</> },
+  { icon: <DownloadIcon />, text: <>In Chrome, tap <b>( ⋮ )</b> → <b>Install app</b> / <b>Add to Home screen</b>.</> },
+  { icon: <CheckIcon />,    text: <>Confirm <b>Install</b> — no warning this time.</> },
+]
+
+type SheetVariant = 'ios' | 'chrome' | 'fallback'
+
+function InstallSheet({ variant, onClose }: { variant: SheetVariant; onClose: () => void }) {
+  const isChrome = variant === 'chrome'
+  const steps = variant === 'ios' ? IOS_STEPS : isChrome ? CHROME_STEPS : FALLBACK_STEPS
+  const title = isChrome ? 'Install with Chrome' : 'Install PakSoc'
+  const subtitle = isChrome ? 'Skips Samsung’s false warning' : 'Full-screen app, works offline'
 
   return createPortal(
     <div className="motion-backdrop fixed inset-0 z-[120] flex items-end justify-center bg-black/60 backdrop-blur-sm sm:items-center"
@@ -81,17 +119,24 @@ function InstallSheet({ onClose }: { onClose: () => void }) {
           <div className="flex items-center gap-3">
             <div style={{ background: 'rgba(34,197,94,0.12)', border: '1px solid rgba(34,197,94,0.28)', color: ACCENT }}
               className="w-10 h-10 rounded-[13px] flex items-center justify-center shrink-0">
-              <DownloadIcon />
+              {isChrome ? <BrowserIcon /> : <DownloadIcon />}
             </div>
             <div>
-              <h3 className="m-0 text-base font-extrabold" style={{ color: PALETTE.dark }}>Install PakSoc</h3>
-              <p className="m-0 text-xs" style={{ color: PALETTE.muted }}>Full-screen app, works offline</p>
+              <h3 className="m-0 text-base font-extrabold" style={{ color: PALETTE.dark }}>{title}</h3>
+              <p className="m-0 text-xs" style={{ color: PALETTE.muted }}>{subtitle}</p>
             </div>
           </div>
           <button onClick={onClose} aria-label="Close"
             style={{ color: PALETTE.muted, border: `1px solid ${PALETTE.border}`, background: PALETTE.cardAlt, borderRadius: '50%' }}
             className="w-8 h-8 flex items-center justify-center text-lg leading-none cursor-pointer hover:border-white/30 transition-colors shrink-0">×</button>
         </div>
+
+        {isChrome && (
+          <p className="m-0 mt-3 text-xs leading-relaxed" style={{ color: PALETTE.secondary }}>
+            Samsung Internet tags new home-screen apps with a false <b>“unsafe app”</b> warning.
+            Installing from <b>Chrome</b> avoids it completely.
+          </p>
+        )}
 
         <ol className="list-none m-0 p-0 mt-4 flex flex-col gap-3">
           {steps.map((s, i) => (
@@ -107,17 +152,32 @@ function InstallSheet({ onClose }: { onClose: () => void }) {
           ))}
         </ol>
 
-        {isIOS && (
+        {isIOS && variant === 'ios' && (
           <p className="m-0 mt-4 text-xs leading-relaxed" style={{ color: PALETTE.disabled }}>
             Opened from Instagram or another app? Tap <b>•••</b> → <b>Open in Browser</b> first, then follow the steps.
           </p>
         )}
 
-        <button onClick={onClose}
-          style={{ background: ACCENT, color: '#fff', borderRadius: 14, boxShadow: '0 0 20px rgba(34,197,94,0.3)' }}
-          className="mt-5 w-full py-3 text-sm font-bold border-none cursor-pointer hover:opacity-85 transition-opacity">
-          Got it
-        </button>
+        {isChrome && (
+          <p className="m-0 mt-4 text-xs leading-relaxed" style={{ color: PALETTE.disabled }}>
+            Rather not switch? PakSoc is completely safe — that warning is a known Samsung glitch, so
+            tapping <b>Install anyway</b> is fine too.
+          </p>
+        )}
+
+        {isChrome ? (
+          <a href={chromeIntentUrl()} onClick={onClose}
+            style={{ background: ACCENT, color: '#fff', borderRadius: 14, boxShadow: '0 0 20px rgba(34,197,94,0.3)' }}
+            className="mt-5 w-full py-3 text-sm font-bold no-underline flex items-center justify-center gap-2 cursor-pointer hover:opacity-85 transition-opacity">
+            <OpenIcon /> Open in Chrome
+          </a>
+        ) : (
+          <button onClick={onClose}
+            style={{ background: ACCENT, color: '#fff', borderRadius: 14, boxShadow: '0 0 20px rgba(34,197,94,0.3)' }}
+            className="mt-5 w-full py-3 text-sm font-bold border-none cursor-pointer hover:opacity-85 transition-opacity">
+            Got it
+          </button>
+        )}
       </div>
     </div>,
     document.body,
@@ -126,22 +186,29 @@ function InstallSheet({ onClose }: { onClose: () => void }) {
 
 export function InstallAppButton() {
   const { canPrompt, installed } = useInstallState()
-  const [sheetOpen, setSheetOpen] = useState(false)
+  const [sheet, setSheet] = useState<SheetVariant | null>(null)
 
   // Already running as the installed app, or it just installed → nothing to do.
   if (installed || isStandalone()) return null
 
   async function handleClick() {
-    // Android / desktop Chromium: one tap → native install → Google-signed
-    // WebAPK. No Play Protect warning, no APK side-loading.
+    // Android browsers other than Chrome (Samsung Internet, in-app webviews,
+    // Firefox…) mint a WebAPK that Google Play Protect falsely flags as unsafe.
+    // Steer them to Chrome — whose install is clean — instead of firing their
+    // own (flag-producing) prompt, even when `canPrompt` is true.
+    if (androidNeedsChrome) {
+      setSheet('chrome')
+      return
+    }
+    // Chrome / desktop Chromium: one tap → native install → clean WebAPK.
     if (canPrompt) {
       const outcome = await promptInstall()
       if (outcome === 'accepted') toast.success('Installing PakSoc…', 'Look for it on your home screen.')
-      else if (outcome === 'unavailable') setSheetOpen(true)
+      else if (outcome === 'unavailable') setSheet(isIOS ? 'ios' : 'fallback')
       return
     }
     // iOS, or a browser that hasn't offered the prompt → guided instructions.
-    setSheetOpen(true)
+    setSheet(isIOS ? 'ios' : 'fallback')
   }
 
   return (
@@ -158,7 +225,7 @@ export function InstallAppButton() {
         <DownloadIcon />
         <span className="hidden md:inline">Install App</span>
       </button>
-      {sheetOpen && <InstallSheet onClose={() => setSheetOpen(false)} />}
+      {sheet && <InstallSheet variant={sheet} onClose={() => setSheet(null)} />}
     </>
   )
 }

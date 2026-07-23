@@ -4,12 +4,19 @@ import { useSyncExternalStore } from 'react'
  * PWA install orchestration.
  *
  * IMPORTANT — this is what actually fixes the "Google Play Protect · Unsafe app
- * blocked" warning. That warning does NOT come from installing a PWA; it comes
- * from side-loading a generated *.apk (PWABuilder / Bubblewrap / a "website to
- * APK" service) whose targetSdkVersion is too old. The safe path is the
- * browser's own install: on Android/desktop Chromium that mints a Google-signed
- * WebAPK (never flagged by Play Protect); on iOS it's Share ▸ Add to Home
- * Screen. This module drives that native path and never distributes an APK.
+ * blocked / built for an older version of Android" warning. It does NOT come
+ * from installing a PWA the normal way; it comes from an Android install whose
+ * WebAPK targets an old SDK. Two sources produce that:
+ *   1. Side-loading a generated *.apk (PWABuilder / Bubblewrap / a "website to
+ *      APK" service) whose targetSdkVersion is too old. We never distribute one.
+ *   2. Installing from **Samsung Internet** — the default browser on Galaxy
+ *      phones (S24, etc.). Its minted WebAPK is falsely flagged by Play Protect;
+ *      a long-standing Samsung bug. Chrome's WebAPK is never flagged.
+ *
+ * We can't set the WebAPK's target SDK — Google mints it, not our build. So the
+ * clean path is the browser's own install, and on Android we steer non-Chrome
+ * browsers to Chrome (`androidNeedsChrome` / `chromeIntentUrl`, used by
+ * InstallAppButton). On iOS it's Share ▸ Add to Home Screen.
  *
  * The `beforeinstallprompt` event can fire before React mounts, so we capture it
  * at module-eval time (imported early from main.tsx) and expose it via an
@@ -91,6 +98,57 @@ export const isIOS: boolean = (() => {
     (navigator as unknown as { maxTouchPoints: number }).maxTouchPoints > 1
   return iDevice || touchMac
 })()
+
+/** UA string, read once. */
+const UA: string = typeof navigator !== 'undefined' ? navigator.userAgent || '' : ''
+
+/** Running on Android. */
+export const isAndroid: boolean = /Android/i.test(UA)
+
+/** Samsung's built-in browser — the Galaxy default; its WebAPK is Play-Protect-flagged. */
+export const isSamsungInternet: boolean = /SamsungBrowser/i.test(UA)
+
+/**
+ * In-app webviews (Instagram, Facebook, TikTok, Snapchat, in-app Google, generic
+ * `; wv`). These can't install a PWA at all, so on Android they must be kicked
+ * out to Chrome first.
+ */
+export const isInAppBrowser: boolean =
+  /(FBAN|FB_IAB|FBAV|Instagram|Line\/|Snapchat|TikTok|musical_ly|GSA\/|; wv\))/i.test(UA)
+
+/**
+ * Real Chrome on Android — the one browser whose WebAPK install is never flagged
+ * by Play Protect. Excludes Samsung Internet, Edge, Opera, etc. (they all carry
+ * "Chrome" in their UA but mint differently, or not at all) and in-app webviews.
+ */
+export const isAndroidChrome: boolean =
+  isAndroid &&
+  /Chrome\/\d/i.test(UA) &&
+  !/SamsungBrowser|EdgA|OPR\/|OPT\/|UCBrowser|DuckDuckGo|YaBrowser|MiuiBrowser|HeyTap/i.test(UA) &&
+  !isInAppBrowser
+
+/**
+ * The current Android browser will produce a Play-Protect-flagged install
+ * (Samsung Internet, an in-app webview, Firefox…). These users get steered to
+ * Chrome, whose WebAPK installs cleanly. False on iOS and desktop.
+ */
+export const androidNeedsChrome: boolean = isAndroid && !isAndroidChrome
+
+/**
+ * An Android `intent://` URL that reopens the current page in Chrome, falling
+ * back to plain https if Chrome is somehow absent. Tapping a link with this href
+ * hands the user to Chrome, where the install mints a clean, unflagged WebAPK.
+ */
+export function chromeIntentUrl(): string {
+  if (typeof window === 'undefined') return '/'
+  const { host, pathname, search } = window.location
+  const httpsUrl = `https://${host}${pathname}${search}`
+  return (
+    `intent://${host}${pathname}${search}` +
+    '#Intent;scheme=https;package=com.android.chrome;' +
+    `S.browser_fallback_url=${encodeURIComponent(httpsUrl)};end`
+  )
+}
 
 /** True when running as the installed standalone app (any platform). */
 export function isStandalone(): boolean {
