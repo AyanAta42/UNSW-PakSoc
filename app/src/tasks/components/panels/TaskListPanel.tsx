@@ -101,7 +101,7 @@ export function TaskListPanel({ tasks, loading, overTask, members, allCategories
                                 className="w-full flex items-center gap-2.5 px-3 py-1.5 text-xs text-left">
                                 <button type="button" aria-pressed={st.done} aria-label={st.done ? 'Mark step incomplete' : 'Mark step complete'}
                                   onClick={e => { e.stopPropagation(); onToggleSubtask(task.id, st.id, !st.done) }}
-                                  className={`w-3.5 h-3.5 rounded-[4px] border-[1.5px] shrink-0 inline-flex items-center justify-center bg-transparent p-0 cursor-pointer transition-colors ${st.done ? 'bg-[#22C55E] border-[#22C55E] text-[#0B0E15]' : 'border-[#2E333D] hover:border-[#22C55E]'}`}>
+                                  className={`w-3.5 h-3.5 rounded-[4px] border-[1.5px] shrink-0 inline-flex items-center justify-center p-0 cursor-pointer transition-colors ${st.done ? 'bg-[#22C55E] border-[#22C55E] text-[#0B0E15]' : 'bg-transparent border-[#2E333D] hover:border-[#22C55E]'}`}>
                                   {st.done && <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round" className="w-2.5 h-2.5" aria-hidden><path d="M20 6 9 17l-5-5" /></svg>}
                                 </button>
                                 <span className={`min-w-0 break-words transition-colors ${st.done ? 'line-through text-[#64748B]' : 'text-[#94A3B8]'}`}>{st.title}</span>
