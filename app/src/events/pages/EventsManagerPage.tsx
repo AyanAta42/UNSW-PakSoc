@@ -149,8 +149,15 @@ export default function EventsManagerPage() {
         </div>
       </div>
 
-      {showAdd   && <AddEditEventModal onClose={() => setShowAdd(false)} onCreated={ev => { setEvents(p => [...p, ev]); setShowAdd(false); toast.success('Event created') }} />}
-      {editingEv && <AddEditEventModal event={editingEv} onClose={() => setEditingEv(null)} onUpdated={updated => { setEvents(p => p.map(e => e.id === updated.id ? updated : e)); setEditingEv(null); toast.success('Event updated') }} />}
+      {showAdd   && <AddEditEventModal
+        onClose={() => setShowAdd(false)}
+        onCreated={ev => { setEvents(p => [...p, ev]); setShowAdd(false) }}
+        onCreateSettled={(tempId, ev) => setEvents(p => ev ? p.map(e => e.id === tempId ? ev : e) : p.filter(e => e.id !== tempId))}
+      />}
+      {editingEv && <AddEditEventModal event={editingEv}
+        onClose={() => setEditingEv(null)}
+        onUpdated={updated => { setEvents(p => p.map(e => e.id === updated.id ? updated : e)); setEditingEv(null) }}
+      />}
       {showHistory && (
         <HistoryPanel title="Event History" onClose={() => setShowHistory(false)}
           fetcher={fetchEventInteractions} emptyMessage="No event activity yet." />

@@ -28,7 +28,7 @@ export function useRealtimeTable(
   onChange: () => void,
   enabled = true,
   onRow?: (change: RealtimeRowChange) => void,
-  pollMs = 12000,
+  pollMs = 3000,
 ) {
   const cb = useRef(onChange)
   cb.current = onChange

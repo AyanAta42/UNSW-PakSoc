@@ -11,12 +11,14 @@ import type { DbEvent, NewEvent, TimelineItem, EventButton } from '@/events/type
 import { DEFAULT_BUTTONS }   from '@/events/types/Event'
 import { ACCENT, ACCENT_TEXT, PALETTE } from '@/config/theme'
 import { useSheetSwipe }     from '@/shared/hooks/useSheetSwipe'
+import { toast, errorMessage } from '@/shared/toast/toast'
 
 interface Props {
-  onClose:    () => void
-  onCreated?: (ev: DbEvent) => void
-  onUpdated?: (ev: DbEvent) => void
-  event?:     DbEvent
+  onClose:          () => void
+  onCreated?:       (ev: DbEvent) => void
+  onCreateSettled?: (tempId: string, ev: DbEvent | null) => void
+  onUpdated?:       (ev: DbEvent) => void
+  event?:           DbEvent
 }
 
 const inp = { border: `1px solid ${PALETTE.border}`, color: PALETTE.dark, background: PALETTE.input, borderRadius: 12, colorScheme: 'dark' } as const
@@ -50,7 +52,7 @@ function Label({ icon, children }: { icon: React.ReactNode; children: React.Reac
   )
 }
 
-export function AddEditEventModal({ onClose, onCreated, onUpdated, event }: Props) {
+export function AddEditEventModal({ onClose, onCreated, onCreateSettled, onUpdated, event }: Props) {
   const isEdit = !!event
 
   const start0 = parseTimeHM(event?.time, '17:00')
@@ -71,9 +73,6 @@ export function AddEditEventModal({ onClose, onCreated, onUpdated, event }: Prop
   const [imageFile,    setImageFile]    = useState<File | null>(null)
   const [imagePreview, setImagePreview] = useState(event?.image_url ?? '')
   const [dragOver,     setDragOver]     = useState(false)
-  const [saving,       setSaving]       = useState(false)
-  const [uploading,    setUploading]    = useState(false)
-  const [error,        setError]        = useState('')
   const [mapPreview,   setMapPreview]   = useState(false)
 
   const { sheetRef, scrollRef, close, backdropOpacity, sheetStyle, touchHandlers } = useSheetSwipe(onClose)
@@ -85,35 +84,54 @@ export function AddEditEventModal({ onClose, onCreated, onUpdated, event }: Prop
     setImageFile(file); setImagePreview(URL.createObjectURL(file))
   }
 
+  // Reflects the change instantly (locally and, via realtime, on every other
+  // device) instead of waiting on the image upload + network round trip.
+  // The write happens in the background; failures roll back and toast.
   async function submit() {
     const startIso = buildIso(eventDate, startTime)
     if (!name.trim() || !startIso) return
-    setSaving(true); setError('')
-    try {
-      let image_url = event?.image_url ?? undefined
-      if (imageFile) { setUploading(true); image_url = await uploadEventImage(imageFile); setUploading(false) }
 
-      const endIso = buildEndIso(eventDate, startTime, endTime)
+    const endIso = buildEndIso(eventDate, startTime, endTime)
+    // A freshly-picked file already has a local blob preview URL — use it as
+    // the optimistic image so the picture shows immediately, then swap in the
+    // real storage URL once the upload finishes.
+    const optimisticImageUrl = imageFile ? imagePreview : (event?.image_url ?? undefined)
 
-      const fields: NewEvent = {
-        name: name.trim(), location,
-        time: startIso, end_time: endIso || undefined,
-        image_url, price: parseFloat(price) || 0,
-        timeline: timeline.map(i => ({ time: i.time.trim(), title: i.title.trim() })).filter(i => i.time && i.title).sort((a, b) => a.time.localeCompare(b.time)),
-        buttons:  buttons.filter(b => b.label.trim()),
-      }
+    const fields: NewEvent = {
+      name: name.trim(), location,
+      time: startIso, end_time: endIso || undefined,
+      image_url: optimisticImageUrl, price: parseFloat(price) || 0,
+      timeline: timeline.map(i => ({ time: i.time.trim(), title: i.title.trim() })).filter(i => i.time && i.title).sort((a, b) => a.time.localeCompare(b.time)),
+      buttons:  buttons.filter(b => b.label.trim()),
+    }
 
-      if (isEdit && event) {
-        await updateEvent(event.id, fields)
-        onUpdated?.({ ...event, ...fields })
+    if (isEdit && event) {
+      onUpdated?.({ ...event, ...fields })
+      try {
+        const image_url = imageFile ? await uploadEventImage(imageFile) : fields.image_url
+        const finalFields = { ...fields, image_url }
+        await updateEvent(event.id, finalFields)
+        if (imageFile) onUpdated?.({ ...event, ...finalFields })
+        toast.success('Event updated')
         void logInteraction('event.updated', 'event', event.id, event.id, `updated event "${fields.name}"`)
-      } else {
-        const ev = await createEvent(fields)
-        onCreated?.(ev)
-        void logInteraction('event.created', 'event', ev.id, ev.id, `created event "${ev.name}"`)
+      } catch (e) {
+        onUpdated?.(event)
+        toast.error("Couldn't update event", errorMessage(e, 'Please try again.'))
       }
-    } catch (e) { setError(e instanceof Error ? e.message : 'Something went wrong.') }
-    finally { setSaving(false); setUploading(false) }
+    } else {
+      const tempId = `temp_${Date.now()}`
+      onCreated?.({ id: tempId, public: false, ...fields })
+      try {
+        const image_url = imageFile ? await uploadEventImage(imageFile) : fields.image_url
+        const ev = await createEvent({ ...fields, image_url })
+        onCreateSettled?.(tempId, ev)
+        toast.success('Event created')
+        void logInteraction('event.created', 'event', ev.id, ev.id, `created event "${ev.name}"`)
+      } catch (e) {
+        onCreateSettled?.(tempId, null)
+        toast.error("Couldn't create event", errorMessage(e, 'Please try again.'))
+      }
+    }
   }
 
   const canSave = name.trim() && eventDate
@@ -196,19 +214,14 @@ export function AddEditEventModal({ onClose, onCreated, onUpdated, event }: Prop
             <ImageUploadZone preview={imagePreview} dragOver={dragOver} onFile={handleFile} onClear={() => { setImageFile(null); setImagePreview('') }} onDragOver={setDragOver} /></div>
         </div>
 
-        {error && (
-          <div className="mx-6 mb-2 px-3.5 py-2.5 text-sm"
-            style={{ background: 'rgba(239,68,68,0.1)', color: '#F87171', border: '1px solid rgba(239,68,68,0.3)', borderRadius: 12 }}>{error}</div>
-        )}
-
         <div className="px-5 sm:px-6 pt-3 pb-[max(1.25rem,env(safe-area-inset-bottom))] flex gap-3 shrink-0" style={{ borderTop: `1px solid ${PALETTE.border}` }}>
           <button onClick={close}
             style={{ border: `1px solid ${PALETTE.border}`, color: PALETTE.secondary, borderRadius: 14, background: 'transparent' }}
             className="flex-1 py-2.5 text-sm font-semibold cursor-pointer hover:bg-white/5 transition-colors">Cancel</button>
-          <button onClick={submit} disabled={!canSave || saving}
+          <button onClick={submit} disabled={!canSave}
             style={{ background: canSave ? ACCENT : PALETTE.cardAlt, color: canSave ? ACCENT_TEXT : PALETTE.disabled, borderRadius: 14, boxShadow: canSave ? '0 0 20px rgba(34,197,94,0.25)' : 'none' }}
             className="flex-1 py-2.5 text-sm font-bold border-none cursor-pointer transition-all disabled:cursor-not-allowed">
-            {uploading ? 'Uploading…' : saving ? 'Saving…' : isEdit ? 'Save Changes' : '+ Save as Draft'}
+            {isEdit ? 'Save Changes' : '+ Save as Draft'}
           </button>
         </div>
       </div>

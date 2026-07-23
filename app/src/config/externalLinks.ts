@@ -1,6 +1,6 @@
 export const REGISTER_TEAM_URL = 'https://docs.google.com/forms/d/e/1FAIpQLSf-oBs55neMNS7-w-79MLrYtVTQ41lILchY_LTfdH67Ho5ltA/viewform'
 export const TICKETS_URL       = 'https://campus.hellorubric.com/?eid=67422'
-export const INSTAGRAM_URL     = 'https://instagram.com/unswpaksoc'
-export const TIKTOK_URL        = 'https://tiktok.com/@unswpaksoc'
+export const INSTAGRAM_URL     = 'https://www.instagram.com/unswpaksoc/?hl=en'
+export const TIKTOK_URL        = 'https://www.tiktok.com/@unswpaksoc?_r=1&_t=ZS-98HJW4IlJCs'
 export const FACEBOOK_URL      = 'https://www.facebook.com/PakSocUnsw/'
 export const ARC_MEMBERSHIP_URL = 'https://campus.hellorubric.com/?s=8022'

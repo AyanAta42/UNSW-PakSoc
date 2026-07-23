@@ -219,7 +219,7 @@ export default function HomePage({ active = true }: { active?: boolean }) {
           <div className="bg-transparent rounded-none px-4 py-4 lg:px-6 lg:py-5">
             <div className="flex items-center justify-between mb-5">
               <span className="text-[10px] font-bold tracking-widest uppercase" style={{ color: PALETTE.muted }}>Social Wall</span>
-              <a href="https://www.instagram.com/unswpaksoc" target="_blank" rel="noopener noreferrer" style={{ color: ACCENT }} className="text-xs font-semibold no-underline hover:opacity-80">View on Instagram →</a>
+              <a href="https://www.instagram.com/unswpaksoc/?hl=en" target="_blank" rel="noopener noreferrer" style={{ color: ACCENT }} className="text-xs font-semibold no-underline hover:opacity-80">View on Instagram →</a>
             </div>
             <SocialWall />
           </div>

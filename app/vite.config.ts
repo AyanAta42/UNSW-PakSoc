@@ -57,11 +57,14 @@ export default defineConfig(({ mode }) => {
           skipWaiting: true,
           runtimeCaching: [
             {
-              // Public events data — serve cached instantly, refresh in background
+              // Public events data — try the network first (so realtime-triggered
+              // reconcile fetches always see fresh rows instead of a stale cache
+              // entry), falling back to cache only when offline/slow.
               urlPattern: /^https:\/\/[^/]+\.supabase\.co\/rest\/v1\/events/,
-              handler: 'StaleWhileRevalidate',
+              handler: 'NetworkFirst',
               options: {
                 cacheName: 'events-api',
+                networkTimeoutSeconds: 3,
                 expiration: { maxEntries: 32, maxAgeSeconds: 7 * 24 * 60 * 60 },
                 cacheableResponse: { statuses: [0, 200] },
               },
