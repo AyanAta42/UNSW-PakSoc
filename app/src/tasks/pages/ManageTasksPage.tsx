@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { useAppNavigate as useNavigate } from '@/shared/router/useAppNavigate'
 import { useTaskBoard }      from '@/tasks/hooks/useTaskBoard'
@@ -12,7 +12,9 @@ import { MemberPickerSheet } from '@/tasks/components/assignment/MemberPickerShe
 import { HistoryButton }     from '@/interactions/components/HistoryButton'
 import { HistoryPanel }      from '@/interactions/components/HistoryPanel'
 import { AmbientBackground } from '@/shared/components/AmbientBackground'
+import { useThemeColor }     from '@/shared/pwa/useThemeColor'
 import { fetchEventTaskInteractions } from '@/interactions/services/fetchEventTaskInteractions'
+import { PALETTE }           from '@/config/theme'
 import type { Member }       from '@/members/types/Member'
 
 type PickerMode = 'form' | null
@@ -26,6 +28,29 @@ export default function ManageTasksPage() {
   const [myTasksOnly,  setMyTasksOnly] = useState(false)
   const board   = useTaskBoard(eventId)
   const { user } = useAuth()
+
+  // The mobile board header is a solid card colour, not the aurora base — match
+  // the Android status/nav bar to it so there's no seam behind the system bars.
+  useThemeColor(PALETTE.card)
+
+  // Full-height app-shell (100dvh, overflow-hidden) with its own fixed header.
+  // The body keeps a bottom safe-area padding for normal scrollable routes, which
+  // makes the document a hair taller than the viewport here — so when the task
+  // list is too short to scroll, a downward drag chains to the document and slides
+  // the "fixed" header a few px. Pin html+body while this page is mounted so the
+  // header can never move; the inner list keeps its own scroll.
+  useEffect(() => {
+    const html = document.documentElement
+    const { body } = document
+    const prevHtml = html.style.overflow
+    const prevBody = body.style.overflow
+    html.style.overflow = 'hidden'
+    body.style.overflow = 'hidden'
+    return () => {
+      html.style.overflow = prevHtml
+      body.style.overflow = prevBody
+    }
+  }, [])
 
   const closePicker = () => setPickerMode(null)
 

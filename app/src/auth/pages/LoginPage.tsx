@@ -29,7 +29,7 @@ export default function LoginPage() {
   }
 
   return (
-    <AuroraPage contentClassName="min-h-[100dvh] flex flex-col items-center justify-center px-4">
+    <AuroraPage still contentClassName="min-h-[100dvh] flex flex-col items-center justify-center px-4">
       <div className="flex items-center gap-3 mb-8">
         <img src="/logo.webp" alt="PakSoc" className="w-11 h-11 rounded-full object-cover" />
         <div>

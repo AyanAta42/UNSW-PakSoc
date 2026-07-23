@@ -890,6 +890,17 @@ input[type="time"]::-webkit-calendar-picker-indicator {
   animation-play-state: paused !important;
 }
 
+/* Fully static backdrop (AmbientBackground still) — the gradient layers still
+   paint their color, but nothing drifts, sways, flickers, or floats. Used on
+   the login screen so it reads as a native app, not a jittery webview. */
+.ambient-still.ambient-root,
+.ambient-still .ambient-layer,
+.ambient-still .ambient-aurora,
+.ambient-still .ambient-aurora-ribbon,
+.ambient-still .ambient-grain {
+  animation: none !important;
+}
+
 /* ─── Route view transitions ───────────────────────────────────────────────── */
 /* Client-side route changes opt into the View Transitions API (see
    useAppNavigate). React Router replays the same transition on browser
