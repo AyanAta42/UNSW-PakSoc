@@ -31,7 +31,7 @@ export function MemberPickerSheet({ open, title = 'Choose a member', members, mu
     <div className="fixed inset-0 z-[80]">
       <div className="absolute inset-0 bg-black/55 backdrop-blur-[2px] touch-none transition-opacity duration-[220ms]" style={{ opacity: backdropOpacity }} onClick={close} />
       <div ref={sheetRef} style={sheetStyle} {...touchHandlers} className="absolute bottom-0 left-0 right-0 rounded-t-[28px] h-[85dvh] flex flex-col bg-[#0D1119] border-t border-[#1D2129] shadow-[0_-8px_60px_rgba(0,0,0,0.6)] animate-[slideUp_0.28s_ease-out]" onClick={e => e.stopPropagation()}>
-        <div className="flex justify-center pt-3 pb-1 shrink-0"><div className="w-10 h-1 rounded-full bg-[#1D2129]" /></div>
+        <div className="flex justify-center pt-[max(0.75rem,env(safe-area-inset-top))] pb-1 shrink-0"><div className="w-10 h-1 rounded-full bg-[#1D2129]" /></div>
         <div className="flex items-center justify-between px-5 pb-3 shrink-0">
           <div className="text-[15px] font-extrabold text-[#F8FAFC]">{title}</div>
           <button onClick={close} className="w-8 h-8 rounded-full border border-[#1D2129] flex items-center justify-center text-lg leading-none cursor-pointer text-[#94A3B8] bg-[#080B12] hover:bg-white/5 transition-colors">{'×'}</button>
