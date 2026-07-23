@@ -202,14 +202,17 @@ export function InstallAppButton() {
       setSheet('chrome')
       return
     }
-    // Chrome / desktop Chromium: one tap → native install → clean WebAPK.
+    // Chrome / desktop Chromium: this native prompt installs a real WebAPK — no
+    // Chrome-badge shortcut. Android's final confirm is labelled "Add to Home
+    // screen"; desktop just installs.
     if (canPrompt) {
-      // Android installs in two steps: our prompt, then the system's "Add to
-      // Home screen" confirm. Nudge the user toward that second, final tap.
-      if (isAndroid) toast.info('Click "Add to Home Screen"', 'Tap it on the next pop-up to finish installing PakSoc.')
       const outcome = await promptInstall()
-      if (outcome === 'accepted') toast.success('Installing PakSoc…', 'Look for it on your home screen.')
-      else if (outcome === 'unavailable') setSheet(isIOS ? 'ios' : 'fallback')
+      if (outcome === 'accepted') {
+        if (isAndroid) toast.success('Click "Add to Home Screen"', 'Confirm it to finish adding PakSoc.')
+        else toast.success('Installing PakSoc…', 'Find it in your apps.')
+      } else if (outcome === 'unavailable') {
+        setSheet(isIOS ? 'ios' : 'fallback')
+      }
       return
     }
     // iOS, or a browser that hasn't offered the prompt → guided instructions.

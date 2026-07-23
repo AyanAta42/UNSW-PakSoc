@@ -46,6 +46,7 @@ export default function ManageTasksPage() {
     myTasksOnly, onMyTasksChange: setMyTasksOnly,
     onRemoveTask: board.removeTask, onRemoveAssigned: board.removeAssigned,
     onEditTask: board.editTask,
+    onToggleSubtask: board.toggleSubtask,
     onApplyAssignees: board.applyAssignees,
   }
 

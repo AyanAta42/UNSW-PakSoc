@@ -15,14 +15,20 @@ export type RealtimeRowChange = RealtimePostgresChangesPayload<Record<string, un
  * patch local state in place — the debounced `onChange` refetch still runs
  * afterwards as the authoritative reconcile.
  *
- * Also catches up (via `onChange`) after a dropped connection rejoins and when
- * the tab becomes visible again, so backgrounded phones never stay stale.
+ * Also catches up (via `onChange`) after a dropped connection rejoins, when
+ * the tab becomes visible again, and on a slow poll while visible — so devices
+ * still converge even if the realtime socket is silently dropped or blocked
+ * (locked phones, flaky mobile networks, corporate/proxy WebSocket blocking, or
+ * the table missing from the `supabase_realtime` publication).
+ *
+ * `pollMs` is that safety-net interval (0 disables it).
  */
 export function useRealtimeTable(
   tables: string | string[],
   onChange: () => void,
   enabled = true,
   onRow?: (change: RealtimeRowChange) => void,
+  pollMs = 12000,
 ) {
   const cb = useRef(onChange)
   cb.current = onChange
@@ -51,12 +57,13 @@ export function useRealtimeTable(
           scheduleSync()
         })
       }
-      let joined = false
       channel.subscribe(status => {
         if (status !== 'SUBSCRIBED') return
-        // Rejoined after a drop — refetch whatever we missed while offline
-        if (joined) scheduleSync()
-        joined = true
+        // Reconcile on every (re)join, including the first: this closes the race
+        // where a row is written between our initial fetch and the moment the
+        // subscription actually starts capturing changes — otherwise that write
+        // is silently missed until the next visibility/poll catch-up.
+        scheduleSync()
       })
       cleanup = () => { void supabase.removeChannel(channel) }
     })
@@ -67,12 +74,20 @@ export function useRealtimeTable(
     document.addEventListener('visibilitychange', catchUp)
     window.addEventListener('online', catchUp)
 
+    // Safety net: even when the realtime socket is up, delivery can silently
+    // stall. Poll on a slow interval while the tab is visible so every device
+    // still converges within `pollMs`, independent of WebSocket health.
+    const poll = pollMs > 0
+      ? window.setInterval(() => { if (document.visibilityState === 'visible') scheduleSync() }, pollMs)
+      : undefined
+
     return () => {
       alive = false
       window.clearTimeout(timer)
+      if (poll !== undefined) window.clearInterval(poll)
       document.removeEventListener('visibilitychange', catchUp)
       window.removeEventListener('online', catchUp)
       cleanup?.()
     }
-  }, [key, enabled])
+  }, [key, enabled, pollMs])
 }

@@ -7,7 +7,7 @@ export const ROLE_RANK: Record<MemberRole, number> = {
   subcom:         1,
   executive:      2,
   vice_president: 3,
-  president:      4,
+  president:      3,
 }
 
 /** Returns permission flags and helpers based on the current user's role. */

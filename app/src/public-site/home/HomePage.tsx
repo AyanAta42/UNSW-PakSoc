@@ -240,7 +240,14 @@ export default function HomePage({ active = true }: { active?: boolean }) {
       </main>
 
       {sheetEvent && (
-        <MobileEventSheet event={sheetEvent} now={now} onClose={() => setSheetEvent(null)} />
+        <MobileEventSheet
+          // Track the live row so an edit (even a single timeline change) or an
+          // unpublish reflects while the sheet is open, instead of showing the
+          // snapshot captured when it was tapped.
+          event={events.find(e => e.id === sheetEvent.id) ?? sheetEvent}
+          now={now}
+          onClose={() => setSheetEvent(null)}
+        />
       )}
       {editOpen && user && (
         <Suspense fallback={null}>

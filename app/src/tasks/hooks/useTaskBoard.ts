@@ -12,6 +12,7 @@ import { updateTask }      from '@/tasks/services/updateTask'
 import { deleteTask }      from '@/tasks/services/deleteTask'
 import { unassignMember }  from '@/tasks/services/unassignMember'
 import { assignMember }    from '@/tasks/services/assignMember'
+import { setSubtaskDone }  from '@/tasks/services/setSubtaskDone'
 import { useDragAssign }   from '@/tasks/hooks/useDragAssign'
 import type { DragAssignState } from '@/tasks/hooks/useDragAssign'
 import { useRealtimeTable } from '@/core/supabase/useRealtimeTable'
@@ -34,6 +35,7 @@ export interface TaskBoardState extends DragAssignState {
   addTask:         () => void
   removeTask:      (id: string) => void
   editTask:        (id: string, title: string, cat: string, notes: string, subs: string[]) => void
+  toggleSubtask:   (taskId: string, subtaskId: string, done: boolean) => void
   removeAssigned:  (taskId: string, memberId: string) => void
   applyAssignees:  (taskId: string, memberIds: string[]) => void
 }
@@ -121,7 +123,7 @@ export function useTaskBoard(eventId: string): TaskBoardState {
     const subtitleList = subtasks.filter(s => s.trim())
     const memberIds    = preAssigned.map(m => m.id)
     const tempId = `temp_${Date.now()}`
-    const optimistic: Task = { id: tempId, title: title.trim(), category: cat, notes: notes.trim(), subtasks: subtitleList.map((t, i) => ({ id: `st${i}`, title: t })), assigned: preAssigned }
+    const optimistic: Task = { id: tempId, title: title.trim(), category: cat, notes: notes.trim(), subtasks: subtitleList.map((t, i) => ({ id: `st${i}`, title: t, done: false })), assigned: preAssigned }
     setTasks(p => [...p, optimistic])
     setTitle(''); setCat('Task'); setSubtasks(['']); setPreAssigned([]); setNotes('')
     try {
@@ -136,13 +138,28 @@ export function useTaskBoard(eventId: string): TaskBoardState {
   }
 
   async function editTask(id: string, title: string, cat: string, notes: string, subtitles: string[]) {
-    const newSubs = subtitles.map((t, i) => ({ id: `st_${i}`, title: t }))
+    const newSubs = subtitles.map((t, i) => ({ id: `st_${i}`, title: t, done: false }))
     setTasks(p => p.map(t => t.id !== id ? t : { ...t, title, category: cat, notes, subtasks: newSubs }))
     try {
       await updateTask(id, title, cat, notes, subtitles)
       toast.success('Task updated')
       void logInteraction('task.updated', 'task', id, eventId, `updated task "${title}"`)
     } catch (e) { console.error(e); toast.error("Couldn't update task", errorMessage(e, 'Please try again.')) }
+  }
+
+  async function toggleSubtask(taskId: string, subtaskId: string, done: boolean) {
+    // Optimistic strike-through; realtime refetch reconciles for everyone else
+    setTasks(p => p.map(t => t.id !== taskId ? t
+      : { ...t, subtasks: t.subtasks.map(s => s.id === subtaskId ? { ...s, done } : s) }))
+    try {
+      await setSubtaskDone(subtaskId, done)
+    } catch (e) {
+      console.error(e)
+      // Revert on failure
+      setTasks(p => p.map(t => t.id !== taskId ? t
+        : { ...t, subtasks: t.subtasks.map(s => s.id === subtaskId ? { ...s, done: !done } : s) }))
+      toast.error("Couldn't update subtask", errorMessage(e, 'Please try again.'))
+    }
   }
 
   async function removeTask(id: string) {
@@ -195,5 +212,5 @@ export function useTaskBoard(eventId: string): TaskBoardState {
     }
   }
 
-  return { members, tasks, loading, title, setTitle, cat, setCat, subtasks, setSubtasks, preAssigned, setPreAssigned, notes, setNotes, allCategories, selectedMemberId, selectMember, addCustomCategory, removeCustomCategory, addTask, editTask, removeTask, removeAssigned, applyAssignees, ...drag }
+  return { members, tasks, loading, title, setTitle, cat, setCat, subtasks, setSubtasks, preAssigned, setPreAssigned, notes, setNotes, allCategories, selectedMemberId, selectMember, addCustomCategory, removeCustomCategory, addTask, editTask, toggleSubtask, removeTask, removeAssigned, applyAssignees, ...drag }
 }

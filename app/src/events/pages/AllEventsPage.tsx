@@ -105,7 +105,15 @@ export default function AllEventsPage() {
         )}
       </div>
 
-      {modalEvent && <MobileEventSheet event={modalEvent} now={now} mapCacheId="all-events-sheet" onClose={() => setModalEvent(null)} />}
+      {modalEvent && (
+        <MobileEventSheet
+          // Follow the live row so edits/unpublish reflect while the sheet is open.
+          event={events.find(e => e.id === modalEvent.id) ?? modalEvent}
+          now={now}
+          mapCacheId="all-events-sheet"
+          onClose={() => setModalEvent(null)}
+        />
+      )}
     </AuroraPage>
   )
 }

@@ -20,10 +20,11 @@ interface Props {
   onRemoveAssigned:  (taskId: string, memberId: string) => void
   onApplyAssignees:  (taskId: string, memberIds: string[]) => void
   onEditTask:        (id: string, title: string, cat: string, notes: string, subs: string[]) => void
+  onToggleSubtask:   (taskId: string, subtaskId: string, done: boolean) => void
   onTaskClick?:      (taskId: string) => void
 }
 
-export function TaskListPanel({ tasks, loading, overTask, members, allCategories, eventId, mobile, currentUserAuthId, selectedMemberId, myTasksOnly = false, onMyTasksChange, onRemoveTask, onRemoveAssigned, onApplyAssignees, onEditTask, onTaskClick }: Props) {
+export function TaskListPanel({ tasks, loading, overTask, members, allCategories, eventId, mobile, currentUserAuthId, selectedMemberId, myTasksOnly = false, onMyTasksChange, onRemoveTask, onRemoveAssigned, onApplyAssignees, onEditTask, onToggleSubtask, onTaskClick }: Props) {
   const [editingTaskId, setEditingTaskId] = useState<string | null>(null)
   const [deletingTaskId, setDeletingTaskId] = useState<string | null>(null)
   const [unassigning,   setUnassigning]   = useState<{ taskId: string; memberId: string; name: string } | null>(null)
@@ -96,9 +97,15 @@ export function TaskListPanel({ tasks, loading, overTask, members, allCategories
                       {task.subtasks.length > 0 && (
                         <div className="mb-3 rounded-lg border border-[#171C18] bg-white/[0.02] overflow-hidden">
                           {task.subtasks.map(st => (
-                            <div key={st.id} className="flex items-center gap-2.5 px-3 py-1.5 text-xs text-[#94A3B8] border-b border-[#141814] last:border-b-0">
-                              <span className="w-3.5 h-3.5 rounded-[4px] border-[1.5px] border-[#2E333D] shrink-0" />
-                              <span className="min-w-0 break-words">{st.title}</span>
+                            <div key={st.id} className="border-b border-[#141814] last:border-b-0">
+                              <button type="button" aria-pressed={st.done}
+                                onClick={e => { e.stopPropagation(); onToggleSubtask(task.id, st.id, !st.done) }}
+                                className="w-full flex items-center gap-2.5 px-3 py-1.5 text-xs text-left bg-transparent border-0 cursor-pointer hover:bg-white/[0.03] transition-colors">
+                                <span className={`w-3.5 h-3.5 rounded-[4px] border-[1.5px] shrink-0 inline-flex items-center justify-center transition-colors ${st.done ? 'bg-[#22C55E] border-[#22C55E] text-[#0B0E15]' : 'border-[#2E333D]'}`}>
+                                  {st.done && <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round" className="w-2.5 h-2.5" aria-hidden><path d="M20 6 9 17l-5-5" /></svg>}
+                                </span>
+                                <span className={`min-w-0 break-words transition-colors ${st.done ? 'line-through text-[#64748B]' : 'text-[#94A3B8]'}`}>{st.title}</span>
+                              </button>
                             </div>
                           ))}
                         </div>

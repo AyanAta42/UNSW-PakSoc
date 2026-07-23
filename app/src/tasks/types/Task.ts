@@ -5,7 +5,7 @@ export type TaskCategory = string
 
 export const DEFAULT_TASK_CATEGORIES: TaskCategory[] = ['Task', 'Game', 'Stall']
 
-export interface SubtaskItem { id: string; title: string }
+export interface SubtaskItem { id: string; title: string; done: boolean }
 
 export interface Task {
   id:       string
