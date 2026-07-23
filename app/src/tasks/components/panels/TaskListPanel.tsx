@@ -86,28 +86,26 @@ export function TaskListPanel({ tasks, loading, overTask, members, allCategories
                             : 'border border-[#1D2129] hover:border-[#2E333D]'
                       }`}>
                       <div className="absolute top-2.5 right-2.5 flex items-center gap-1">
-                        <button onClick={e => { e.stopPropagation(); setEditingTaskId(task.id) }} aria-label="Edit task" className="h-8 w-8 inline-flex items-center justify-center rounded-lg text-[#94A3B8] hover:text-[#F8FAFC] hover:bg-white/[0.06] bg-transparent border border-[#1D2129] hover:border-[#2E333D] cursor-pointer transition-colors">
+                        <button onClick={e => { e.stopPropagation(); setEditingTaskId(task.id) }} aria-label="Edit task" className="h-8 w-8 inline-flex items-center justify-center text-[#94A3B8] hover:text-[#F8FAFC] bg-transparent border-none p-0 cursor-pointer transition-colors">
                           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4" aria-hidden><path d="M12 20h9" /><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4Z" /></svg>
                         </button>
                       </div>
                       <div className="flex items-center gap-2 pr-14 mb-2.5">
                         <span className="text-sm font-bold text-[#F8FAFC] min-w-0 break-words">{task.title}</span>
-                        {task.subtasks.length > 0 && (
-                          <span className="shrink-0 text-[10px] font-bold text-[#64748B] bg-white/[0.05] rounded px-1.5 py-0.5">{task.subtasks.length} {task.subtasks.length === 1 ? 'step' : 'steps'}</span>
-                        )}
                       </div>
                       {task.subtasks.length > 0 && (
                         <div className="mb-3 rounded-lg border border-[#171C18] bg-white/[0.02] overflow-hidden">
                           {task.subtasks.map(st => (
                             <div key={st.id} className="border-b border-[#141814] last:border-b-0">
-                              <button type="button" aria-pressed={st.done}
-                                onClick={e => { e.stopPropagation(); onToggleSubtask(task.id, st.id, !st.done) }}
-                                className="w-full flex items-center gap-2.5 px-3 py-1.5 text-xs text-left bg-transparent border-0 cursor-pointer hover:bg-white/[0.03] transition-colors">
-                                <span className={`w-3.5 h-3.5 rounded-[4px] border-[1.5px] shrink-0 inline-flex items-center justify-center transition-colors ${st.done ? 'bg-[#22C55E] border-[#22C55E] text-[#0B0E15]' : 'border-[#2E333D]'}`}>
+                              <div onClick={e => e.stopPropagation()}
+                                className="w-full flex items-center gap-2.5 px-3 py-1.5 text-xs text-left">
+                                <button type="button" aria-pressed={st.done} aria-label={st.done ? 'Mark step incomplete' : 'Mark step complete'}
+                                  onClick={e => { e.stopPropagation(); onToggleSubtask(task.id, st.id, !st.done) }}
+                                  className={`w-3.5 h-3.5 rounded-[4px] border-[1.5px] shrink-0 inline-flex items-center justify-center bg-transparent p-0 cursor-pointer transition-colors ${st.done ? 'bg-[#22C55E] border-[#22C55E] text-[#0B0E15]' : 'border-[#2E333D] hover:border-[#22C55E]'}`}>
                                   {st.done && <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round" className="w-2.5 h-2.5" aria-hidden><path d="M20 6 9 17l-5-5" /></svg>}
-                                </span>
+                                </button>
                                 <span className={`min-w-0 break-words transition-colors ${st.done ? 'line-through text-[#64748B]' : 'text-[#94A3B8]'}`}>{st.title}</span>
-                              </button>
+                              </div>
                             </div>
                           ))}
                         </div>
