@@ -64,21 +64,27 @@ export default function EventsManagerPage() {
 
   const announce = async (id: string) => {
     const name = events.find(e => e.id === id)?.name ?? 'an event'
+    setEvents(p => p.map(e => e.id === id ? { ...e, public: true } : e))
     try {
       await setEventPublic(id, true)
-      setEvents(p => p.map(e => e.id === id ? { ...e, public: true } : e))
       toast.success('Event announced')
       void logInteraction('event.published', 'event', id, id, `announced "${name}"`)
-    } catch (e) { toast.error("Couldn't announce event", errorMessage(e, 'Please try again.')) }
+    } catch (e) {
+      setEvents(p => p.map(e => e.id === id ? { ...e, public: false } : e))
+      toast.error("Couldn't announce event", errorMessage(e, 'Please try again.'))
+    }
   }
   const unpublish = async (id: string) => {
     const name = events.find(e => e.id === id)?.name ?? 'an event'
+    setEvents(p => p.map(e => e.id === id ? { ...e, public: false } : e))
     try {
       await setEventPublic(id, false)
-      setEvents(p => p.map(e => e.id === id ? { ...e, public: false } : e))
       toast.info('Event unannounced')
       void logInteraction('event.unpublished', 'event', id, id, `unpublished "${name}"`)
-    } catch (e) { toast.error("Couldn't unannounce event", errorMessage(e, 'Please try again.')) }
+    } catch (e) {
+      setEvents(p => p.map(e => e.id === id ? { ...e, public: true } : e))
+      toast.error("Couldn't unannounce event", errorMessage(e, 'Please try again.'))
+    }
   }
   const handleDelete = async (id: string) => {
     const name = events.find(e => e.id === id)?.name ?? 'an event'
