@@ -7,6 +7,7 @@ import { PublicEventsProvider } from '@/events/context/PublicEventsContext'
 import RoleRoute from '@/core/router/RoleRoute'
 import HomePage from '@/public-site/home/HomePage'
 import { ToastViewport } from '@/shared/toast/ToastViewport'
+import { useSuppressPopViewTransition } from '@/shared/router/useSuppressPopViewTransition'
 
 const LoginPage = lazy(() => import('@/auth/pages/LoginPage'))
 const AuthCallbackPage = lazy(() => import('@/auth/pages/AuthCallbackPage'))
@@ -19,6 +20,11 @@ const ManageTasksPage = lazy(() => import('@/tasks/pages/ManageTasksPage'))
 
 function AppRoutes() {
   const isHome = useLocation().pathname === '/'
+
+  // A swipe-back (POP) fires the browser's native back-gesture animation; letting
+  // React Router replay its cross-fade on top of that makes the still-mounted home
+  // blink/re-spawn. Suppress the transition on POP only — PUSH keeps its cross-fade.
+  useSuppressPopViewTransition()
 
   // Home stays mounted for the whole session and is only hidden when a sub-route
   // is open — so navigating (or swiping) back reveals the *live* page instead of
