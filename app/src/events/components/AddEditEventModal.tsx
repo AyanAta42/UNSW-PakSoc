@@ -165,7 +165,7 @@ export function AddEditEventModal({ onClose, onCreated, onUpdated, event }: Prop
             <div><Label icon={ICON.date}>Date</Label>
               <input type="date" value={eventDate} onChange={e => setEventDate(e.target.value)}
                 style={{ ...inp, minWidth: 0 }} className="w-full max-w-full px-3.5 py-2.5 text-sm outline-none focus:ring-2 focus:ring-green-500/30 cursor-pointer" /></div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div className="grid grid-cols-2 gap-3">
               <TimeField label="Starts" value={startTime} onChange={setStartTime} />
               <TimeField label="Ends"   value={endTime}   onChange={setEndTime} />
             </div>
