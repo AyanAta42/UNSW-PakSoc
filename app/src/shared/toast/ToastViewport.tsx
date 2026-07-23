@@ -89,7 +89,7 @@ function ToastCard({ item }: { item: ToastItem }) {
       onTouchStart={onTouchStart}
       onTouchMove={onTouchMove}
       onTouchEnd={onTouchEnd}
-      className={`pointer-events-auto relative overflow-hidden flex items-center gap-2.5 pl-3 pr-4 py-2.5 cursor-pointer w-full max-w-[340px] ${leaving ? 'motion-toast-out' : interacted ? '' : 'motion-toast-in'}`}
+      className={`pointer-events-auto relative overflow-hidden flex items-center gap-2.5 pl-3 pr-4 py-2.5 cursor-pointer w-fit max-w-[320px] ${leaving ? 'motion-toast-out' : interacted ? '' : 'motion-toast-in'}`}
       style={{
         background: PALETTE.modal,
         border: `1px solid ${PALETTE.border}`,
