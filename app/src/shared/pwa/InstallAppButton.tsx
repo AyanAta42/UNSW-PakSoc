@@ -5,6 +5,7 @@ import { toast } from '@/shared/toast/toast'
 import {
   androidNeedsChrome,
   chromeIntentUrl,
+  isAndroid,
   isIOS,
   isStandalone,
   promptInstall,
@@ -185,11 +186,12 @@ function InstallSheet({ variant, onClose }: { variant: SheetVariant; onClose: ()
 }
 
 export function InstallAppButton() {
-  const { canPrompt, installed } = useInstallState()
+  const { canPrompt } = useInstallState()
   const [sheet, setSheet] = useState<SheetVariant | null>(null)
 
-  // Already running as the installed app, or it just installed → nothing to do.
-  if (installed || isStandalone()) return null
+  // Only hide once we're actually *running inside* the installed app. On the
+  // website the button always stays — signed in or not, already installed or not.
+  if (isStandalone()) return null
 
   async function handleClick() {
     // Android browsers other than Chrome (Samsung Internet, in-app webviews,
@@ -202,6 +204,9 @@ export function InstallAppButton() {
     }
     // Chrome / desktop Chromium: one tap → native install → clean WebAPK.
     if (canPrompt) {
+      // Android installs in two steps: our prompt, then the system's "Add to
+      // Home screen" confirm. Nudge the user toward that second, final tap.
+      if (isAndroid) toast.info('Click "Add to Home Screen"', 'Tap it on the next pop-up to finish installing PakSoc.')
       const outcome = await promptInstall()
       if (outcome === 'accepted') toast.success('Installing PakSoc…', 'Look for it on your home screen.')
       else if (outcome === 'unavailable') setSheet(isIOS ? 'ios' : 'fallback')
