@@ -62,7 +62,7 @@ export function TimeField({ label, value, onChange }: TimeFieldProps) {
         type="time"
         value={value}
         onChange={e => e.target.value && onChange(e.target.value)}
-        style={{ border: `1px solid ${PALETTE.border}`, color: PALETTE.dark, background: PALETTE.input, borderRadius: PALETTE.radiusInput, colorScheme: 'dark', width: '100%', minWidth: 0, maxWidth: '100%', boxSizing: 'border-box', textAlign: 'center' }}
+        style={{ border: `1px solid ${PALETTE.border}`, color: PALETTE.dark, background: PALETTE.input, borderRadius: PALETTE.radiusInput, colorScheme: 'dark', width: '100%', minWidth: 0, maxWidth: '100%', boxSizing: 'border-box', textAlign: 'center', WebkitAppearance: 'none', appearance: 'none' }}
         className="block w-full max-w-full px-3 py-2.5 text-sm outline-none focus:ring-2 focus:ring-green-500/30 cursor-pointer"
       />
     </div>

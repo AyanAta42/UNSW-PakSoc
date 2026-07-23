@@ -74,6 +74,22 @@ html.home-mounted body { padding-bottom: 0; }
   height: 0;
 }
 
+/* Native date/time inputs on iOS Safari keep an intrinsic min-width via their inner
+   value pseudo-element, so they overflow their column on real phones even though
+   desktop responsive mode (which uses the desktop engine) shrinks them fine. Zero
+   out the inner widths so the input honours our width:100% + box-sizing constraints. */
+input[type="date"]::-webkit-date-and-time-value,
+input[type="time"]::-webkit-date-and-time-value {
+  min-width: 0;
+  width: 100%;
+  margin: 0;
+  text-align: center;
+}
+input[type="date"]::-webkit-calendar-picker-indicator,
+input[type="time"]::-webkit-calendar-picker-indicator {
+  margin: 0;
+}
+
 /* Home app-shell scroll region — the ONLY elastic surface on the page. The navbar
    and footer are fixed flex children; this middle region keeps the iOS rubber-band
    bounce that the document-level scroll had to suppress (overscroll-behavior:none on
