@@ -162,9 +162,9 @@ export function AddEditEventModal({ onClose, onCreated, onUpdated, event }: Prop
           {/* When — date + times grouped in an accent panel */}
           <div className="p-4 flex flex-col gap-4"
             style={{ background: 'rgba(34,197,94,0.05)', border: '1px solid rgba(34,197,94,0.18)', borderRadius: 16 }}>
-            <div className="min-w-0 overflow-hidden"><Label icon={ICON.date}>Date</Label>
+            <div className="min-w-0"><Label icon={ICON.date}>Date</Label>
               <input type="date" value={eventDate} onChange={e => setEventDate(e.target.value)}
-                style={{ ...inp, width: '100%', minWidth: 0, maxWidth: '100%', boxSizing: 'border-box' }} className="block w-full max-w-full px-3.5 py-2.5 text-sm outline-none focus:ring-2 focus:ring-green-500/30 cursor-pointer" /></div>
+                style={{ ...inp, width: '100%', minWidth: 0, maxWidth: '100%', boxSizing: 'border-box', textAlign: 'center' }} className="block w-full max-w-full px-3.5 py-2.5 text-sm outline-none focus:ring-2 focus:ring-green-500/30 cursor-pointer" /></div>
             <div className="grid grid-cols-2 gap-3">
               <TimeField label="Starts" value={startTime} onChange={setStartTime} />
               <TimeField label="Ends"   value={endTime}   onChange={setEndTime} />
