@@ -61,7 +61,7 @@ export function EditTaskModal({ task, members, allCategories, mobile, onClose, o
             <input value={title} onChange={e => setTitle(e.target.value)} className={inputCls} /></div>
           <div>
             <label className={labelCls}>Category</label>
-            <div className="flex flex-wrap gap-2">
+            <div className="grid grid-cols-3 gap-2">
               {allCategories.map(c => {
                 const cfg = getCatCfg(c)
                 return (

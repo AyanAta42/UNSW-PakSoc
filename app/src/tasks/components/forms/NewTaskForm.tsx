@@ -77,13 +77,13 @@ export function NewTaskForm({ title, setTitle, cat, setCat, allCategories, onAdd
               className={`px-3 py-1.5 rounded-lg text-xs font-bold border-none shrink-0 transition-colors ${catInput.trim() ? 'bg-[#22C55E] text-white hover:bg-[#16A34A] cursor-pointer' : 'bg-white/5 text-[#475569] cursor-not-allowed'}`}>Add</button>
           </div>
         )}
-        <div className="flex flex-wrap gap-2">
+        <div className="grid grid-cols-3 gap-2">
           {allCategories.map(c => {
             const cfg = getCatCfg(c)
             const isCustom = !DEFAULT_TASK_CATEGORIES.includes(c)
             return (
               <button key={c} type="button" onClick={() => setCat(c)}
-                className={`px-3 py-1.5 rounded-lg text-xs font-bold border-[1.5px] cursor-pointer transition-all flex items-center gap-1 ${cat === c ? cfg.activeCls : 'bg-white/[0.03] border-[#1D2129] text-[#64748B] hover:border-[#2E333D]'}`}>
+                className={`px-3 py-1.5 rounded-lg text-xs font-bold border-[1.5px] cursor-pointer transition-all flex items-center justify-center gap-1 ${cat === c ? cfg.activeCls : 'bg-white/[0.03] border-[#1D2129] text-[#64748B] hover:border-[#2E333D]'}`}>
                 {c}
                 {isCustom && showAddCat && onRemoveCategory && (
                   <span role="button" tabIndex={0}
