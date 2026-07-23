@@ -13,11 +13,12 @@ interface Props {
   mobile?:       boolean
   onClose:       () => void
   onSave:        (id: string, title: string, cat: string, notes: string, subtasks: string[]) => void
+  onDelete:      (id: string) => void
   onUnassignMember: (taskId: string, memberId: string) => void
   onApplyAssignees: (taskId: string, memberIds: string[]) => void
 }
 
-export function EditTaskModal({ task, members, allCategories, mobile, onClose, onSave, onUnassignMember, onApplyAssignees }: Props) {
+export function EditTaskModal({ task, members, allCategories, mobile, onClose, onSave, onDelete, onUnassignMember, onApplyAssignees }: Props) {
   const [title, setTitle] = useState(task.title)
   const [cat,   setCat]   = useState(task.category)
   const [notes, setNotes] = useState(task.notes)
@@ -102,11 +103,17 @@ export function EditTaskModal({ task, members, allCategories, mobile, onClose, o
           <div><label className={labelCls}>Notes</label>
             <textarea value={notes} onChange={e => setNotes(e.target.value)} rows={3} className={inputCls + ' resize-none'} placeholder="Additional notes…" /></div>
         </div>
-        <div className="px-6 pb-5 flex gap-3 border-t border-[#1D2129] pt-4">
-          <button onClick={onClose} className="flex-1 py-2.5 rounded-xl border border-[#1D2129] text-[#CBD5E1] text-sm font-semibold cursor-pointer bg-transparent hover:bg-white/5 transition-colors">Cancel</button>
-          <button onClick={save} disabled={!title.trim()}
-            style={title.trim() ? { boxShadow: '0 0 20px rgba(34,197,94,0.25)' } : undefined}
-            className={`flex-1 py-2.5 rounded-xl text-sm font-bold border-none transition-all ${title.trim() ? 'bg-[#22C55E] text-white hover:bg-[#16A34A] cursor-pointer' : 'bg-white/5 text-[#475569] cursor-not-allowed'}`}>Save Changes</button>
+        <div className="px-6 pb-5 flex flex-col gap-3 border-t border-[#1D2129] pt-4">
+          <div className="flex gap-3">
+            <button onClick={onClose} className="flex-1 py-2.5 rounded-xl border border-[#1D2129] text-[#CBD5E1] text-sm font-semibold cursor-pointer bg-transparent hover:bg-white/5 transition-colors">Cancel</button>
+            <button onClick={save} disabled={!title.trim()}
+              style={title.trim() ? { boxShadow: '0 0 20px rgba(34,197,94,0.25)' } : undefined}
+              className={`flex-1 py-2.5 rounded-xl text-sm font-bold border-none transition-all ${title.trim() ? 'bg-[#22C55E] text-white hover:bg-[#16A34A] cursor-pointer' : 'bg-white/5 text-[#475569] cursor-not-allowed'}`}>Save Changes</button>
+          </div>
+          <button onClick={() => onDelete(task.id)} className="w-full py-2.5 rounded-xl border border-red-500/30 text-red-400 text-sm font-semibold cursor-pointer bg-transparent hover:bg-red-500/10 hover:border-red-500/50 transition-colors inline-flex items-center justify-center gap-2">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4" aria-hidden><path d="M3 6h18" /><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" /><path d="M10 11v6" /><path d="M14 11v6" /></svg>
+            Delete Task
+          </button>
         </div>
         {mobile && pickerOpen && (
           <MemberPickerSheet

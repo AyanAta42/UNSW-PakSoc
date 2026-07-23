@@ -85,9 +85,10 @@ export function TaskListPanel({ tasks, loading, overTask, members, allCategories
                             ? 'cursor-pointer border border-[#22C55E]/45 shadow-[0_0_0_1px_rgba(34,197,94,0.14),0_6px_20px_-6px_rgba(34,197,94,0.4)] hover:border-[#22C55E] hover:bg-[#0D1119] hover:-translate-y-0.5 hover:shadow-[0_0_0_1px_rgba(34,197,94,0.45),0_12px_28px_-6px_rgba(34,197,94,0.55)]'
                             : 'border border-[#1D2129] hover:border-[#2E333D]'
                       }`}>
-                      <div className="absolute top-3 right-3 flex items-center gap-1">
-                        <button onClick={e => { e.stopPropagation(); setEditingTaskId(task.id) }} aria-label="Edit task" className="h-6 px-1.5 inline-flex items-center justify-center text-[#94A3B8] hover:text-[#F8FAFC] bg-transparent border-none cursor-pointer text-[11px] font-semibold leading-none transition-colors">Edit</button>
-                        <button onClick={e => { e.stopPropagation(); setDeletingTaskId(task.id) }} aria-label="Delete task" className="h-6 w-6 inline-flex items-center justify-center text-lg text-[#64748B] hover:text-red-400 bg-transparent border-none cursor-pointer leading-none transition-colors">{'×'}</button>
+                      <div className="absolute top-2.5 right-2.5 flex items-center gap-1">
+                        <button onClick={e => { e.stopPropagation(); setEditingTaskId(task.id) }} aria-label="Edit task" className="h-8 w-8 inline-flex items-center justify-center rounded-lg text-[#94A3B8] hover:text-[#F8FAFC] hover:bg-white/[0.06] bg-transparent border border-[#1D2129] hover:border-[#2E333D] cursor-pointer transition-colors">
+                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4" aria-hidden><path d="M12 20h9" /><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4Z" /></svg>
+                        </button>
                       </div>
                       <div className="flex items-center gap-2 pr-14 mb-2.5">
                         <span className="text-sm font-bold text-[#F8FAFC] min-w-0 break-words">{task.title}</span>
@@ -132,6 +133,7 @@ export function TaskListPanel({ tasks, loading, overTask, members, allCategories
         <EditTaskModal task={editingTask} members={members} allCategories={allCategories} mobile={mobile}
           onClose={() => setEditingTaskId(null)}
           onSave={(id, title, cat, notes, subs) => { onEditTask(id, title, cat, notes, subs); setEditingTaskId(null) }}
+          onDelete={id => { setEditingTaskId(null); setDeletingTaskId(id) }}
           onUnassignMember={onRemoveAssigned} onApplyAssignees={onApplyAssignees} />
       )}
       {deletingTaskId && (
