@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useAppNavigate as useNavigate } from '@/shared/router/useAppNavigate'
 import type { User } from '@supabase/supabase-js'
 import { usePermissions } from '@/roles/hooks/usePermissions'
+import { useAuth }        from '@/auth/hooks/useAuth'
 import { UserDropdown }   from './UserDropdown'
 import { InstallAppButton } from '@/shared/pwa/InstallAppButton'
 import { ACCENT, ACCENT_TEXT, GLASS_CHIP, GLASS_NAV, PALETTE } from '@/config/theme'
@@ -37,6 +38,7 @@ export function Navbar({ user, avatarUrl, avatarBroken, initial, onAvatarError, 
   const navigate   = useNavigate()
   const [menuOpen, setMenuOpen] = useState(false)
   const { can }    = usePermissions()
+  const { signOut } = useAuth()
 
   return (
     <header style={GLASS_NAV} className="glass-nav z-50 shrink-0 pt-[env(safe-area-inset-top)] md:pt-[calc(env(safe-area-inset-top)+8px)]">
@@ -95,10 +97,9 @@ export function Navbar({ user, avatarUrl, avatarBroken, initial, onAvatarError, 
                 onEditProfile={() => { setMenuOpen(false); onEditProfile() }}
                 onSignOut={() => {
                   setMenuOpen(false)
-                  void import('@/auth/services/signOut')
-                    .then(m => m.signOut())
-                    .then(() => { toast.success('Logged out'); navigate('/') })
-                    .catch(() => toast.error("Couldn't log out", 'Please try again.'))
+                  navigate('/')
+                  toast.success('Logged out')
+                  void signOut().catch(() => toast.error("Couldn't log out", 'Please try again.'))
                 }}
                 onClose={() => setMenuOpen(false)} />}
             </div>

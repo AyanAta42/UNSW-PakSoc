@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useMemo, useState } from 'react'
+import { createContext, useContext, useCallback, useEffect, useMemo, useState } from 'react'
 import type { User, Session } from '@supabase/supabase-js'
 import { getAvatarUrl } from '@/auth/utils/getAvatarUrl'
 
@@ -7,6 +7,7 @@ export interface AuthCtx {
   session: Session | null
   loading: boolean
   avatarUrl: string | undefined
+  signOut: () => Promise<void>
 }
 
 const AuthContext = createContext<AuthCtx | null>(null)
@@ -107,9 +108,22 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   }, [])
 
+  // Clear React state immediately so the logged-in UI (avatar, admin buttons)
+  // disappears at once. Without this, `user` only clears when the
+  // onAuthStateChange subscription fires — but that subscription lives in
+  // boot(), which may not have run yet (it's gated on login intent / idle),
+  // leaving the stored-session UI on screen until the delayed idle boot.
+  const signOut = useCallback(async () => {
+    setSession(null)
+    setUser(null)
+    const { supabase } = await import('@/core/supabase/client')
+    const { error } = await supabase.auth.signOut()
+    if (error) throw error
+  }, [])
+
   const value = useMemo(
-    () => ({ user, session, loading, avatarUrl: getAvatarUrl(user) }),
-    [user, session, loading],
+    () => ({ user, session, loading, avatarUrl: getAvatarUrl(user), signOut }),
+    [user, session, loading, signOut],
   )
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
