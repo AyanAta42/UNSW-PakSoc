@@ -141,7 +141,7 @@ export function AddEditEventModal({ onClose, onCreated, onUpdated, event }: Prop
           <button onClick={close} style={{ color: PALETTE.muted, background: PALETTE.cardAlt, border: `1px solid ${PALETTE.border}`, borderRadius: '50%' }} className="w-8 h-8 flex items-center justify-center text-lg cursor-pointer hover:border-white/30 transition-colors">×</button>
         </div>
 
-        <div ref={scrollRef} className="p-5 sm:p-6 flex flex-col gap-5 overflow-y-auto overscroll-contain">
+        <div ref={scrollRef} className="p-5 sm:p-6 flex flex-col gap-3.5 overflow-y-auto overscroll-contain">
           {/* Name */}
           <div><Label icon={ICON.name}>Event Name</Label>
             <input value={name} onChange={e => setName(e.target.value)} placeholder="e.g. Eid Gala 2026" style={inp} className="w-full px-3.5 py-2.5 text-sm outline-none focus:ring-2 focus:ring-green-500/30" /></div>
@@ -160,7 +160,7 @@ export function AddEditEventModal({ onClose, onCreated, onUpdated, event }: Prop
           </div>
 
           {/* When — date + times grouped in an accent panel */}
-          <div className="p-4 flex flex-col gap-4"
+          <div className="p-3.5 flex flex-col gap-3"
             style={{ background: 'rgba(34,197,94,0.05)', border: '1px solid rgba(34,197,94,0.18)', borderRadius: 16 }}>
             <div className="min-w-0"><Label icon={ICON.date}>Date</Label>
               <input type="date" value={eventDate} onChange={e => setEventDate(e.target.value)}
