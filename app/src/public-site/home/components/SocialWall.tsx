@@ -179,9 +179,7 @@ export function SocialWall() {
             className="w-full p-5">
             <h3 className="m-0 mb-2 text-base font-semibold" style={{ color: PALETTE.dark }}>Fetch latest posts</h3>
             <p className="m-0 mb-5 text-xs leading-relaxed" style={{ color: PALETTE.muted }}>
-              Use this after a new reel has been posted on Instagram. It checks
-              @{IG_USERNAME} and stores any posts that aren't in the database yet —
-              only the missing reels are added.
+              Use this after a new reel has been posted on Instagram. It stores most recent posts into our database so it can be displayed to all users.
             </p>
             <div className="flex flex-row flex-nowrap justify-end gap-2">
               <button onClick={() => setConfirmOpen(false)}

@@ -56,6 +56,33 @@ export function useSheetSwipe(onClose: () => void, open = true) {
     return () => el.removeEventListener('touchmove', blockPan)
   }, [open])
 
+  // The on-screen keyboard overlays the page without resizing the layout
+  // viewport, so a field low in a long sheet can end up hidden underneath it.
+  // `visualViewport`'s `resize` fires once the keyboard finishes animating in —
+  // that's the reliable moment to nudge the focused field back into view. A
+  // timeout is the fallback/safety-net for browsers without the API, or when
+  // the keyboard was already open (so no resize event fires at all).
+  useEffect(() => {
+    const el = sheetRef.current
+    if (!el) return
+    const onFocusIn = (e: FocusEvent) => {
+      const target = e.target
+      if (!(target instanceof HTMLElement)) return
+      if (target.tagName !== 'INPUT' && target.tagName !== 'TEXTAREA') return
+      let settled = false
+      const reveal = () => {
+        if (settled) return
+        settled = true
+        target.scrollIntoView({ block: 'center', behavior: 'smooth' })
+      }
+      const vv = window.visualViewport
+      vv?.addEventListener('resize', reveal)
+      setTimeout(() => { vv?.removeEventListener('resize', reveal); reveal() }, 350)
+    }
+    el.addEventListener('focusin', onFocusIn)
+    return () => el.removeEventListener('focusin', onFocusIn)
+  }, [open])
+
   function close() {
     if (closing) return
     setClosing(true)
