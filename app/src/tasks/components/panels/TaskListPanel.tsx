@@ -46,11 +46,6 @@ export function TaskListPanel({ tasks, loading, overTask, members, allCategories
           <div className="w-1 h-5 bg-[#22C55E] rounded-sm" />
           <h1 className="m-0 text-[17px] font-extrabold text-[#F8FAFC]">Manage Tasks</h1>
           <span className="bg-white/[0.06] text-[#94A3B8] rounded-full px-3 py-0.5 text-xs font-semibold">{visibleTasks.length} {visibleTasks.length === 1 ? 'task' : 'tasks'}</span>
-          {hasSelected && (
-            <span className="ml-2 px-3 py-1 rounded-full text-xs font-semibold bg-blue-500/10 border border-blue-400/40 text-blue-300">
-              Member selected — click a task to assign
-            </span>
-          )}
           <div className="ml-auto flex items-center gap-2">
             <TaskFilterMenu myTasksOnly={myTasksOnly} onChange={v => onMyTasksChange?.(v)} showMine={!!currentUserAuthId} />
             <HistoryButton onClick={() => setShowHistory(true)} label="View task history for this event" />
@@ -83,7 +78,13 @@ export function TaskListPanel({ tasks, loading, overTask, members, allCategories
                   return (
                     <div key={task.id} data-task-id={task.id}
                       onClick={() => !mobile && onTaskClick?.(task.id)}
-                      className={`task-card group relative bg-[#0B0E15] rounded-xl p-4 select-none ${hasSelected && !mobile ? 'cursor-pointer hover:border-[#22C55E] hover:bg-[#0D1119]' : ''} ${isOver ? 'border-2 border-dashed border-[#22C55E] bg-[#22C55E]/[0.04]' : 'border border-[#1D2129] hover:border-[#2E333D]'}`}>
+                      className={`task-card group relative bg-[#0B0E15] rounded-xl p-4 select-none transition-all duration-200 ${
+                        isOver
+                          ? 'border-2 border-dashed border-[#22C55E] bg-[#22C55E]/[0.04]'
+                          : hasSelected && !mobile
+                            ? 'cursor-pointer border border-[#22C55E]/45 shadow-[0_0_0_1px_rgba(34,197,94,0.14),0_6px_20px_-6px_rgba(34,197,94,0.4)] hover:border-[#22C55E] hover:bg-[#0D1119] hover:-translate-y-0.5 hover:shadow-[0_0_0_1px_rgba(34,197,94,0.45),0_12px_28px_-6px_rgba(34,197,94,0.55)]'
+                            : 'border border-[#1D2129] hover:border-[#2E333D]'
+                      }`}>
                       <div className="absolute top-3 right-3 flex items-center gap-1">
                         <button onClick={e => { e.stopPropagation(); setEditingTaskId(task.id) }} aria-label="Edit task" className="h-6 px-1.5 inline-flex items-center justify-center text-[#94A3B8] hover:text-[#F8FAFC] bg-transparent border-none cursor-pointer text-[11px] font-semibold leading-none transition-colors">Edit</button>
                         <button onClick={e => { e.stopPropagation(); setDeletingTaskId(task.id) }} aria-label="Delete task" className="h-6 w-6 inline-flex items-center justify-center text-lg text-[#64748B] hover:text-red-400 bg-transparent border-none cursor-pointer leading-none transition-colors">{'×'}</button>
