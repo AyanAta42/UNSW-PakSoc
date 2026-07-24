@@ -32,11 +32,13 @@ CREATE POLICY read_members ON public.members
   FOR SELECT USING (true);
 
 -- A user may create only their own row, always as a plain public member.
+DROP POLICY IF EXISTS members_insert_self ON public.members;
 CREATE POLICY members_insert_self ON public.members
   FOR INSERT TO authenticated
   WITH CHECK (user_id = auth.uid() AND role = 'public' AND is_developer = false);
 
 -- A user may update their own row; an admin (President/dev) may update anyone's.
+DROP POLICY IF EXISTS members_update ON public.members;
 CREATE POLICY members_update ON public.members
   FOR UPDATE TO authenticated
   USING      (user_id = auth.uid() OR public.is_member_admin(auth.uid()))
