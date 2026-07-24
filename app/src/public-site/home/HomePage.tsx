@@ -5,6 +5,7 @@ import { useCurrentMember } from '@/roles/context/CurrentMemberContext'
 import type { DbEvent } from '@/events/types/Event'
 import { Navbar } from './components/Navbar'
 import { HeroBanner } from './components/HeroBanner'
+import { PurposeStrip } from './components/PurposeStrip'
 import { PublicEventCard } from './components/PublicEventCard'
 import { EventCardSkeleton } from './components/EventCardSkeleton'
 import { Footer } from './components/Footer'
@@ -177,6 +178,8 @@ export default function HomePage({ active = true }: { active?: boolean }) {
       <div className="flex gap-0 lg:gap-5 px-0 lg:px-8 py-0 lg:py-5 max-w-[1400px] mx-auto items-start w-full">
         <div className="flex flex-col gap-0 lg:gap-5 flex-[7] min-w-0 w-full">
           <HeroBanner banner={banner} loading={loading && !banner} />
+
+          <PurposeStrip />
 
           <div className="bg-transparent rounded-none px-4 py-4 lg:px-6 lg:py-5">
             <div className="flex items-center justify-between mb-5">

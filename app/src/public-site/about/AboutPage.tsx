@@ -33,8 +33,9 @@ export default function AboutPage() {
 
       <LegalSection title="Who runs it">
         <LegalParagraph>
-          The app is built and maintained for the UNSW Pakistani Society. For any questions, contact{' '}
-          <a href="mailto:syedayanata@gmail.com" className="text-green-700 font-medium hover:underline">syedayanata@gmail.com</a>.
+          The app is built and maintained for the UNSW Pakistani Society. For any questions, contact the
+          committee through our Instagram,{' '}
+          <a href="https://www.instagram.com/unswpaksoc/" target="_blank" rel="noopener noreferrer" className="text-green-700 font-medium hover:underline">@unswpaksoc</a>.
         </LegalParagraph>
       </LegalSection>
     </LegalPageLayout>
