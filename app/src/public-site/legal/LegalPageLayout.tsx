@@ -11,7 +11,7 @@ export function LegalPageLayout({ title, effectiveDate, children }: Props) {
     <AuroraPage className="font-sans" contentClassName="text-[#CBD5E1]">
       <article className="max-w-[800px] mx-auto px-6 py-12 md:py-16">
         <div className="flex items-center gap-3 mb-8">
-          <img src="/logo.webp" alt="UNSW PakSoc" className="w-10 h-10 rounded-full object-cover shrink-0" />
+          <img src="/logo-round.png" alt="UNSW PakSoc" className="w-10 h-10 rounded-full object-cover shrink-0" />
           <div>
             <div className="font-bold text-sm text-[#F8FAFC] leading-tight">PakSoc UNSW</div>
             <div className="text-[10px] tracking-widest uppercase font-bold text-[#4ADE80]">Pakistani Society</div>

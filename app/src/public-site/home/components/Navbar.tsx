@@ -45,7 +45,7 @@ export function Navbar({ user, avatarUrl, avatarBroken, initial, onAvatarError, 
       <nav className="min-h-16 px-4 md:px-8 max-w-[1400px] mx-auto flex items-center justify-between gap-3">
         <div className="flex items-center gap-2.5 shrink min-w-0">
           <img
-            src="/logo.webp"
+            src="/logo-round.png"
             alt="PakSoc UNSW"
             width={36}
             height={36}

@@ -22,7 +22,7 @@
       ]
     },
     {
-      "source": "/(logo-v2\\.png|logo\\.png|logo\\.webp|logo-source\\.png|favicon-96\\.png|favicon-512\\.png)",
+      "source": "/(app-icon\\.png|logo-round\\.png|og-image\\.png)",
       "headers": [
         { "key": "Cache-Control", "value": "public, max-age=3600, must-revalidate" }
       ]
