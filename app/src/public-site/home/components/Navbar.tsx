@@ -43,15 +43,15 @@ export function Navbar({ user, avatarUrl, avatarBroken, initial, onAvatarError, 
   return (
     <header style={GLASS_NAV} className="glass-nav z-50 shrink-0 pt-[env(safe-area-inset-top)] md:pt-[calc(env(safe-area-inset-top)+8px)]">
       <nav className="min-h-16 px-4 md:px-8 max-w-[1400px] mx-auto flex items-center justify-between gap-3">
-        <div className="flex items-center gap-1 shrink min-w-0">
+        <div className="flex items-center gap-2.5 shrink min-w-0">
           <img
             src="/logo.webp"
             alt="PakSoc UNSW"
-            width={40}
-            height={40}
+            width={36}
+            height={36}
             decoding="async"
             fetchPriority="high"
-            className="w-10 h-10 -mr-0.5 rounded-full object-cover shrink-0"
+            className="w-9 h-9 rounded-full object-cover shrink-0"
           />
           <div className="min-w-0">
             <div style={{ color: PALETTE.dark }} className="font-bold text-sm leading-tight truncate">PakSoc UNSW</div>
