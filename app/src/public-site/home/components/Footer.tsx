@@ -26,7 +26,11 @@ export function Footer() {
       </a>
 
       <p style={{ color: PALETTE.secondary }} className="text-sm max-w-lg leading-relaxed m-0">
-        Discover events, locations and updates in one place.
+        UNSW PakSoc is the official web app of the Pakistani Society at the University of New South Wales.
+        Discover upcoming society events with their dates, times and locations, open maps and ticket links,
+        and keep up with the society across social media — all in one place. Signing in with Google is
+        optional; it only uses your name, email and profile photo to personalise your membership and unlock
+        committee tools where relevant.
       </p>
 
       <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-1.5 text-xs">
