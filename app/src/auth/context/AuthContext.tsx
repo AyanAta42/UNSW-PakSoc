@@ -8,7 +8,8 @@ export interface AuthCtx {
   loading: boolean
   avatarUrl: string | undefined
   signOut: () => Promise<void>
-}
+} 
+
 
 const AuthContext = createContext<AuthCtx | null>(null)
 
