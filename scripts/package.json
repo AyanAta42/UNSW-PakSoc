@@ -1,0 +1,13 @@
+{
+  "name": "paksoc-scripts",
+  "private": true,
+  "type": "module",
+  "description": "One-off maintenance scripts. Not part of the app build.",
+  "scripts": {
+    "backfill-images": "node backfill-image-compression.mjs"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.108.2",
+    "sharp": "^0.33.5"
+  }
+}

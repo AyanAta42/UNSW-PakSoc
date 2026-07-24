@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { ACCENT, PALETTE } from '@/config/theme'
 import { usePermissions } from '@/roles/hooks/usePermissions'
-import { useRealtimeTable } from '@/core/supabase/useRealtimeTable'
+import { useRefreshOnVisible } from '@/core/supabase/useRefreshOnVisible'
 import { fetchSocialPosts, syncSocialPosts, getCachedSocialPosts, IG_USERNAME, type SocialPost } from '../services/socialPosts'
 import { isImageReady, markImageReady, warmImages } from '@/shared/utils/imageCache'
 import { toast, errorMessage } from '@/shared/toast/toast'
@@ -133,8 +133,9 @@ export function SocialWall() {
     return () => { alive = false }
   }, [])
 
-  // Live updates: when an exec refetches a reel, every open client sees it
-  useRealtimeTable('social_posts', () => {
+  // No socket on this public surface — refresh on load and whenever the visitor
+  // returns to the tab. Reels only change when an exec hits "Fetch latest".
+  useRefreshOnVisible(() => {
     fetchSocialPosts().then(setPosts).catch(() => {})
   })
 

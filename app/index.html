@@ -103,7 +103,32 @@
         #app-loader-word { -webkit-text-fill-color: #F8FAFC; color: #F8FAFC; }
         #app-loader { transition: opacity 0.12s linear; }
       }
+
+      /* Static boot fallback (inside #root): the app is client-rendered, so this
+         is the only human-readable description of the app present in the raw HTML
+         — what non-JS clients and Google's automated OAuth homepage verification
+         read. React replaces #root on mount, and the splash covers it during boot,
+         so users with JavaScript never see it. */
+      .boot-fallback {
+        max-width: 720px;
+        margin: 0 auto;
+        padding: 56px 24px 40px;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+        color: #F8FAFC;
+        line-height: 1.7;
+      }
+      .boot-fallback-logo { border-radius: 50%; display: block; margin-bottom: 20px; }
+      .boot-fallback h1 { font-size: 1.5rem; line-height: 1.3; margin: 0 0 18px; font-weight: 800; }
+      .boot-fallback p { color: #CBD5E1; margin: 0 0 16px; font-size: 1rem; }
+      .boot-fallback-links a { color: #4ADE80; font-weight: 600; text-decoration: none; margin-right: 18px; }
+      .boot-fallback-note { color: #64748B; font-size: 0.875rem; }
     </style>
+
+    <!-- If JavaScript is disabled, hide the splash so the #root description below
+         is what a no-JS visitor actually sees, instead of a splash that never clears. -->
+    <noscript>
+      <style>#app-loader { display: none !important; }</style>
+    </noscript>
 
     <!-- Events API starts HERE — before React, fonts, or any other asset -->
     <!-- EVENTS_BOOT -->

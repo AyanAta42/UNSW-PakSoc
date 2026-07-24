@@ -1,4 +1,5 @@
 import type { SupabaseClient } from '@supabase/supabase-js'
+import { compressImage } from '@/shared/utils/compressImage'
 
 // Lazy-loaded so the anonymous homepage keeps supabase-js off its critical path
 async function db() {
@@ -30,7 +31,7 @@ interface IgMedia {
 
 export const IG_USERNAME = (import.meta.env.VITE_IG_USERNAME as string) || 'unswpaksoc'
 
-export const WALL_SIZE = 10
+export const WALL_SIZE = 6
 
 // Session cache so navigating back to Home paints the wall instantly instead of
 // re-fetching and flashing skeletons every time the page remounts.
@@ -65,12 +66,19 @@ async function mirrorPost(supabase: SupabaseClient, media: IgMedia): Promise<Soc
   if (!cdnUrl) throw new Error('Media has no downloadable thumbnail')
   const imgRes = await fetch(cdnUrl)
   if (!imgRes.ok) throw new Error(`Thumbnail download failed (${imgRes.status})`)
-  const blob = await imgRes.blob()
+  const raw = await imgRes.blob()
+  // Cards render ~150px wide, so a full-res IG thumbnail is mostly wasted egress
+  // once it's served to every visitor — downscale before storing.
+  const blob = await compressImage(raw, { maxDim: 480, quality: 0.8 })
 
   const path = `${media.id}.jpg`
   const { error: uploadError } = await supabase.storage
     .from('social-thumbs')
-    .upload(path, blob, { upsert: true, contentType: blob.type || 'image/jpeg' })
+    .upload(path, blob, {
+      upsert: true,
+      contentType: blob.type || 'image/jpeg',
+      cacheControl: '31536000',
+    })
   if (uploadError) throw uploadError
   const { data: pub } = supabase.storage.from('social-thumbs').getPublicUrl(path)
 

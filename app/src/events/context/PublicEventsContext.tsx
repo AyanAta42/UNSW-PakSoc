@@ -5,8 +5,7 @@ import {
   loadPublicEvents,
   refreshPublicEvents,
 } from '@/events/services/publicEventsBootstrap'
-import { useRealtimeTable } from '@/core/supabase/useRealtimeTable'
-import { applyEventChange } from '@/events/utils/applyEventChange'
+import { useRefreshOnVisible } from '@/core/supabase/useRefreshOnVisible'
 import { eventImageUrl } from '@/events/utils/eventImageUrl'
 import { warmImages } from '@/shared/utils/imageCache'
 
@@ -46,18 +45,22 @@ export function PublicEventsProvider({ children }: { children: React.ReactNode }
     return () => { alive = false }
   }, [])
 
-  // Live sync: every admin action (create / edit / announce / unannounce / delete)
-  // lands instantly from the change payload; the debounced refetch reconciles after.
-  useRealtimeTable(
-    'events',
+  // Public surfaces don't hold a realtime socket: that would open a WebSocket and
+  // pull supabase-js in for every anonymous visitor, and threaten the free-tier
+  // connection cap at scale. Events change a few times a week, so fetching on load
+  // and again whenever the visitor returns to the tab is plenty fresh.
+  useRefreshOnVisible(
     () => { refreshPublicEvents().then(setEvents).catch(console.error) },
     ready,
-    change => setEvents(prev => applyEventChange(prev, change, true)),
   )
 
-  // Keep every event poster decoded and in memory so route changes repaint them
-  // instantly instead of flashing empty while the browser re-fetches/re-decodes.
-  useEffect(() => { warmImages(events.map(eventImageUrl)) }, [events])
+  // Keep *upcoming* event posters decoded and in memory so route changes repaint
+  // them instantly instead of flashing empty. Only upcoming ones are warmed —
+  // preloading every past poster on every visit is wasted image egress.
+  useEffect(() => {
+    const now = Date.now()
+    warmImages(events.filter(e => new Date(e.time).getTime() >= now).map(eventImageUrl))
+  }, [events])
 
   const value = useMemo(() => ({ events, loading, ready }), [events, loading, ready])
 
