@@ -168,13 +168,13 @@ export function AddEditEventModal({ onClose, onCreated, onCreateSettled, onUpdat
         <div ref={scrollRef} className="p-5 sm:p-6 flex flex-col gap-3.5 overflow-y-auto overscroll-contain">
           {/* Name */}
           <div><Label icon={ICON.name}>Event Name</Label>
-            <input value={name} onChange={e => setName(e.target.value)} placeholder="e.g. Eid Gala 2026" style={inp} className="w-full px-3.5 py-2.5 text-sm outline-none focus:ring-2 focus:ring-green-500/30" /></div>
+            <input value={name} onChange={e => setName(e.target.value)} placeholder="e.g. Raunaq Fest" style={inp} className="w-full px-3.5 py-2.5 text-sm outline-none focus:ring-2 focus:ring-green-500/30" /></div>
 
           {/* Location */}
           <div>
             <Label icon={ICON.location}>Location</Label>
             <div className="flex gap-2 items-center">
-              <input value={location} onChange={e => setLocation(e.target.value)} placeholder="e.g. Roundhouse, UNSW" style={inp} className="flex-1 min-w-0 px-3.5 py-2.5 text-sm outline-none focus:ring-2 focus:ring-green-500/30" />
+              <input value={location} onChange={e => setLocation(e.target.value)} placeholder="e.g. Patricia O'Shane G06, UNSW" style={inp} className="flex-1 min-w-0 px-3.5 py-2.5 text-sm outline-none focus:ring-2 focus:ring-green-500/30" />
               <button type="button" onClick={() => location.trim() && setMapPreview(true)} disabled={!location.trim()}
                 style={{ borderColor: PALETTE.border, color: location.trim() ? PALETTE.secondary : PALETTE.disabled, background: PALETTE.cardAlt, borderRadius: 12 }}
                 className="shrink-0 px-3 py-2.5 text-xs font-semibold border cursor-pointer hover:bg-white/5 transition-colors disabled:cursor-not-allowed whitespace-nowrap">

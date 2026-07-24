@@ -33,7 +33,7 @@ export function TimelineEditor({ items, onChange }: Props) {
         <div key={i} className="flex gap-2 items-center">
           <input type="time" value={item.time} onChange={e => update(i, { time: e.target.value })}
             style={timeInp} className="w-[110px] shrink-0 px-2.5 py-2 text-sm outline-none focus:ring-2 focus:ring-green-500/30" />
-          <input value={item.title} onChange={e => update(i, { title: e.target.value })} placeholder="e.g. Kahoot"
+          <input value={item.title} onChange={e => update(i, { title: e.target.value })} placeholder="e.g. Arrival, Games"
             style={textInp} className="flex-1 px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-green-500/30" />
           <button type="button" onClick={() => remove(i)} style={{ color: PALETTE.muted }}
             className="bg-transparent border-none cursor-pointer text-lg leading-none hover:text-red-400 px-1 transition-colors">×</button>
