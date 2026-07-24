@@ -13,6 +13,7 @@ const LoginPage = lazy(() => import('@/auth/pages/LoginPage'))
 const AuthCallbackPage = lazy(() => import('@/auth/pages/AuthCallbackPage'))
 const PrivacyPolicyPage = lazy(() => import('@/public-site/legal/PrivacyPolicyPage'))
 const TermsOfServicePage = lazy(() => import('@/public-site/legal/TermsOfServicePage'))
+const AboutPage = lazy(() => import('@/public-site/about/AboutPage'))
 const AllEventsPage = lazy(() => import('@/events/pages/AllEventsPage'))
 const EventsManagerPage = lazy(() => import('@/events/pages/EventsManagerPage'))
 const ManageRolesPage = lazy(() => import('@/roles/pages/ManageRolesPage'))
@@ -43,6 +44,7 @@ function AppRoutes() {
           <Route path="/auth/callback" element={<AuthCallbackPage />} />
           <Route path="/privacy" element={<PrivacyPolicyPage />} />
           <Route path="/terms" element={<TermsOfServicePage />} />
+          <Route path="/about" element={<AboutPage />} />
           <Route path="/all-events" element={<AllEventsPage />} />
           <Route path="/events" element={<RoleRoute minRole="subcom"><EventsManagerPage /></RoleRoute>} />
           <Route path="/subcom/tasks/:eventId" element={<RoleRoute minRole="subcom"><ManageTasksPage /></RoleRoute>} />

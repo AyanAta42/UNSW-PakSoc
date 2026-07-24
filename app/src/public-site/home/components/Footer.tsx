@@ -1,7 +1,9 @@
 import { INSTAGRAM_URL, TIKTOK_URL, FACEBOOK_URL, ARC_MEMBERSHIP_URL } from '@/config/externalLinks'
+import { useAppNavigate as useNavigate } from '@/shared/router/useAppNavigate'
 import { ACCENT, PALETTE } from '@/config/theme'
 
 export function Footer() {
+  const navigate = useNavigate()
   return (
     <footer className="pt-8 pb-[calc(2.5rem+env(safe-area-inset-bottom))] px-4 lg:px-8 flex flex-col items-center gap-3 text-center">
       <div className="flex items-center gap-6">
@@ -22,6 +24,29 @@ export function Footer() {
         style={{ color: ACCENT }} className="text-sm font-semibold no-underline hover:opacity-70 transition-opacity">
         Join us on Rubric →
       </a>
+
+      {/* One-line statement of purpose. Kept here (rather than a prominent home
+          section) so the landing page still explains what the app is — for
+          first-time visitors and Google OAuth review — without a heavy block.
+          The About link opens the full description. */}
+      <p style={{ color: PALETTE.muted }} className="text-xs max-w-md leading-relaxed m-0">
+        The official app of the UNSW Pakistani Society — discover events, locations and updates in one place.
+      </p>
+
+      <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-1.5 text-xs">
+        {[
+          { label: 'About us', to: '/about' },
+          { label: 'Privacy',  to: '/privacy' },
+          { label: 'Terms',    to: '/terms' },
+        ].map(l => (
+          <button key={l.to} onClick={() => navigate(l.to)}
+            style={{ color: PALETTE.secondary }}
+            className="bg-transparent border-none cursor-pointer p-0 font-medium hover:opacity-70 transition-opacity">
+            {l.label}
+          </button>
+        ))}
+      </div>
+
       <div style={{ color: PALETTE.disabled }} className="text-xs">
         &copy; {new Date().getFullYear()} · Pakistani Society, University of New South Wales
       </div>
