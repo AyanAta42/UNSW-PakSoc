@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { createPortal } from 'react-dom'
 import { ACCENT, PALETTE } from '@/config/theme'
+import { useScrollLock } from '@/shared/hooks/useScrollLock'
 import {
   androidNeedsChrome,
   chromeIntentUrl,
@@ -84,6 +85,7 @@ const CHROME_STEPS: Step[] = [
 type SheetVariant = 'ios' | 'chrome' | 'fallback'
 
 function InstallSheet({ variant, onClose }: { variant: SheetVariant; onClose: () => void }) {
+  useScrollLock()
   const isChrome = variant === 'chrome'
   const steps = variant === 'ios' ? IOS_STEPS : isChrome ? CHROME_STEPS : FALLBACK_STEPS
   const title = isChrome ? 'Install with Chrome' : 'Install PakSoc'

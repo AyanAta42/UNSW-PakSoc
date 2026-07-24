@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import type { CSSProperties, TouchEvent as ReactTouchEvent } from 'react'
+import { useScrollLock } from '@/shared/hooks/useScrollLock'
 
 const CLOSE_THRESHOLD = 60
 const CLOSE_DURATION_MS = 220
@@ -28,6 +29,9 @@ export function useSheetSwipe(onClose: () => void, open = true) {
   const [dragY, setDragY]       = useState(0)
   const [dragging, setDragging] = useState(false)
   const [closing, setClosing]   = useState(false)
+
+  // Freeze the page behind the sheet so scrolling its body never pans the site.
+  useScrollLock(open)
 
   useEffect(() => () => clearTimeout(closeTimerRef.current), [])
 

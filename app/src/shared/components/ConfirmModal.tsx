@@ -1,4 +1,5 @@
 import { PALETTE } from '@/config/theme'
+import { useScrollLock } from '@/shared/hooks/useScrollLock'
 
 interface Props {
   title:         string
@@ -11,6 +12,7 @@ interface Props {
 }
 
 export function ConfirmModal({ title, message, warning, confirmLabel = 'Confirm', danger = false, onConfirm, onCancel }: Props) {
+  useScrollLock()
   return (
     <div className="motion-backdrop fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm px-4" onClick={onCancel}>
       <div style={{ background: PALETTE.modal, border: `1px solid ${PALETTE.border}`, borderRadius: 24, boxShadow: PALETTE.shadowLg }}

@@ -5,6 +5,7 @@ import { useRealtimeTable } from '@/core/supabase/useRealtimeTable'
 import { fetchSocialPosts, syncSocialPosts, getCachedSocialPosts, IG_USERNAME, type SocialPost } from '../services/socialPosts'
 import { isImageReady, markImageReady, warmImages } from '@/shared/utils/imageCache'
 import { toast, errorMessage } from '@/shared/toast/toast'
+import { useScrollLock } from '@/shared/hooks/useScrollLock'
 
 const PLACEHOLDERS = [
   { id: 1, type: 'reel', likes: 412, caption: 'Highlights from our last event' },
@@ -92,6 +93,8 @@ export function SocialWall() {
   const [confirmOpen, setConfirmOpen] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const scrollerRef = useRef<HTMLDivElement>(null)
+
+  useScrollLock(confirmOpen)
   const [canLeft, setCanLeft] = useState(false)
   const [canRight, setCanRight] = useState(false)
 

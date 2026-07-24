@@ -3,6 +3,7 @@ import type { Interaction } from '@/interactions/types/Interaction'
 import { formatRelativeTime } from '@/shared/utils/formatRelativeTime'
 import { HistoryIcon } from '@/interactions/components/HistoryIcon'
 import { ACCENT, PALETTE } from '@/config/theme'
+import { useScrollLock } from '@/shared/hooks/useScrollLock'
 
 interface Props {
   title:         string
@@ -18,6 +19,8 @@ export function HistoryPanel({ title, onClose, fetcher, emptyMessage = 'No activ
   const [error,   setError]   = useState('')
   const fetcherRef = useRef(fetcher)
   fetcherRef.current = fetcher
+
+  useScrollLock()
 
   useEffect(() => {
     let alive = true

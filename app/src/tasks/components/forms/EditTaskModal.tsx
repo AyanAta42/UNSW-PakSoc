@@ -5,6 +5,7 @@ import type { KeyboardEvent } from 'react'
 import { getCatCfg, inputCls, labelCls } from '@/config/categoryConfig'
 import { AssignedChip }      from '@/tasks/components/assignment/AssignedChip'
 import { MemberPickerSheet } from '@/tasks/components/assignment/MemberPickerSheet'
+import { useScrollLock }     from '@/shared/hooks/useScrollLock'
 
 interface Props {
   task:          Task
@@ -27,6 +28,8 @@ export function EditTaskModal({ task, members, allCategories, mobile, onClose, o
   // Draft assignee selection while the picker is open — nothing is committed (or announced) until Done.
   const [draftAssignees, setDraftAssignees] = useState<string[]>([])
   const subInputs = useRef<(HTMLInputElement | null)[]>([])
+
+  useScrollLock()
 
   function openPicker() { setDraftAssignees(task.assigned.map(m => m.id)); setPickerOpen(true) }
   function toggleDraft(id: string) { setDraftAssignees(prev => prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]) }

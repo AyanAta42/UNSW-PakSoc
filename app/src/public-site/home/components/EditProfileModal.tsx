@@ -4,6 +4,7 @@ import { updateMemberName } from '@/members/services/updateMemberName'
 import { fetchMemberName }  from '@/members/services/fetchMemberName'
 import { PALETTE } from '@/config/theme'
 import { toast, errorMessage } from '@/shared/toast/toast'
+import { useScrollLock } from '@/shared/hooks/useScrollLock'
 
 interface Props {
   user:    User
@@ -16,6 +17,8 @@ export function EditProfileModal({ user, onClose }: Props) {
   const [name,    setName]    = useState('')
   const [loading, setLoading] = useState(true)
   const [saving,  setSaving]  = useState(false)
+
+  useScrollLock()
 
   // Pre-fill with the name actually on record (`members.name`) — not the
   // Google account snapshot, which never changes after sign-up and would
