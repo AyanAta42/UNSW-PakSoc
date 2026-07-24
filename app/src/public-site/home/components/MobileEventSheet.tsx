@@ -31,7 +31,7 @@ export function MobileEventSheet({ event, now, onClose, mapCacheId = 'home-map-s
           borderRadius: '24px 24px 0 0',
           ...sheetStyle,
         }}
-        className="absolute bottom-0 left-0 right-0 h-[85dvh] flex flex-col animate-[slideUp_0.22s_ease-out]"
+        className="absolute bottom-0 left-0 right-0 max-h-[85dvh] flex flex-col animate-[slideUp_0.22s_ease-out]"
         onClick={e => e.stopPropagation()}
         {...touchHandlers}>
 

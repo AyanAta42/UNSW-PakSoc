@@ -1,5 +1,5 @@
 import { Navigate } from 'react-router-dom'
-import { usePermissions, ROLE_RANK } from '@/roles/hooks/usePermissions'
+import { usePermissions }            from '@/roles/hooks/usePermissions'
 import { useAuth }                   from '@/auth/hooks/useAuth'
 import { PAGE_BG }                   from '@/config/theme'
 import type { MemberRole }           from '@/members/types/Member'
@@ -18,14 +18,15 @@ const Spinner = () => (
 
 export default function RoleRoute({ children, minRole }: Props) {
   const { user, loading: authLoading } = useAuth()
-  const { loading, role }              = usePermissions()
+  const { loading, isAtLeast }         = usePermissions()
 
   if (authLoading || loading) return <Spinner />
 
   if (!user) return <Navigate to="/login" replace />
 
-  const rank = role ? ROLE_RANK[role] : 0
-  if (rank < ROLE_RANK[minRole]) return <Navigate to="/" replace />
+  // isAtLeast already accounts for the developer super-role, so a dev clears
+  // every minRole gate regardless of their display role.
+  if (!isAtLeast(minRole)) return <Navigate to="/" replace />
 
   return <>{children}</>
 }

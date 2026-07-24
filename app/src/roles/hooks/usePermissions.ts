@@ -15,12 +15,20 @@ export function usePermissions() {
   const { user }          = useAuth()
   const { member, loading } = useCurrentMember()
 
-  const rank = member ? ROLE_RANK[member.role] : -1
+  // The developer flag is a hidden super-role that lives alongside the normal
+  // display role. When set, effective rank is pushed above every real role so
+  // that every access check below — routes, nav, edit controls — passes at once,
+  // giving access equal to a President across the whole app. `role` still exposes
+  // only the display role, so nothing about the dev status leaks into the UI.
+  const isDeveloper = !!member?.isDeveloper
+  const baseRank = member ? ROLE_RANK[member.role] : -1
+  const rank = isDeveloper ? Infinity : baseRank
 
   return {
     loading,
     isLoggedIn:  !!user,
     role:        member?.role ?? null,
+    isDeveloper,
     isAtLeast:   (min: MemberRole) => rank >= ROLE_RANK[min],
     can: {
       viewEvents:    rank >= ROLE_RANK.subcom,

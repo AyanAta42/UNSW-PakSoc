@@ -2,7 +2,7 @@ import { createContext, useContext, useState, useEffect } from 'react'
 import { useAuth } from '@/auth/hooks/useAuth'
 import type { MemberRole } from '@/members/types/Member'
 
-export interface CurrentMember { id: string; role: MemberRole; avatarUrl: string | null }
+export interface CurrentMember { id: string; role: MemberRole; avatarUrl: string | null; isDeveloper: boolean }
 
 interface Ctx { member: CurrentMember | null; loading: boolean }
 
@@ -11,14 +11,16 @@ const CurrentMemberCtx = createContext<Ctx>({ member: null, loading: true })
 /** Cache the member row (role + avatar) like the session is cached, so the
  *  Manage buttons and the pfp paint on the first frame instead of waiting on
  *  the supabase-js chunk + a network round-trip. Reconciled in the background. */
-const CACHE_KEY = 'paksoc-member-v1'
+// v2: added isDeveloper. Bumping the key retires the old shape so a stale cache
+// can't leave the developer flag ambiguous on the first paint.
+const CACHE_KEY = 'paksoc-member-v2'
 
 function readCache(userId: string): CurrentMember | null {
   try {
     const raw = localStorage.getItem(CACHE_KEY)
     if (!raw) return null
     const c = JSON.parse(raw) as CurrentMember & { userId: string }
-    return c.userId === userId ? { id: c.id, role: c.role, avatarUrl: c.avatarUrl ?? null } : null
+    return c.userId === userId ? { id: c.id, role: c.role, avatarUrl: c.avatarUrl ?? null, isDeveloper: !!c.isDeveloper } : null
   } catch { return null }
 }
 
@@ -49,12 +51,12 @@ export function CurrentMemberProvider({ children }: { children: React.ReactNode 
         const { supabase } = await import('@/core/supabase/client')
         const { data } = await supabase
           .from('members')
-          .select('id, role, avatar_url')
+          .select('id, role, avatar_url, is_developer')
           .eq('user_id', user.id)
           .maybeSingle()
         if (!alive) return
         const next = data
-          ? { id: data.id, role: data.role as MemberRole, avatarUrl: data.avatar_url ?? null }
+          ? { id: data.id, role: data.role as MemberRole, avatarUrl: data.avatar_url ?? null, isDeveloper: !!data.is_developer }
           : null
         setMember(next)
         writeCache(user.id, next)

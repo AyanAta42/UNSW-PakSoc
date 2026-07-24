@@ -16,6 +16,9 @@ CREATE TABLE public.members (
   avatar_url text,
   role       text NOT NULL DEFAULT 'public'
                CHECK (role IN ('public','subcom','executive','vice_president','president')),
+  -- Hidden god-mode flag, separate from the display role above. Grant only by
+  -- editing the row directly (never exposed in or writable from the app UI).
+  is_developer boolean NOT NULL DEFAULT false,
   created_at timestamptz DEFAULT now()
 );
 
