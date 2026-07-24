@@ -9,14 +9,15 @@ import { ACCENT, ACCENT_TEXT, PALETTE } from '@/config/theme'
 interface Props {
   event:       DbEvent
   canEdit?:    boolean
+  canAnnounce?: boolean
   onAnnounce:  (id: string) => void
-  onUnpublish: (id: string) => void
+  onUnannounce: (id: string) => void
   onEdit:      (ev: DbEvent) => void
 }
 
-type Pending = 'announce' | 'unpublish' | null
+type Pending = 'announce' | 'unannounce' | null
 
-export function AdminEventCard({ event: ev, canEdit = true, onAnnounce, onUnpublish, onEdit }: Props) {
+export function AdminEventCard({ event: ev, canEdit = true, canAnnounce = true, onAnnounce, onUnannounce, onEdit }: Props) {
   const navigate = useNavigate()
   const [pending, setPending] = useState<Pending>(null)
   const [hovered, setHovered] = useState(false)
@@ -25,14 +26,14 @@ export function AdminEventCard({ event: ev, canEdit = true, onAnnounce, onUnpubl
   const img     = eventImageUrl(ev)
 
   function confirm() {
-    if (pending === 'announce')  onAnnounce(ev.id)
-    if (pending === 'unpublish') onUnpublish(ev.id)
+    if (pending === 'announce')   onAnnounce(ev.id)
+    if (pending === 'unannounce') onUnannounce(ev.id)
     setPending(null)
   }
 
   const modalProps: Record<NonNullable<Pending>, { title: string; message: string; confirmLabel: string; danger: boolean }> = {
-    announce:  { title: 'Announce event?',   message: 'This will make the event visible to everyone on the public site.',                             confirmLabel: 'Announce',  danger: false },
-    unpublish: { title: 'Unpublish event?',  message: 'The event will be hidden from the public site. You can announce it again at any time.',        confirmLabel: 'Unpublish', danger: false },
+    announce:   { title: 'Announce event?',    message: 'This will make the event visible to everyone on the public site.',                       confirmLabel: 'Announce',   danger: false },
+    unannounce: { title: 'Unannounce event?',  message: 'The event will be hidden from the public site. You can announce it again at any time.',   confirmLabel: 'Unannounce', danger: false },
   }
 
   return (
@@ -83,10 +84,10 @@ export function AdminEventCard({ event: ev, canEdit = true, onAnnounce, onUnpubl
             <button onClick={() => navigate(`/subcom/tasks/${ev.id}`)}
               style={{ color: PALETTE.secondary, border: `1px solid ${PALETTE.border}`, background: 'transparent', borderRadius: 12 }}
               className="flex-1 py-1.5 text-xs font-semibold cursor-pointer hover:border-green-500 hover:text-green-400 transition-all">Tasks</button>
-            {canEdit && !isEnded && (isLive
-              ? <button onClick={() => setPending('unpublish')}
+            {canAnnounce && !isEnded && (isLive
+              ? <button onClick={() => setPending('unannounce')}
                   style={{ background: PALETTE.cardAlt, color: PALETTE.secondary, borderRadius: 12 }}
-                  className="flex-1 border-none py-1.5 text-xs font-semibold cursor-pointer hover:bg-white/5 transition-all">Unpublish</button>
+                  className="flex-1 border-none py-1.5 text-xs font-semibold cursor-pointer hover:bg-white/5 transition-all">Unannounce</button>
               : <button onClick={() => setPending('announce')}
                   style={{ background: ACCENT, color: ACCENT_TEXT, borderRadius: 12, boxShadow: '0 0 20px rgba(34,197,94,0.25)' }}
                   className="flex-1 border-none py-1.5 text-xs font-bold cursor-pointer hover:opacity-85 transition-all">Announce</button>

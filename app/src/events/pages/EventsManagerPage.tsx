@@ -17,9 +17,9 @@ import { AuroraPage } from '@/shared/components/AuroraPage'
 import { HomeButton } from '@/shared/components/HomeButton'
 import { toast, errorMessage } from '@/shared/toast/toast'
 
-function EventSection({ title, color, events, canEdit, onAnnounce, onUnpublish, onEdit }: {
-  title: string; color: string; events: DbEvent[]; canEdit: boolean
-  onAnnounce: (id: string) => void; onUnpublish: (id: string) => void
+function EventSection({ title, color, events, canEdit, canAnnounce, onAnnounce, onUnannounce, onEdit }: {
+  title: string; color: string; events: DbEvent[]; canEdit: boolean; canAnnounce: boolean
+  onAnnounce: (id: string) => void; onUnannounce: (id: string) => void
   onEdit: (ev: DbEvent) => void
 }) {
   return (
@@ -31,8 +31,8 @@ function EventSection({ title, color, events, canEdit, onAnnounce, onUnpublish, 
           style={{ background: `${color}22`, color }}>{events.length}</span>
       </div>
       <div className="grid grid-cols-[repeat(auto-fill,minmax(min(260px,100%),1fr))] gap-4">
-        {events.map(ev => <AdminEventCard key={ev.id} event={ev} canEdit={canEdit}
-          onAnnounce={onAnnounce} onUnpublish={onUnpublish} onEdit={onEdit} />)}
+        {events.map(ev => <AdminEventCard key={ev.id} event={ev} canEdit={canEdit} canAnnounce={canAnnounce}
+          onAnnounce={onAnnounce} onUnannounce={onUnannounce} onEdit={onEdit} />)}
       </div>
     </section>
   )
@@ -74,13 +74,15 @@ export default function EventsManagerPage() {
       toast.error("Couldn't announce event", errorMessage(e, 'Please try again.'))
     }
   }
-  const unpublish = async (id: string) => {
+  const unannounce = async (id: string) => {
     const name = events.find(e => e.id === id)?.name ?? 'an event'
     setEvents(p => p.map(e => e.id === id ? { ...e, public: false } : e))
     try {
       await setEventPublic(id, false)
       toast.info('Event unannounced')
-      void logInteraction('event.unpublished', 'event', id, id, `unpublished "${name}"`)
+      // NOTE: the persisted action key stays 'event.unpublished' so the audit
+      // trail is continuous with rows written before the rename.
+      void logInteraction('event.unpublished', 'event', id, id, `unannounced "${name}"`)
     } catch (e) {
       setEvents(p => p.map(e => e.id === id ? { ...e, public: true } : e))
       toast.error("Couldn't unannounce event", errorMessage(e, 'Please try again.'))
@@ -96,7 +98,7 @@ export default function EventsManagerPage() {
     } catch (e) { toast.error("Couldn't delete event", errorMessage(e, 'Please try again.')) }
   }
 
-  const sectionProps = { canEdit: can.editEvents, onAnnounce: announce, onUnpublish: unpublish, onEdit: setEditingEv }
+  const sectionProps = { canEdit: can.editEvents, canAnnounce: can.announceEvents, onAnnounce: announce, onUnannounce: unannounce, onEdit: setEditingEv }
 
   return (
     <AuroraPage contentClassName="flex h-[100dvh] flex-col overflow-hidden">
@@ -157,7 +159,7 @@ export default function EventsManagerPage() {
       {editingEv && <AddEditEventModal event={editingEv}
         onClose={() => setEditingEv(null)}
         onUpdated={updated => { setEvents(p => p.map(e => e.id === updated.id ? updated : e)); setEditingEv(null) }}
-        onDelete={id => { handleDelete(id); setEditingEv(null) }}
+        onDelete={can.deleteEvents ? id => { handleDelete(id); setEditingEv(null) } : undefined}
       />}
       {showHistory && (
         <HistoryPanel title="Event History" onClose={() => setShowHistory(false)}

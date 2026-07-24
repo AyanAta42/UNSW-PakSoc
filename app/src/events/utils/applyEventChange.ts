@@ -8,7 +8,7 @@ const byTime = (a: DbEvent, b: DbEvent) => +new Date(a.time) - +new Date(b.time)
  * Apply one realtime row change to an events list so every device reflects an
  * admin action the instant it happens, without waiting for the reconcile fetch.
  * With `publicOnly`, rows that are (or become) drafts are removed — that keeps
- * unpublish and delete live on the public home page.
+ * unannounce and delete live on the public home page.
  * Returns `prev` unchanged when the payload is a no-op, so React skips the render.
  */
 export function applyEventChange(prev: DbEvent[], change: RealtimeRowChange, publicOnly = false): DbEvent[] {

@@ -46,7 +46,7 @@ export function PublicEventsProvider({ children }: { children: React.ReactNode }
     return () => { alive = false }
   }, [])
 
-  // Live sync: every admin action (create / edit / publish / unpublish / delete)
+  // Live sync: every admin action (create / edit / announce / unannounce / delete)
   // lands instantly from the change payload; the debounced refetch reconciles after.
   useRealtimeTable(
     'events',

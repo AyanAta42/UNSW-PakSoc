@@ -242,7 +242,7 @@ export default function HomePage({ active = true }: { active?: boolean }) {
       {sheetEvent && (
         <MobileEventSheet
           // Track the live row so an edit (even a single timeline change) or an
-          // unpublish reflects while the sheet is open, instead of showing the
+          // unannounce reflects while the sheet is open, instead of showing the
           // snapshot captured when it was tapped.
           event={events.find(e => e.id === sheetEvent.id) ?? sheetEvent}
           now={now}

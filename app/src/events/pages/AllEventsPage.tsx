@@ -107,7 +107,7 @@ export default function AllEventsPage() {
 
       {modalEvent && (
         <MobileEventSheet
-          // Follow the live row so edits/unpublish reflect while the sheet is open.
+          // Follow the live row so edits/unannounce reflect while the sheet is open.
           event={events.find(e => e.id === modalEvent.id) ?? modalEvent}
           now={now}
           mapCacheId="all-events-sheet"

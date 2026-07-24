@@ -31,10 +31,15 @@ export function usePermissions() {
     isDeveloper,
     isAtLeast:   (min: MemberRole) => rank >= ROLE_RANK[min],
     can: {
-      viewEvents:    rank >= ROLE_RANK.subcom,
-      editEvents:    rank >= ROLE_RANK.executive,
-      manageRoles:   rank >= ROLE_RANK.president,
-      viewTaskBoard: rank >= ROLE_RANK.subcom,
+      viewEvents:     rank >= ROLE_RANK.subcom,
+      // Subcom may create and edit events...
+      editEvents:     rank >= ROLE_RANK.subcom,
+      // ...but announcing/unannouncing (toggling public visibility) and deleting
+      // are reserved for executives and above.
+      announceEvents: rank >= ROLE_RANK.executive,
+      deleteEvents:   rank >= ROLE_RANK.executive,
+      manageRoles:    rank >= ROLE_RANK.president,
+      viewTaskBoard:  rank >= ROLE_RANK.subcom,
     },
   }
 }
