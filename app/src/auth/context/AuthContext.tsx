@@ -10,7 +10,6 @@ export interface AuthCtx {
   signOut: () => Promise<void>
 } 
 
-
 const AuthContext = createContext<AuthCtx | null>(null)
 
 /** Supabase persists sessions as `sb-<ref>-auth-token` JSON. Reading it directly
