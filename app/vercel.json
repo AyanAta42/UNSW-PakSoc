@@ -16,9 +16,21 @@
       ]
     },
     {
-      "source": "/(.*)\\.(webp|png|svg|jpg|jpeg|woff2)",
+      "source": "/(?!logo-v2\\.png|logo\\.png|logo\\.webp|logo-source\\.png|favicon-96\\.png|favicon-512\\.png|manifest\\.webmanifest)(.*)\\.(webp|png|svg|jpg|jpeg|woff2)",
       "headers": [
         { "key": "Cache-Control", "value": "public, max-age=2592000, stale-while-revalidate=86400" }
+      ]
+    },
+    {
+      "source": "/(logo-v2\\.png|logo\\.png|logo\\.webp|logo-source\\.png|favicon-96\\.png|favicon-512\\.png)",
+      "headers": [
+        { "key": "Cache-Control", "value": "public, max-age=3600, must-revalidate" }
+      ]
+    },
+    {
+      "source": "/manifest.webmanifest",
+      "headers": [
+        { "key": "Cache-Control", "value": "public, max-age=3600, must-revalidate" }
       ]
     }
   ]
