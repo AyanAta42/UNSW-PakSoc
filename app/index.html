@@ -148,7 +148,35 @@
     />
   </head>
   <body>
-    <div id="root"></div>
+    <div id="root">
+      <!-- Static, crawler-visible description of the app. React (main.tsx) replaces
+           this whole subtree on mount, so JavaScript users never see it. Keep this a
+           truthful summary of what the app does and how it uses Google Sign-In. -->
+      <main class="boot-fallback">
+        <img src="/logo-round.png" alt="PakSoc UNSW logo" width="56" height="56" class="boot-fallback-logo" />
+        <h1>PakSoc UNSW — the official app of the UNSW Pakistani Society</h1>
+        <p>
+          PakSoc UNSW is the official web app of the Pakistani Society at the University of New South Wales
+          (UNSW). It is the society's home for its members: discover upcoming society events with their
+          dates, times and venue locations, open maps and ticket or RSVP links, and keep up with the society
+          across Instagram, TikTok and Facebook — all in one place.
+        </p>
+        <p>
+          Signing in is optional and uses Google Sign-In. When you choose to sign in with Google, the app
+          only uses your name, email address and profile photo to create and personalise your society
+          membership. Committee members can additionally manage events, assign tasks and control member roles
+          from a single dashboard. We never receive your Google password.
+        </p>
+        <p class="boot-fallback-links">
+          <a href="/about">About</a>
+          <a href="/privacy">Privacy Policy</a>
+          <a href="/terms">Terms of Service</a>
+        </p>
+        <p class="boot-fallback-note">
+          This application requires JavaScript. Please enable JavaScript in your browser to use PakSoc UNSW.
+        </p>
+      </main>
+    </div>
     <div id="app-loader" aria-hidden="true">
       <div id="app-loader-aurora"></div>
       <div id="app-loader-content">
