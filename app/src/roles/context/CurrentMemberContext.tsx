@@ -1,5 +1,6 @@
-import { createContext, useContext, useState, useEffect } from 'react'
+import { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react'
 import { useAuth } from '@/auth/hooks/useAuth'
+import { useRealtimeTable } from '@/core/supabase/useRealtimeTable'
 import type { MemberRole } from '@/members/types/Member'
 
 export interface CurrentMember { id: string; role: MemberRole; avatarUrl: string | null; isDeveloper: boolean }
@@ -36,8 +37,34 @@ export function CurrentMemberProvider({ children }: { children: React.ReactNode 
   const [member, setMember] = useState<CurrentMember | null>(() => (user ? readCache(user.id) : null))
   const [loading, setLoading] = useState(() => !(user && readCache(user.id)))
 
+  // Guards against a stale response landing after the user has already
+  // changed (e.g. logout/login racing the in-flight request).
+  const requestedUserId = useRef<string | null>(null)
+
+  const refetch = useCallback(async (userId: string) => {
+    try {
+      const { supabase } = await import('@/core/supabase/client')
+      const { data } = await supabase
+        .from('members')
+        .select('id, role, avatar_url, is_developer')
+        .eq('user_id', userId)
+        .maybeSingle()
+      if (requestedUserId.current !== userId) return
+      const next = data
+        ? { id: data.id, role: data.role as MemberRole, avatarUrl: data.avatar_url ?? null, isDeveloper: !!data.is_developer }
+        : null
+      setMember(next)
+      writeCache(userId, next)
+    } catch {
+      /* keep the optimistic cached member on a transient failure */
+    } finally {
+      if (requestedUserId.current === userId) setLoading(false)
+    }
+  }, [])
+
   useEffect(() => {
     if (authLoading) return
+    requestedUserId.current = user?.id ?? null
     if (!user) { setMember(null); setLoading(false); writeCache('', null); return }
 
     // Seed from cache for this user (instant paint), then reconcile.
@@ -45,30 +72,13 @@ export function CurrentMemberProvider({ children }: { children: React.ReactNode 
     setMember(cached)
     setLoading(!cached)
 
-    let alive = true
-    ;(async () => {
-      try {
-        const { supabase } = await import('@/core/supabase/client')
-        const { data } = await supabase
-          .from('members')
-          .select('id, role, avatar_url, is_developer')
-          .eq('user_id', user.id)
-          .maybeSingle()
-        if (!alive) return
-        const next = data
-          ? { id: data.id, role: data.role as MemberRole, avatarUrl: data.avatar_url ?? null, isDeveloper: !!data.is_developer }
-          : null
-        setMember(next)
-        writeCache(user.id, next)
-      } catch {
-        /* keep the optimistic cached member on a transient failure */
-      } finally {
-        if (alive) setLoading(false)
-      }
-    })()
+    void refetch(user.id)
+  }, [user?.id, authLoading, refetch])
 
-    return () => { alive = false }
-  }, [user?.id, authLoading])
+  // An admin changing anyone's role (e.g. via Manage Roles) writes to the
+  // `members` table — re-pull this session's own row on every change so
+  // role-gated buttons/routes/nav update live, without a refresh or re-login.
+  useRealtimeTable('members', () => { if (user) void refetch(user.id) }, !!user && !authLoading)
 
   return (
     <CurrentMemberCtx.Provider value={{ member, loading }}>
