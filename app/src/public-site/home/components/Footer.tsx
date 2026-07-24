@@ -25,12 +25,15 @@ export function Footer() {
         Join us on Rubric →
       </a>
 
-      {/* One-line statement of purpose. Kept here (rather than a prominent home
-          section) so the landing page still explains what the app is — for
-          first-time visitors and Google OAuth review — without a heavy block.
-          The About link opens the full description. */}
-      <p style={{ color: PALETTE.muted }} className="text-xs max-w-md leading-relaxed m-0">
-        The official app of the UNSW Pakistani Society — discover events, locations and updates in one place.
+      {/* Statement of purpose, kept in the footer (not a separate on-page
+          section) — covers both what the app does AND why it requests Google
+          account data, which Google's OAuth homepage review checks for
+          explicitly. The About link opens the full description. */}
+      <p style={{ color: PALETTE.secondary }} className="text-sm max-w-lg leading-relaxed m-0">
+        PakSoc UNSW is the official app of the Pakistani Society at the University of New South Wales — discover
+        events, locations and updates in one place. Signing in with Google is optional; it only uses your name,
+        email and profile photo to personalise your membership, and lets committee members manage events, tasks
+        and roles.
       </p>
 
       <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-1.5 text-xs">
