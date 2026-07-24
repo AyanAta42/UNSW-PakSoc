@@ -13,7 +13,7 @@ export function LegalPageLayout({ title, effectiveDate, children }: Props) {
         <div className="flex items-center gap-3 mb-8">
           <img src="/logo-round.png" alt="UNSW PakSoc" className="w-10 h-10 rounded-full object-cover shrink-0" />
           <div>
-            <div className="font-bold text-sm text-[#F8FAFC] leading-tight">PakSoc UNSW</div>
+            <div className="font-bold text-sm text-[#F8FAFC] leading-tight">UNSW PakSoc</div>
             <div className="text-[10px] tracking-widest uppercase font-bold text-[#4ADE80]">Pakistani Society</div>
           </div>
         </div>

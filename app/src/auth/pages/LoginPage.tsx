@@ -31,9 +31,9 @@ export default function LoginPage() {
   return (
     <AuroraPage still contentClassName="min-h-[100dvh] flex flex-col items-center justify-center px-4">
       <div className="flex items-center gap-3 mb-8">
-        <img src="/logo-round.png" alt="PakSoc" className="w-11 h-11 rounded-full object-cover" />
+        <img src="/logo-round.png" alt="UNSW PakSoc" className="w-11 h-11 rounded-full object-cover" />
         <div>
-          <div style={{ color: PALETTE.dark }} className="font-extrabold text-lg leading-tight">PakSoc UNSW</div>
+          <div style={{ color: PALETTE.dark }} className="font-extrabold text-lg leading-tight">UNSW PakSoc</div>
           <div style={{ color: ACCENT, fontSize: 10 }} className="tracking-widest uppercase font-bold">Pakistani Society</div>
         </div>
       </div>

@@ -46,7 +46,7 @@ export function Navbar({ user, avatarUrl, avatarBroken, initial, onAvatarError, 
         <div className="flex items-center gap-2.5 shrink min-w-0">
           <img
             src="/logo-round.png"
-            alt="PakSoc UNSW"
+            alt="UNSW PakSoc"
             width={36}
             height={36}
             decoding="async"
@@ -54,7 +54,7 @@ export function Navbar({ user, avatarUrl, avatarBroken, initial, onAvatarError, 
             className="w-9 h-9 rounded-full object-cover shrink-0"
           />
           <div className="min-w-0">
-            <div style={{ color: PALETTE.dark }} className="font-bold text-sm leading-tight truncate">PakSoc UNSW</div>
+            <div style={{ color: PALETTE.dark }} className="font-bold text-sm leading-tight truncate">UNSW PakSoc</div>
             <div style={{ color: ACCENT, fontSize: 9 }} className="tracking-widest uppercase truncate">Pakistani Society</div>
           </div>
         </div>
