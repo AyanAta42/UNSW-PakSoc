@@ -7,21 +7,6 @@ import { isImageReady, markImageReady, warmImages } from '@/shared/utils/imageCa
 import { toast, errorMessage } from '@/shared/toast/toast'
 import { useScrollLock } from '@/shared/hooks/useScrollLock'
 
-const PLACEHOLDERS = [
-  { id: 1, type: 'reel', likes: 412, caption: 'Highlights from our last event' },
-  { id: 2, type: 'post', likes: 289, caption: 'Eid Mubarak from PakSoc UNSW'   },
-  { id: 3, type: 'post', likes: 198, caption: 'Chai and Chaat night recap'      },
-  { id: 4, type: 'reel', likes: 534, caption: 'Cricket Carnival 2025'           },
-  { id: 5, type: 'post', likes: 173, caption: 'Behind the scenes'               },
-  { id: 6, type: 'post', likes: 310, caption: 'New exec team 2026'              },
-]
-
-const GRADS = [
-  'linear-gradient(135deg,#0D2A20,#061510)', 'linear-gradient(135deg,#0D1A2A,#060D14)',
-  'linear-gradient(135deg,#1A1028,#0A0614)', 'linear-gradient(135deg,#2A1A0D,#140D06)',
-  'linear-gradient(135deg,#0A1E30,#050C18)', 'linear-gradient(135deg,#1E0D1A,#0D060E)',
-]
-
 function CardOverlay({ caption }: { caption: string }) {
   return (
     <div className="absolute bottom-0 left-0 right-0 px-2.5 pb-2.5 pt-8"
@@ -212,14 +197,7 @@ export function SocialWall() {
           ? Array.from({ length: 6 }, (_, i) => <CardSkeleton key={i} />)
           : posts.length > 0
           ? posts.map(p => <WallCard key={p.id} post={p} />)
-          : PLACEHOLDERS.map((p, i) => (
-            <div key={p.id}
-              style={{ background: GRADS[i], border: `1px solid ${PALETTE.border}`, borderRadius: 14, minWidth: 150, aspectRatio: '3/4' }}
-              className="motion-social-card relative overflow-hidden cursor-pointer shrink-0">
-              {p.type === 'reel' && <ReelBadge />}
-              <CardOverlay caption={p.caption} />
-            </div>
-          ))}
+          : <p style={{ color: PALETTE.muted }} className="text-sm m-0">No posts yet — check back soon.</p>}
       </div>
       </div>
     </>
