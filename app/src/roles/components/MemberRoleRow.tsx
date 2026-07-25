@@ -1,10 +1,11 @@
 import type { Member, MemberRole, Committee } from '@/members/types/Member'
 import { ROLE_LABEL, ROLE_COLOR, ALL_ROLES } from '@/roles/config/roleLabels'
+import { EXEC_ONLY_COMMITTEES } from '@/config/categoryConfig'
 import { PALETTE } from '@/config/theme'
 
 const COMMITTEES: Committee[] = ['Events', 'HR', 'Marketing', 'Sports']
-// Arc Delegate is only selectable for members who are Executives.
-const EXEC_COMMITTEES: Committee[] = [...COMMITTEES, 'Arc Delegate']
+// Arc Delegate / Presidential Advisor are only selectable for Executives.
+const EXEC_COMMITTEES: Committee[] = [...COMMITTEES, ...EXEC_ONLY_COMMITTEES]
 const NEEDS_COMMITTEE: MemberRole[] = ['subcom', 'executive']
 
 interface Props {

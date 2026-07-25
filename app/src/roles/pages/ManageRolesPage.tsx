@@ -7,6 +7,7 @@ import { MemberRoleRow }          from '@/roles/components/MemberRoleRow'
 import { useRealtimeTable }       from '@/core/supabase/useRealtimeTable'
 import { useCurrentMember }       from '@/roles/context/CurrentMemberContext'
 import { ROLE_LABEL, ROLE_COLOR, ALL_ROLES } from '@/roles/config/roleLabels'
+import { EXEC_ONLY_COMMITTEES } from '@/config/categoryConfig'
 import type { Member, MemberRole, Committee } from '@/members/types/Member'
 import { PALETTE } from '@/config/theme'
 import { AuroraPage } from '@/shared/components/AuroraPage'
@@ -59,9 +60,9 @@ export default function ManageRolesPage() {
       let committee = member.committee
       if (NEEDS_COMMITTEE.includes(role) && !committee) { committee = 'Events'; await updateMemberCommittee(member.id, 'Events') }
       else if (!NEEDS_COMMITTEE.includes(role))         { committee = undefined; await updateMemberCommittee(member.id, null) }
-      // 'Arc Delegate' is only a valid committee for executives — bump anyone
-      // demoted out of Executive with that committee back to a real one.
-      else if (role !== 'executive' && committee === 'Arc Delegate') { committee = 'Events'; await updateMemberCommittee(member.id, 'Events') }
+      // Arc Delegate / Presidential Advisor are only valid committees for
+      // executives — bump anyone demoted out of Executive back to a real one.
+      else if (role !== 'executive' && committee && EXEC_ONLY_COMMITTEES.includes(committee)) { committee = 'Events'; await updateMemberCommittee(member.id, 'Events') }
       setMembers(ms => ms.map(m => m.id === member.id ? { ...m, role, committee } : m))
       toast.success(`${member.name || 'Member'} is now ${ROLE_LABEL[role]}`)
     } catch (e) { console.error(e); toast.error("Couldn't update role", errorMessage(e, 'Please try again.')) }
