@@ -69,7 +69,9 @@ export default function ManageRolesPage() {
 
   const filtered = members.filter(m => (m.name ?? '').toLowerCase().includes(search.toLowerCase()))
   const grouped  = ALL_ROLES.slice().reverse().reduce<Record<string, Member[]>>((acc, r) => {
-    const ms = filtered.filter(m => m.role === r); if (ms.length) acc[r] = ms; return acc
+    const ms = filtered.filter(m => m.role === r).sort((a, b) => (a.name ?? '').localeCompare(b.name ?? ''))
+    if (ms.length) acc[r] = ms
+    return acc
   }, {})
 
   return (
