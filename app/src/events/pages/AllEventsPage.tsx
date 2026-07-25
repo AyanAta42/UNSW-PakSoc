@@ -50,7 +50,9 @@ export default function AllEventsPage() {
   const { upcoming, ended, featured } = useMemo(() => {
     const now = new Date()
     const upcoming = events.filter(e => new Date(e.time) > now).sort((a, b) => +new Date(a.time) - +new Date(b.time))
-    const ended = events.filter(e => new Date(e.time) <= now).sort((a, b) => +new Date(b.time) - +new Date(a.time))
+    // Hard cap: only the 3 most recent ended events render — older ones would
+    // otherwise all eager-load their (uncached-for-new-visitors) poster images.
+    const ended = events.filter(e => new Date(e.time) <= now).sort((a, b) => +new Date(b.time) - +new Date(a.time)).slice(0, 3)
     const featured = events.find(e => e.id === selectedId) ?? upcoming[0] ?? ended[0] ?? null
     return { upcoming, ended, featured }
   }, [events, selectedId])

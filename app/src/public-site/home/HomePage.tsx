@@ -10,7 +10,6 @@ import { EventCardSkeleton } from './components/EventCardSkeleton'
 import { Footer } from './components/Footer'
 import { SocialWall } from './components/SocialWall'
 import { MobileEventSheet } from './components/MobileEventSheet'
-import { useAppNavigate as useNavigate } from '@/shared/router/useAppNavigate'
 import { eventImageUrl } from '@/events/utils/eventImageUrl'
 import { warmImages } from '@/shared/utils/imageCache'
 import { ACCENT, PALETTE, PAGE_BG } from '@/config/theme'
@@ -60,7 +59,6 @@ function isPhone(): boolean {
 }
 
 export default function HomePage({ active = true }: { active?: boolean }) {
-  const navigate = useNavigate()
   const { user, avatarUrl: authAvatar } = useAuth()
   const { member } = useCurrentMember()
   const { events, loading, ready: eventsReady } = usePublicEvents()
@@ -179,9 +177,8 @@ export default function HomePage({ active = true }: { active?: boolean }) {
           <HeroBanner banner={banner} loading={loading && !banner} />
 
           <div className="bg-transparent rounded-none px-4 py-4 lg:px-6 lg:py-5">
-            <div className="flex items-center justify-between mb-5">
+            <div className="flex items-center mb-5">
               <span className="text-[10px] font-bold tracking-widest uppercase" style={{ color: PALETTE.muted }}>Events</span>
-              <button onClick={() => navigate('/all-events')} style={{ color: ACCENT }} className="text-xs font-semibold bg-transparent border-none cursor-pointer hover:opacity-80">View All Events →</button>
             </div>
 
             {showSkeletons && (

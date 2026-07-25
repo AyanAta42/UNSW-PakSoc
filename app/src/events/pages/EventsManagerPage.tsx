@@ -57,7 +57,8 @@ export default function EventsManagerPage() {
   )
 
   const now    = new Date()
-  const ended  = events.filter(e => new Date(e.time) <= now).sort((a, b) => +new Date(b.time) - +new Date(a.time))
+  // Hard cap: only the 3 most recent ended events render here too.
+  const ended  = events.filter(e => new Date(e.time) <= now).sort((a, b) => +new Date(b.time) - +new Date(a.time)).slice(0, 3)
   const active = events.filter(e => new Date(e.time) > now)
   const live   = active.filter(e => e.public)
   const drafts = active.filter(e => !e.public)
