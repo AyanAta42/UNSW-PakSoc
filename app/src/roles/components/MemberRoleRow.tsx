@@ -3,7 +3,9 @@ import { ROLE_LABEL, ROLE_COLOR, ALL_ROLES } from '@/roles/config/roleLabels'
 import { PALETTE } from '@/config/theme'
 
 const COMMITTEES: Committee[] = ['Events', 'HR', 'Marketing', 'Sports']
-const NEEDS_COMMITTEE: MemberRole[] = ['subcom', 'executive', 'arc_delegate']
+// Arc Delegate is only selectable for members who are Executives.
+const EXEC_COMMITTEES: Committee[] = [...COMMITTEES, 'Arc Delegate']
+const NEEDS_COMMITTEE: MemberRole[] = ['subcom', 'executive']
 
 interface Props {
   member:  Member
@@ -29,7 +31,7 @@ export function MemberRoleRow({ member, saving, onRole, onComm }: Props) {
           onChange={e => onComm(member, e.target.value as Committee)}
           style={{ border: `1px solid ${PALETTE.border}`, color: PALETTE.secondary, background: PALETTE.input }}
           className="rounded-lg px-2 py-1 text-xs font-semibold outline-none cursor-pointer disabled:opacity-50">
-          {COMMITTEES.map(c => <option key={c} value={c}>{c}</option>)}
+          {(member.role === 'executive' ? EXEC_COMMITTEES : COMMITTEES).map(c => <option key={c} value={c}>{c}</option>)}
         </select>
       )}
       <select value={member.role} disabled={saving}

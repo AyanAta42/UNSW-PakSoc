@@ -11,7 +11,7 @@ import { AuroraPage } from '@/shared/components/AuroraPage'
 import { HomeButton } from '@/shared/components/HomeButton'
 import { toast, errorMessage } from '@/shared/toast/toast'
 
-const NEEDS_COMMITTEE: MemberRole[] = ['subcom', 'executive', 'arc_delegate']
+const NEEDS_COMMITTEE: MemberRole[] = ['subcom', 'executive']
 
 export default function ManageRolesPage() {
   const [members, setMembers] = useState<Member[]>([])
@@ -51,6 +51,9 @@ export default function ManageRolesPage() {
       let committee = member.committee
       if (NEEDS_COMMITTEE.includes(role) && !committee) { committee = 'Events'; await updateMemberCommittee(member.id, 'Events') }
       else if (!NEEDS_COMMITTEE.includes(role))         { committee = undefined; await updateMemberCommittee(member.id, null) }
+      // 'Arc Delegate' is only a valid committee for executives — bump anyone
+      // demoted out of Executive with that committee back to a real one.
+      else if (role !== 'executive' && committee === 'Arc Delegate') { committee = 'Events'; await updateMemberCommittee(member.id, 'Events') }
       setMembers(ms => ms.map(m => m.id === member.id ? { ...m, role, committee } : m))
       toast.success(`${member.name || 'Member'} is now ${ROLE_LABEL[role]}`)
     } catch (e) { console.error(e); toast.error("Couldn't update role", errorMessage(e, 'Please try again.')) }

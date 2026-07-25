@@ -8,9 +8,9 @@ export interface MemberSection {
   members: Member[]
 }
 
-// Within a committee section: Arc Delegates first, then execs, then subcom.
-const ROLE_RANK: Record<string, number> = { arc_delegate: 0, executive: 1, subcom: 2 }
-const byRole = (a: Member, b: Member) => (ROLE_RANK[a.role] ?? 3) - (ROLE_RANK[b.role] ?? 3)
+// Within a committee section, execs are listed before subcom members.
+const ROLE_RANK: Record<string, number> = { executive: 0, subcom: 1 }
+const byRole = (a: Member, b: Member) => (ROLE_RANK[a.role] ?? 2) - (ROLE_RANK[b.role] ?? 2)
 
 /** Groups members into ordered sections (President → VP → Committees). Public role and unassigned members are excluded. */
 export function getMemberSections(members: Member[]): MemberSection[] {

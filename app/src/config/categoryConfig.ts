@@ -19,15 +19,16 @@ export const CAT_CFG = DEFAULT_CAT_CFG as Record<string, { color: string; active
 
 /** Muted, low-saturation tones that sit calmly on the dark UI instead of clashing like flat primary colours. */
 export const COMM_CFG: Record<string, { color: string }> = {
-  Presidents: { color: '#C9A97E' },
-  Sports:     { color: '#6FA8C7' },
-  Marketing:  { color: '#C79A6B' },
-  Events:     { color: '#BD7F7F' },
-  HR:         { color: '#9B8FC2' },
+  Presidents:   { color: '#C9A97E' },
+  Sports:       { color: '#6FA8C7' },
+  Marketing:    { color: '#C79A6B' },
+  Events:       { color: '#BD7F7F' },
+  HR:           { color: '#9B8FC2' },
+  'Arc Delegate': { color: '#2DD4BF' },
 }
 
-export const COMM_ORDER = ['Presidents', 'Sports', 'Marketing', 'Events', 'HR']
-export const COMMITTEE_ORDER: Committee[] = ['Sports', 'Marketing', 'Events', 'HR']
+export const COMM_ORDER = ['Presidents', 'Sports', 'Marketing', 'Events', 'HR', 'Arc Delegate']
+export const COMMITTEE_ORDER: Committee[] = ['Sports', 'Marketing', 'Events', 'HR', 'Arc Delegate']
 
 export const ROLE_SECTION_CFG = {
   president:      { label: 'President',      color: '#D4B36A' },
