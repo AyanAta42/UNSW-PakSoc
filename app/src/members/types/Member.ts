@@ -1,4 +1,4 @@
-export type MemberRole = 'public' | 'subcom' | 'executive' | 'vice_president' | 'president'
+export type MemberRole = 'public' | 'subcom' | 'executive' | 'arc_delegate' | 'vice_president' | 'president'
 
 export type Committee = 'Presidents' | 'Sports' | 'Marketing' | 'Events' | 'HR'
 

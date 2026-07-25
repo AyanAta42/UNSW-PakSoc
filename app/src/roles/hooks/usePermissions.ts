@@ -6,6 +6,9 @@ export const ROLE_RANK: Record<MemberRole, number> = {
   public:         0,
   subcom:         1,
   executive:      2,
+  // Arc Delegate carries no committee — it's a standalone role, but ranks
+  // level with Executive so it gets identical permissions.
+  arc_delegate:   2,
   vice_president: 3,
   president:      3,
 }

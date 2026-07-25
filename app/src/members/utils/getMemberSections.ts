@@ -17,12 +17,15 @@ export function getMemberSections(members: Member[]): MemberSection[] {
   const assignable = members.filter(m => m.role !== 'public')
   const sections: MemberSection[] = []
 
-  for (const role of ['president', 'vice_president'] as const) {
+  // Arc Delegate has no committee, so it gets its own top-level section
+  // alongside President/VP instead of being grouped under a committee.
+  const NO_COMMITTEE_ROLES = ['president', 'vice_president', 'arc_delegate'] as const
+  for (const role of NO_COMMITTEE_ROLES) {
     const grouped = assignable.filter(m => m.role === role)
     if (grouped.length) sections.push({ key: role, ...ROLE_SECTION_CFG[role], members: grouped })
   }
 
-  const rest = assignable.filter(m => m.role !== 'president' && m.role !== 'vice_president')
+  const rest = assignable.filter(m => !NO_COMMITTEE_ROLES.includes(m.role as typeof NO_COMMITTEE_ROLES[number]))
 
   for (const comm of COMMITTEE_ORDER) {
     const grouped = rest.filter(m => m.committee === comm).sort(byRole)
