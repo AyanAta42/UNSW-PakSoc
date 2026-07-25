@@ -3,7 +3,7 @@ import { ROLE_LABEL, ROLE_COLOR, ALL_ROLES } from '@/roles/config/roleLabels'
 import { PALETTE } from '@/config/theme'
 
 const COMMITTEES: Committee[] = ['Events', 'HR', 'Marketing', 'Sports']
-const NEEDS_COMMITTEE: MemberRole[] = ['subcom', 'executive']
+const NEEDS_COMMITTEE: MemberRole[] = ['subcom', 'executive', 'arc_delegate']
 
 interface Props {
   member:  Member

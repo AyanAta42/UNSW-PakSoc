@@ -11,7 +11,7 @@ import { AuroraPage } from '@/shared/components/AuroraPage'
 import { HomeButton } from '@/shared/components/HomeButton'
 import { toast, errorMessage } from '@/shared/toast/toast'
 
-const NEEDS_COMMITTEE: MemberRole[] = ['subcom', 'executive']
+const NEEDS_COMMITTEE: MemberRole[] = ['subcom', 'executive', 'arc_delegate']
 
 export default function ManageRolesPage() {
   const [members, setMembers] = useState<Member[]>([])

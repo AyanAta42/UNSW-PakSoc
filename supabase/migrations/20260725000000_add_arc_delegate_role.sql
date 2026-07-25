@@ -1,8 +1,8 @@
 -- ── Add the "Arc Delegate" role ───────────────────────────────────────────
--- Arc Delegate is a standalone role — it doesn't belong to any committee
--- (Events/Marketing/Sports/HR/Presidents) — but carries the same permissions
--- as Executive (create/edit/announce/delete events, write tasks). It must be
--- added everywhere the app enumerates role strings server-side:
+-- Arc Delegate belongs to a committee (Events/Marketing/Sports/HR/Presidents)
+-- exactly like Executive does — it's really just a different label at the
+-- same permission level (create/edit/announce/delete events, write tasks).
+-- It must be added everywhere the app enumerates role strings server-side:
 --   • the CHECK constraint on members.role
 --   • is_event_editor()    (subcom+ — arc_delegate already qualifies via this)
 --   • is_event_publisher() (executive+ — arc_delegate needs adding here)

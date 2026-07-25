@@ -32,7 +32,6 @@ export const COMMITTEE_ORDER: Committee[] = ['Sports', 'Marketing', 'Events', 'H
 export const ROLE_SECTION_CFG = {
   president:      { label: 'President',      color: '#D4B36A' },
   vice_president: { label: 'Vice President', color: '#6FBF97' },
-  arc_delegate:   { label: 'Arc Delegate',   color: '#2DD4BF' },
 } as const
 
 /** Shared Tailwind input classes for the dark task forms. */
