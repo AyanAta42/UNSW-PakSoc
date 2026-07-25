@@ -1,6 +1,8 @@
 import { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react'
-import { useAuth } from '@/auth/hooks/useAuth'
+import type { User } from '@supabase/supabase-js'
+import { useAuth, getAvatarUrl } from '@/auth/hooks/useAuth'
 import { useRealtimeTable } from '@/core/supabase/useRealtimeTable'
+import { ensureMember } from '@/members/services/ensureMember'
 import type { MemberRole } from '@/members/types/Member'
 
 export interface CurrentMember { id: string; role: MemberRole; avatarUrl: string | null; isDeveloper: boolean }
@@ -41,14 +43,33 @@ export function CurrentMemberProvider({ children }: { children: React.ReactNode 
   // changed (e.g. logout/login racing the in-flight request).
   const requestedUserId = useRef<string | null>(null)
 
-  const refetch = useCallback(async (userId: string) => {
+  const refetch = useCallback(async (authUser: User) => {
+    const userId = authUser.id
     try {
       const { supabase } = await import('@/core/supabase/client')
-      const { data } = await supabase
+      let { data } = await supabase
         .from('members')
         .select('id, role, avatar_url, is_developer')
         .eq('user_id', userId)
         .maybeSingle()
+
+      // No row for this account — either it's their very first sign-in before the
+      // signup trigger runs, or an admin removed them via Manage Roles. Either way,
+      // that trigger only ever fires once (on auth.users INSERT), so a deleted row
+      // is never recreated on its own. Recreate it here as a fresh 'public' member
+      // so a returning user lands signed in instead of stuck with no profile.
+      if (!data) {
+        const meta = authUser.user_metadata ?? {}
+        const name = meta.full_name ?? meta.name ?? authUser.email?.split('@')[0] ?? ''
+        await ensureMember(userId, authUser.email ?? '', name, getAvatarUrl(authUser))
+        if (requestedUserId.current !== userId) return
+        ;({ data } = await supabase
+          .from('members')
+          .select('id, role, avatar_url, is_developer')
+          .eq('user_id', userId)
+          .maybeSingle())
+      }
+
       if (requestedUserId.current !== userId) return
       const next = data
         ? { id: data.id, role: data.role as MemberRole, avatarUrl: data.avatar_url ?? null, isDeveloper: !!data.is_developer }
@@ -72,13 +93,13 @@ export function CurrentMemberProvider({ children }: { children: React.ReactNode 
     setMember(cached)
     setLoading(!cached)
 
-    void refetch(user.id)
+    void refetch(user)
   }, [user?.id, authLoading, refetch])
 
   // An admin changing anyone's role (e.g. via Manage Roles) writes to the
   // `members` table — re-pull this session's own row on every change so
   // role-gated buttons/routes/nav update live, without a refresh or re-login.
-  useRealtimeTable('members', () => { if (user) void refetch(user.id) }, !!user && !authLoading)
+  useRealtimeTable('members', () => { if (user) void refetch(user) }, !!user && !authLoading)
 
   return (
     <CurrentMemberCtx.Provider value={{ member, loading }}>

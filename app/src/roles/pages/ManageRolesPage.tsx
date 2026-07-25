@@ -2,22 +2,30 @@ import { useState, useEffect } from 'react'
 import { fetchMembers }           from '@/members/services/fetchMembers'
 import { updateMemberRole }       from '@/members/services/updateMemberRole'
 import { updateMemberCommittee }  from '@/members/services/updateMemberCommittee'
+import { deleteMembers }          from '@/members/services/deleteMembers'
 import { MemberRoleRow }          from '@/roles/components/MemberRoleRow'
 import { useRealtimeTable }       from '@/core/supabase/useRealtimeTable'
+import { useCurrentMember }       from '@/roles/context/CurrentMemberContext'
 import { ROLE_LABEL, ROLE_COLOR, ALL_ROLES } from '@/roles/config/roleLabels'
 import type { Member, MemberRole, Committee } from '@/members/types/Member'
 import { PALETTE } from '@/config/theme'
 import { AuroraPage } from '@/shared/components/AuroraPage'
 import { HomeButton } from '@/shared/components/HomeButton'
+import { ConfirmModal } from '@/shared/components/ConfirmModal'
 import { toast, errorMessage } from '@/shared/toast/toast'
 
 const NEEDS_COMMITTEE: MemberRole[] = ['subcom', 'executive']
 
 export default function ManageRolesPage() {
+  const { member: currentMember } = useCurrentMember()
   const [members, setMembers] = useState<Member[]>([])
   const [loading, setLoading] = useState(true)
   const [saving, setSaving]   = useState<string | null>(null)
   const [search, setSearch]   = useState('')
+  const [removing, setRemoving]         = useState(false)
+  const [selectedIds, setSelectedIds]   = useState<Set<string>>(new Set())
+  const [confirmOpen, setConfirmOpen]   = useState(false)
+  const [deleting, setDeleting]         = useState(false)
 
   useEffect(() => { fetchMembers().then(setMembers).catch(console.error).finally(() => setLoading(false)) }, [])
 
@@ -70,6 +78,33 @@ export default function ManageRolesPage() {
     finally { setSaving(null) }
   }
 
+  function toggleSelected(member: Member) {
+    setSelectedIds(ids => {
+      const next = new Set(ids)
+      if (next.has(member.id)) next.delete(member.id)
+      else next.add(member.id)
+      return next
+    })
+  }
+
+  function cancelRemoving() {
+    setRemoving(false)
+    setSelectedIds(new Set())
+  }
+
+  async function handleDeleteConfirmed() {
+    if (deleting) return
+    const ids = Array.from(selectedIds)
+    setDeleting(true)
+    try {
+      await deleteMembers(ids)
+      setMembers(ms => ms.filter(m => !selectedIds.has(m.id)))
+      toast.success(`${ids.length} member${ids.length === 1 ? '' : 's'} removed`)
+      cancelRemoving()
+    } catch (e) { console.error(e); toast.error("Couldn't remove members", errorMessage(e, 'Please try again.')) }
+    finally { setDeleting(false); setConfirmOpen(false) }
+  }
+
   const filtered = members.filter(m => (m.name ?? '').toLowerCase().includes(search.toLowerCase()))
   const grouped  = ALL_ROLES.slice().reverse().reduce<Record<string, Member[]>>((acc, r) => {
     const ms = filtered.filter(m => m.role === r).sort((a, b) => (a.name ?? '').localeCompare(b.name ?? ''))
@@ -85,6 +120,26 @@ export default function ManageRolesPage() {
           <HomeButton />
           <div className="w-px h-5 shrink-0" style={{ background: PALETTE.border }} />
           <span style={{ color: PALETTE.dark }} className="font-extrabold text-lg md:text-xl">Manage Roles</span>
+          <div className="flex-1" />
+          {removing ? (
+            <>
+              <span style={{ color: PALETTE.muted }} className="text-xs font-semibold whitespace-nowrap">{selectedIds.size} selected</span>
+              <button onClick={cancelRemoving}
+                style={{ border: `1px solid ${PALETTE.border}`, color: PALETTE.secondary, background: 'transparent', borderRadius: 10 }}
+                className="text-xs font-semibold px-3 py-1.5 cursor-pointer hover:bg-white/5 transition-colors">Cancel</button>
+              <button onClick={() => setConfirmOpen(true)} disabled={selectedIds.size === 0}
+                style={{ background: '#EF4444', color: '#fff', borderRadius: 10 }}
+                className="text-xs font-bold px-3 py-1.5 border-none cursor-pointer hover:opacity-85 disabled:opacity-40 disabled:cursor-not-allowed transition-opacity">
+                Delete{selectedIds.size > 0 ? ` (${selectedIds.size})` : ''}
+              </button>
+            </>
+          ) : (
+            <button onClick={() => setRemoving(true)}
+              style={{ border: `1px solid rgba(239,68,68,0.3)`, color: '#EF4444', background: 'rgba(239,68,68,0.08)', borderRadius: 10 }}
+              className="text-xs font-semibold px-3 py-1.5 cursor-pointer hover:bg-red-500/15 transition-colors whitespace-nowrap">
+              Remove Member
+            </button>
+          )}
         </nav>
         <div className="px-4 pb-3">
           <div className="max-w-2xl mx-auto">
@@ -111,7 +166,8 @@ export default function ManageRolesPage() {
             <div style={{ background: PALETTE.card, border: `1px solid ${PALETTE.border}`, borderRadius: PALETTE.radiusCard, boxShadow: PALETTE.shadowSm }} className="overflow-hidden">
               {ms.map((member, i) => (
                 <div key={member.id} style={{ borderTop: i > 0 ? `1px solid ${PALETTE.border}` : 'none' }}>
-                  <MemberRoleRow member={member} saving={saving === member.id} onRole={handleRoleChange} onComm={handleCommitteeChange} />
+                  <MemberRoleRow member={member} saving={saving === member.id} onRole={handleRoleChange} onComm={handleCommitteeChange}
+                    removing={removing} selected={selectedIds.has(member.id)} selectable={member.id !== currentMember?.id} onToggle={toggleSelected} />
                 </div>
               ))}
             </div>
@@ -119,6 +175,17 @@ export default function ManageRolesPage() {
         ))}
         </div>
       </div>
+      {confirmOpen && (
+        <ConfirmModal
+          title={`Remove ${selectedIds.size} member${selectedIds.size === 1 ? '' : 's'}?`}
+          message="This cannot be undone."
+          warning="These users will be completely removed from the database!"
+          confirmLabel={deleting ? 'Removing…' : 'Delete'}
+          danger
+          onConfirm={handleDeleteConfirmed}
+          onCancel={() => setConfirmOpen(false)}
+        />
+      )}
     </AuroraPage>
   )
 }
