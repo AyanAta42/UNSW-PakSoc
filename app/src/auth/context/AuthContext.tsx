@@ -116,6 +116,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const signOut = useCallback(async () => {
     setSession(null)
     setUser(null)
+    // Stop Google from silently re-selecting the same account on the next
+    // login — the user should get the account chooser after signing out.
+    try { window.google?.accounts?.id?.disableAutoSelect?.() } catch { /* GSI not loaded */ }
     const { supabase } = await import('@/core/supabase/client')
     const { error } = await supabase.auth.signOut()
     if (error) throw error

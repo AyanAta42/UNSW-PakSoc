@@ -74,11 +74,10 @@ export function TaskListPanel({ tasks, loading, overTask, members, allCategories
               <div className="flex flex-col gap-2.5 mb-5">
                 {catTasks.map(task => {
                   const isOver = overTask === task.id
-                  const doneHint = mobile ? '' : isOver ? 'Release to assign' : hasSelected ? '' : 'Drag or click a member, then click a card'
                   return (
                     <div key={task.id} data-task-id={task.id}
                       onClick={() => !mobile && onTaskClick?.(task.id)}
-                      className={`task-card group relative bg-[#0B0E15] rounded-xl p-4 select-none transition-all duration-200 ${
+                      className={`task-card group relative bg-[#0B0E15] rounded-xl px-4 py-3 select-none transition-all duration-200 ${
                         isOver
                           ? 'border-2 border-dashed border-[#22C55E] bg-[#22C55E]/[0.04]'
                           : hasSelected && !mobile
@@ -90,7 +89,7 @@ export function TaskListPanel({ tasks, loading, overTask, members, allCategories
                           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4" aria-hidden><path d="M12 20h9" /><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4Z" /></svg>
                         </button>
                       </div>
-                      <div className="flex items-center gap-2 pr-14 mb-2.5">
+                      <div className="flex items-center gap-2 pr-14 mb-2">
                         <span className="text-sm font-bold text-[#F8FAFC] min-w-0 break-words">{task.title}</span>
                       </div>
                       {task.subtasks.length > 0 && (
@@ -118,7 +117,6 @@ export function TaskListPanel({ tasks, loading, overTask, members, allCategories
                         </div>
                       )}
                       {task.notes && <div className="mt-2 px-3 py-2 bg-white/[0.04] rounded-lg text-xs text-[#94A3B8] border-l-2 border-[#2E333D] leading-relaxed whitespace-pre-wrap break-words">{task.notes}</div>}
-                      {!mobile && <div className={`text-[11px] mt-1.5 transition-opacity ${isOver ? 'text-[#4ADE80] opacity-100' : 'text-[#64748B] opacity-0 group-hover:opacity-100'}`}>{doneHint || ' '}</div>}
                     </div>
                   )
                 })}

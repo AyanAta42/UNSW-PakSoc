@@ -13,6 +13,7 @@ declare global {
         id: {
           initialize: (config: object) => void
           renderButton: (el: HTMLElement, options: object) => void
+          disableAutoSelect: () => void
         }
       }
     }

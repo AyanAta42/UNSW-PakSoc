@@ -7,7 +7,12 @@ export async function signInWithGoogle() {
 
   const { error } = await supabase.auth.signInWithOAuth({
     provider: 'google',
-    options: { redirectTo },
+    options: {
+      redirectTo,
+      // Always show the account chooser instead of silently reusing the last
+      // Google session — so after signing out the user can pick an account.
+      queryParams: { prompt: 'select_account' },
+    },
   })
   if (error) throw error
 }

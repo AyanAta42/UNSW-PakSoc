@@ -30,6 +30,13 @@ export default function LoginPage() {
 
   return (
     <AuroraPage still contentClassName="min-h-[100dvh] flex flex-col items-center justify-center px-4">
+      <button
+        onClick={() => navigate('/')}
+        style={{ color: PALETTE.muted }}
+        className="absolute top-[max(1rem,env(safe-area-inset-top))] left-4 inline-flex items-center gap-1.5 text-sm font-semibold bg-transparent border-none cursor-pointer hover:text-green-400 transition-colors"
+      >
+        <span aria-hidden>&larr;</span> Home
+      </button>
       <div className="flex items-center gap-3 mb-8">
         <img src="/logo-round.png" alt="UNSW PakSoc" className="w-11 h-11 rounded-full object-cover" />
         <div>
