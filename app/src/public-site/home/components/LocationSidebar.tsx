@@ -12,10 +12,13 @@ export function LocationSidebar({ mapEvent, featured, now }: Props) {
   const desktopMapSrc = mapEvent ? mapEmbedSrc(mapEvent.location) : null
   const ref = useRef<HTMLDivElement>(null)
 
-  // The sidebar and the events + social wall column differ in height, so
-  // scroll the sidebar at a different rate: the height gap is fed back in
-  // proportionally to page scroll, so its bottom lands level with the social
-  // wall's bottom exactly when the wall's bottom reaches the viewport.
+  // The sidebar and the events + social wall column differ in height — which
+  // one is taller flips depending on content (e.g. no upcoming event drops the
+  // hero, shrinking the left column below the sidebar's location+timeline
+  // card). Whichever column is SHORTER gets scrolled at a different rate: the
+  // height gap is fed back in proportionally to page scroll, so its bottom
+  // lands level with the taller column's bottom exactly when that bottom
+  // reaches the viewport.
   //
   // The scroll surface differs by build: a plain browser tab scrolls the
   // DOCUMENT (index.css unlocks `html.home-mounted` and drops `.home-scroll`
@@ -41,16 +44,20 @@ export function LocationSidebar({ mapEvent, featured, now }: Props) {
     let raf = 0
     const apply = () => {
       raf = 0
-      const slack = left.offsetHeight - el.offsetHeight
+      const diff = left.offsetHeight - el.offsetHeight
+      const slack = Math.abs(diff)
+      const short = diff >= 0 ? el : left
+      const tall = diff >= 0 ? left : el
       const viewport = useContainer ? scroller.clientHeight : window.innerHeight
       const scrollTop = useContainer ? scroller.scrollTop : window.scrollY
       // Left column's top in the scroller's own scroll-space (0 for the document).
       const originTop = useContainer ? scroller.getBoundingClientRect().top : 0
       const leftTop = left.getBoundingClientRect().top - originTop + scrollTop
-      const end = leftTop + left.offsetHeight - viewport
-      if (slack <= 0 || end <= 0) { el.style.transform = ''; return }
+      const end = leftTop + tall.offsetHeight - viewport
+      if (slack <= 0 || end <= 0) { el.style.transform = ''; left.style.transform = ''; return }
       const progress = Math.min(1, Math.max(0, scrollTop / end))
-      el.style.transform = `translate3d(0, ${(progress * slack).toFixed(1)}px, 0)`
+      short.style.transform = `translate3d(0, ${(progress * slack).toFixed(1)}px, 0)`
+      tall.style.transform = ''
     }
     const schedule = () => { if (!raf) raf = requestAnimationFrame(apply) }
     apply()
@@ -65,6 +72,7 @@ export function LocationSidebar({ mapEvent, featured, now }: Props) {
       scrollTarget.removeEventListener('scroll', schedule)
       window.removeEventListener('resize', schedule)
       el.style.transform = ''
+      left.style.transform = ''
     }
   }, [])
 

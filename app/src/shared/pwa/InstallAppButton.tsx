@@ -89,7 +89,7 @@ function InstallSheet({ variant, onClose }: { variant: SheetVariant; onClose: ()
   const isChrome = variant === 'chrome'
   const steps = variant === 'ios' ? IOS_STEPS : isChrome ? CHROME_STEPS : FALLBACK_STEPS
   const title = isChrome ? 'Install with Chrome' : 'Install PakSoc'
-  const subtitle = isChrome ? 'Skips Samsung’s false warning' : 'Full-screen app, works offline'
+  const subtitle = isChrome ? 'Skips Samsung’s false warning' : undefined
 
   return createPortal(
     <div className="motion-backdrop fixed inset-0 z-[120] flex items-end justify-center bg-black/60 backdrop-blur-sm sm:items-center"
@@ -115,7 +115,7 @@ function InstallSheet({ variant, onClose }: { variant: SheetVariant; onClose: ()
             </div>
             <div>
               <h3 className="m-0 text-base font-extrabold" style={{ color: PALETTE.dark }}>{title}</h3>
-              <p className="m-0 text-xs" style={{ color: PALETTE.muted }}>{subtitle}</p>
+              {subtitle && <p className="m-0 text-xs" style={{ color: PALETTE.muted }}>{subtitle}</p>}
             </div>
           </div>
           <button onClick={onClose} aria-label="Close"

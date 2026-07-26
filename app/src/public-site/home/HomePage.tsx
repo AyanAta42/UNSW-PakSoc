@@ -94,14 +94,12 @@ export default function HomePage({ active = true }: { active?: boolean }) {
   }, [active])
 
   const overlayOpen = !!sheetEvent || editOpen
+  // MobileEventSheet and EditProfileModal each lock scroll themselves (see
+  // their own useScrollLock/useSheetSwipe calls) — no need to duplicate it here.
   useEffect(() => {
     if (!active) return
-    document.body.style.overflow = overlayOpen ? 'hidden' : ''
     document.documentElement.classList.toggle('modal-open', overlayOpen)
-    return () => {
-      document.body.style.overflow = ''
-      document.documentElement.classList.remove('modal-open')
-    }
+    return () => { document.documentElement.classList.remove('modal-open') }
   }, [overlayOpen, active])
 
   const { phoneEvents, allPublic, banner, featured, now } = useMemo(() => {
@@ -137,6 +135,12 @@ export default function HomePage({ active = true }: { active?: boolean }) {
   }
 
   const showSkeletons = loading && events.length === 0
+  // No upcoming event means the hero (which normally carries the page's visual
+  // weight) doesn't render, so this label steps up in size to read as the page
+  // heading — same weight/colour/tracking as usual, just bigger.
+  const eventsLabelClass = !loading && !banner
+    ? 'text-sm md:text-base font-bold tracking-widest uppercase'
+    : 'text-[10px] font-bold tracking-widest uppercase'
 
   return (
     <div
@@ -178,7 +182,7 @@ export default function HomePage({ active = true }: { active?: boolean }) {
 
           <div className="bg-transparent rounded-none px-4 py-4 lg:px-6 lg:py-5">
             <div className="flex items-center mb-5">
-              <span className="text-[10px] font-bold tracking-widest uppercase" style={{ color: PALETTE.muted }}>Events</span>
+              <span className={eventsLabelClass} style={{ color: PALETTE.muted }}>Events</span>
             </div>
 
             {showSkeletons && (
@@ -230,8 +234,13 @@ export default function HomePage({ active = true }: { active?: boolean }) {
       </div>
 
         {/* Footer lives at the end of the scroll flow — reached by scrolling, not
-            pinned. mt-auto drops it to the bottom when the page is short. */}
-        <div className="relative z-10 mt-auto">
+            pinned. mt-auto drops it to the bottom when the page is short (phone,
+            single-column). On lg+ the two-column grid is much shorter than the
+            stacked mobile layout for the same content (e.g. no upcoming event
+            drops the hero), so pinning there stranded the footer at the bottom
+            of the viewport with a huge dead gap above it — reset to natural
+            flow so the footer just follows the content instead. */}
+        <div className="relative z-10 mt-auto lg:mt-0">
           <Footer />
         </div>
       </main>

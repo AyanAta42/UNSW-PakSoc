@@ -20,8 +20,11 @@ const CLOSE_DURATION_MS = 220
  * `open` only matters for sheets that stay mounted while hidden (gated by an
  * early `return null`): it resets the transient drag/close state each time they
  * reopen. Sheets that unmount when hidden can leave it at its default.
+ *
+ * `lockScroll` lets a caller opt out when the page behind it is already
+ * locked some other way (e.g. permanently via CSS) — see MobileEventSheet.
  */
-export function useSheetSwipe(onClose: () => void, open = true) {
+export function useSheetSwipe(onClose: () => void, open = true, lockScroll = true) {
   const sheetRef      = useRef<HTMLDivElement>(null)
   const scrollRef     = useRef<HTMLDivElement>(null)
   const startYRef     = useRef<number | null>(null)
@@ -31,7 +34,7 @@ export function useSheetSwipe(onClose: () => void, open = true) {
   const [closing, setClosing]   = useState(false)
 
   // Freeze the page behind the sheet so scrolling its body never pans the site.
-  useScrollLock(open)
+  useScrollLock(open && lockScroll)
 
   useEffect(() => () => clearTimeout(closeTimerRef.current), [])
 

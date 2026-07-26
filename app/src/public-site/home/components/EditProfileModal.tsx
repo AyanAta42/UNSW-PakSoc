@@ -5,6 +5,7 @@ import { fetchMemberName }  from '@/members/services/fetchMemberName'
 import { PALETTE } from '@/config/theme'
 import { toast, errorMessage } from '@/shared/toast/toast'
 import { useScrollLock } from '@/shared/hooks/useScrollLock'
+import { isStandalone } from '@/shared/pwa/installPrompt'
 
 interface Props {
   user:    User
@@ -18,7 +19,11 @@ export function EditProfileModal({ user, onClose }: Props) {
   const [loading, setLoading] = useState(true)
   const [saving,  setSaving]  = useState(false)
 
-  useScrollLock()
+  // Only mounts on the home route — same reasoning as MobileEventSheet: skip
+  // the lock in the installed standalone app, where the document is already
+  // permanently locked by CSS and re-locking it here is what caused the sheet
+  // open/close to flash a laggy black layer on iOS.
+  useScrollLock(!isStandalone())
 
   // Pre-fill with the name actually on record (`members.name`) — not the
   // Google account snapshot, which never changes after sign-up and would

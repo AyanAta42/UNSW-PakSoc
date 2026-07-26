@@ -7,13 +7,23 @@ import { EventCtaButton }              from '@/events/components/EventCtaButton'
 import { ACCENT, PALETTE }             from '@/config/theme'
 import { PinIcon }                     from '@/shared/components/MetaIcons'
 import { useSheetSwipe }               from '@/shared/hooks/useSheetSwipe'
+import { isStandalone }                from '@/shared/pwa/installPrompt'
 
 interface Props { event: DbEvent; now: Date; onClose: () => void; mapCacheId?: string }
 
 export function MobileEventSheet({ event, now, onClose, mapCacheId = 'home-map-sheet' }: Props) {
   const upcoming  = new Date(event.time) > now
   const btns      = getEventButtons(event.buttons)
-  const { sheetRef, scrollRef, close, backdropOpacity, sheetStyle, touchHandlers } = useSheetSwipe(onClose)
+  // This sheet only ever mounts on the home route, where `body`/`html` are
+  // already locked permanently by CSS while in the installed standalone app
+  // (index.css, `display-mode: standalone`) — the real scroll happens inside
+  // `.home-scroll`, not the document. Locking scroll again here on top of that
+  // is what was causing a laggy black layer to flash in as the sheet opened:
+  // on iOS specifically, toggling `body.style.position` on an already-locked
+  // document can make WKWebView reconsider its layout viewport and briefly
+  // show its own chrome. Skip it there; only the mobile-browser-tab case
+  // (not yet installed) actually needs this lock.
+  const { sheetRef, scrollRef, close, backdropOpacity, sheetStyle, touchHandlers } = useSheetSwipe(onClose, true, !isStandalone())
 
   return (
     <div className="fixed inset-0 z-[60]">
@@ -55,22 +65,23 @@ export function MobileEventSheet({ event, now, onClose, mapCacheId = 'home-map-s
             <p style={{ color: PALETTE.muted }} className="text-sm m-0 py-1 text-center">No schedule posted yet.</p>
           )}
 
-          {/* Map — only for upcoming events; no reason to show directions to one that's over */}
-          {upcoming && (
-            <div>
-              <div style={{ color: PALETTE.muted }} className="text-[10px] font-bold uppercase tracking-widest mb-2.5">Location</div>
-              <div style={{ height: 200, borderRadius: 16, border: `1px solid ${PALETTE.border}`, overflow: 'hidden', background: PALETTE.card }}>
-                <DeferredMapEmbed cacheId={mapCacheId} src={mapEmbedSrc(event.location)} linkHref={mapLinkUrl(event.location)} title="Event location map" className="w-full h-full" delayMs={280} />
-              </div>
-              <div style={{ color: PALETTE.muted }} className="text-xs mt-2 flex items-center gap-1.5">
-                <PinIcon color={ACCENT} />{event.location}
-              </div>
+          {/* Map — shown for every event, past or upcoming, so it's useful as a
+              record of where something happened too, not just directions. */}
+          <div>
+            <div style={{ color: PALETTE.muted }} className="text-[10px] font-bold uppercase tracking-widest mb-2.5">Location</div>
+            <div style={{ height: 200, borderRadius: 16, border: `1px solid ${PALETTE.border}`, overflow: 'hidden', background: PALETTE.card }}>
+              <DeferredMapEmbed cacheId={mapCacheId} src={mapEmbedSrc(event.location)} linkHref={mapLinkUrl(event.location)} title="Event location map" className="w-full h-full" delayMs={280} />
             </div>
-          )}
+            <div style={{ color: PALETTE.muted }} className="text-xs mt-2 flex items-center gap-1.5">
+              <PinIcon color={ACCENT} />{event.location}
+            </div>
+          </div>
         </div>
 
-        {/* Pinned CTA buttons — always visible */}
-        {upcoming && btns.length > 0 && (
+        {/* Pinned CTA buttons — shown for every event so a past one still reads
+            the same as an upcoming one; past events just get them stale/grayed
+            out with no link, since there's nothing left to register/buy into. */}
+        {btns.length > 0 && (
           <div
             style={{
               background: PALETTE.modal,
@@ -81,7 +92,7 @@ export function MobileEventSheet({ event, now, onClose, mapCacheId = 'home-map-s
           >
             {btns.map((b, i) => (
               <EventCtaButton key={i} label={b.label} url={b.url} variant={getCtaVariant(i, btns.length)}
-                className="w-full py-3.5 text-sm" />
+                disabled={!upcoming} className="w-full py-3.5 text-sm" />
             ))}
           </div>
         )}
