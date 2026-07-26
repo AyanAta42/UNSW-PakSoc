@@ -26,11 +26,12 @@ export const COMM_CFG: Record<string, { color: string }> = {
   HR:                     { color: '#9B8FC2' },
   'Arc Delegate':         { color: '#2DD4BF' },
   'Presidential Advisor': { color: '#818CF8' },
+  Treasurer:              { color: '#EAB308' },
 }
 
 // Committees only selectable for members whose role is Executive — they're
 // "just a different label" at the same permission level, not real committees.
-export const EXEC_ONLY_COMMITTEES: Committee[] = ['Arc Delegate', 'Presidential Advisor']
+export const EXEC_ONLY_COMMITTEES: Committee[] = ['Arc Delegate', 'Presidential Advisor', 'Treasurer']
 
 export const COMM_ORDER = ['Presidents', 'Sports', 'Marketing', 'Events', 'HR', ...EXEC_ONLY_COMMITTEES]
 export const COMMITTEE_ORDER: Committee[] = ['Sports', 'Marketing', 'Events', 'HR', ...EXEC_ONLY_COMMITTEES]

@@ -1,6 +1,6 @@
 export type MemberRole = 'public' | 'subcom' | 'executive' | 'vice_president' | 'president'
 
-export type Committee = 'Presidents' | 'Sports' | 'Marketing' | 'Events' | 'HR' | 'Arc Delegate' | 'Presidential Advisor'
+export type Committee = 'Presidents' | 'Sports' | 'Marketing' | 'Events' | 'HR' | 'Arc Delegate' | 'Presidential Advisor' | 'Treasurer'
 
 export interface Member {
   id: string
