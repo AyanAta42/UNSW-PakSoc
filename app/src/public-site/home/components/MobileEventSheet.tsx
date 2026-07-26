@@ -83,11 +83,6 @@ export function MobileEventSheet({ event, now, onClose, mapCacheId = 'home-map-s
             out with no link, since there's nothing left to register/buy into. */}
         {btns.length > 0 && (
           <div
-            style={{
-              background: PALETTE.modal,
-              borderTop: `1px solid ${PALETTE.border}`,
-              boxShadow: '0 -8px 24px rgba(0,0,0,0.35)',
-            }}
             className="shrink-0 px-5 pt-3 pb-[max(1rem,env(safe-area-inset-bottom))] flex flex-col gap-2.5"
           >
             {btns.map((b, i) => (
