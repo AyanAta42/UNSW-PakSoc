@@ -10,6 +10,13 @@ export function getCatCfg(cat: string) {
   return DEFAULT_CAT_CFG[cat] ?? { color: '#94A3B8', activeCls: 'bg-slate-500/10 border-slate-400/60 text-slate-300', headerCls: 'bg-slate-500/10 text-slate-300' }
 }
 
+/** Plural display labels for the default categories — kept separate from the singular
+ *  values stored on tasks so existing rows (category: "Task") still match correctly. */
+const CAT_LABELS: Record<string, string> = { Task: 'Tasks', Game: 'Games', Stall: 'Stalls' }
+export function getCatLabel(cat: string) {
+  return CAT_LABELS[cat] ?? cat
+}
+
 export const DEFAULT_TASK_CATEGORIES: string[] = ['Task', 'Game', 'Stall']
 
 /** @deprecated use DEFAULT_TASK_CATEGORIES */

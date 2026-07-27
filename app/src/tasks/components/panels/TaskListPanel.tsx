@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import type { Task } from '@/tasks/types/Task'
 import type { Member } from '@/members/types/Member'
-import { getCatCfg } from '@/config/categoryConfig'
+import { getCatCfg, getCatLabel } from '@/config/categoryConfig'
 import { AssignedChip }  from '@/tasks/components/assignment/AssignedChip'
 import { EditTaskModal } from '@/tasks/components/forms/EditTaskModal'
 import { ConfirmModal }  from '@/shared/components/ConfirmModal'
@@ -67,7 +67,7 @@ export function TaskListPanel({ tasks, loading, overTask, members, allCategories
           return (
             <div key={category}>
               <div className="flex items-center gap-2 mb-3">
-                <span className={`px-3 py-1 rounded-lg text-xs font-bold ${cfg.headerCls}`}>{category}</span>
+                <span className={`px-3 py-1 rounded-lg text-xs font-bold ${cfg.headerCls}`}>{getCatLabel(category)}</span>
                 <span className="text-xs text-[#64748B]">{catTasks.length} {catTasks.length === 1 ? 'item' : 'items'}</span>
                 <div className="flex-1 h-px bg-[#1D2129]" />
               </div>
