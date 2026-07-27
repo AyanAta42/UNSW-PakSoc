@@ -104,15 +104,23 @@ export async function refreshPublicEvents(): Promise<DbEvent[]> {
 /**
  * Load events once for the SPA session. Reuses memory/cache; only hits network
  * if we have nothing fresh yet.
+ *
+ * `onRevalidate` fires if a background refetch runs (stale-cache path) so the
+ * caller can push the corrected data into state once it lands, instead of the
+ * screen being stuck on the stale paint until an unrelated focus/visibility
+ * event happens to trigger a refetch.
  */
-export async function loadPublicEvents(): Promise<DbEvent[]> {
+export async function loadPublicEvents(onRevalidate?: (events: DbEvent[]) => void): Promise<DbEvent[]> {
   if (hasFreshSessionEvents() && sessionEvents) return sessionEvents
   const cached = readCache()
   if (cached && Date.now() - cached.at < FRESH_MS) {
     sessionEvents = cached.events
     sessionAt = cached.at
-    // Soft revalidate in background without blocking UI
-    void prefetchPublicEvents()
+    // Soft revalidate in background without blocking UI. Must bypass the
+    // freshness check via refreshPublicEvents() — sessionAt was just stamped
+    // to the cache's own (old) write time above, so prefetchPublicEvents()
+    // would see it as "fresh" and skip the network call entirely.
+    void refreshPublicEvents().then(onRevalidate)
     return cached.events
   }
   try {

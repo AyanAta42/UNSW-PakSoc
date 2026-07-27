@@ -29,7 +29,7 @@ export function PublicEventsProvider({ children }: { children: React.ReactNode }
 
   useEffect(() => {
     let alive = true
-    loadPublicEvents()
+    loadPublicEvents(next => { if (alive) setEvents(next) })
       .then(next => {
         if (!alive) return
         setEvents(next)
