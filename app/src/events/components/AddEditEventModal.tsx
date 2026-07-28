@@ -144,13 +144,17 @@ export function AddEditEventModal({ onClose, onCreated, onCreateSettled, onUpdat
 
   return (
     <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center sm:px-4">
+      {/* Blur is desktop-only: a backdrop-filter forces the compositor to snapshot
+          the whole page behind before the first frame can paint, which on a phone
+          showed as a black layer sitting there while the sheet was still sliding
+          up. The mobile sheet uses a flat scrim, same as MobileEventSheet. */}
       <div
-        className="absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity duration-[220ms] animate-[fadeIn_var(--motion-fast)_var(--motion-ease)]"
+        className="absolute inset-0 bg-black/60 touch-none transition-opacity duration-[220ms] sm:backdrop-blur-sm sm:animate-[fadeIn_var(--motion-fast)_var(--motion-ease)]"
         style={{ opacity: backdropOpacity }}
         onClick={close}
       />
       <div ref={sheetRef} {...touchHandlers} onClick={e => e.stopPropagation()}
-        className="relative w-full max-w-md overflow-hidden max-h-[94dvh] sm:max-h-[92dvh] flex flex-col rounded-t-3xl sm:rounded-3xl animate-[slideUp_0.28s_ease-out] sm:animate-[modalIn_var(--motion-base)_var(--motion-ease)]"
+        className="relative w-full max-w-md overflow-hidden max-h-[94dvh] sm:max-h-[92dvh] flex flex-col rounded-t-3xl sm:rounded-3xl animate-[slideUp_0.22s_ease-out] sm:animate-[modalIn_var(--motion-base)_var(--motion-ease)]"
         style={{ background: PALETTE.modal, border: `1px solid ${PALETTE.border}`, boxShadow: PALETTE.shadowLg, ...sheetStyle }}>
 
         {/* Grab handle (mobile sheet affordance) */}

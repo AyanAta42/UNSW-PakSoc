@@ -1,4 +1,3 @@
-import { useEffect } from 'react'
 import type { Dispatch, SetStateAction } from 'react'
 import type { Member } from '@/members/types/Member'
 import { NewTaskForm, CreateTaskButton } from './NewTaskForm'
@@ -19,14 +18,9 @@ interface Props {
 }
 
 export function NewTaskModal({ open, onClose, title, setTitle, cat, setCat, allCategories, onAddCategory, onRemoveCategory, subtasks, setSubtasks, preAssigned, setPreAssigned, notes, setNotes, onAddTask, onOpenAssigneePicker }: Props) {
+  // useSheetSwipe already ref-counts a scroll lock on the page behind — a second
+  // hand-rolled `body.style.overflow` lock here only fought its save/restore.
   const { sheetRef, scrollRef, close, backdropOpacity, sheetStyle, touchHandlers } = useSheetSwipe(onClose, open)
-
-  useEffect(() => {
-    if (!open) return
-    const prev = document.body.style.overflow
-    document.body.style.overflow = 'hidden'
-    return () => { document.body.style.overflow = prev }
-  }, [open])
 
   if (!open) return null
 
@@ -37,8 +31,8 @@ export function NewTaskModal({ open, onClose, title, setTitle, cat, setCat, allC
 
   return (
     <div className="fixed inset-0 z-[70] lg:hidden">
-      <div className="absolute inset-0 bg-black/55 backdrop-blur-[2px] touch-none transition-opacity duration-[220ms]" style={{ opacity: backdropOpacity }} onClick={close} />
-      <div ref={sheetRef} style={sheetStyle} {...touchHandlers} className="absolute bottom-0 left-0 right-0 rounded-t-[28px] h-[85dvh] flex flex-col bg-[#0D1119] border-t border-[#1D2129] shadow-[0_-8px_60px_rgba(0,0,0,0.6)] animate-[slideUp_0.28s_ease-out]" onClick={e => e.stopPropagation()}>
+      <div className="absolute inset-0 bg-black/55 touch-none transition-opacity duration-[220ms]" style={{ opacity: backdropOpacity }} onClick={close} />
+      <div ref={sheetRef} style={sheetStyle} {...touchHandlers} className="absolute bottom-0 left-0 right-0 rounded-t-[28px] h-[85dvh] flex flex-col bg-[#0D1119] border-t border-[#1D2129] shadow-[0_-8px_60px_rgba(0,0,0,0.6)] animate-[slideUp_0.22s_ease-out]" onClick={e => e.stopPropagation()}>
         <div className="flex justify-center pt-3 pb-1 shrink-0"><div className="w-10 h-1 rounded-full bg-[#1D2129]" /></div>
         <div className="flex items-center justify-between px-5 pb-3 shrink-0">
           <div>
