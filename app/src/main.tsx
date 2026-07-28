@@ -5,14 +5,30 @@ import '@/shared/pwa/installPrompt' // capture `beforeinstallprompt` before it c
 import { prefetchPublicEvents } from '@/events/services/publicEventsBootstrap'
 import { installTouchGestureLocks } from '@/shared/utils/lockTopOverscroll'
 
-// Start / adopt the early events fetch — shared via PublicEventsProvider
-void prefetchPublicEvents()
+function start() {
+  // Start / adopt the early events fetch — shared via PublicEventsProvider
+  void prefetchPublicEvents()
 
-// Lock the top rubber-band (bottom bounce stays) and block the browser
-// swipe-left/right back/forward navigation gesture.
-installTouchGestureLocks()
+  // Lock the top rubber-band (bottom bounce stays) and block the browser
+  // swipe-left/right back/forward navigation gesture.
+  installTouchGestureLocks()
 
-ReactDOM.createRoot(document.getElementById('root')!).render(<App />)
+  ReactDOM.createRoot(document.getElementById('root')!).render(<App />)
+}
+
+if (import.meta.env.DEV) {
+  // Sandbox mode: live reads, writes kept in the browser. On by default in dev
+  // — `npm run dev:live` opts out. Must install before the first request goes
+  // out, and the app is deliberately NOT started if it fails: better a blank
+  // screen than a localhost tab silently writing to the real database.
+  // Dynamically imported and DEV-gated so none of it exists in a prod build.
+  void import('@/core/supabase/sandbox')
+    .then(({ bootSandbox }) => bootSandbox())
+    .then(start)
+    .catch(err => console.error('[sandbox] boot failed — app not started', err))
+} else {
+  start()
+}
 
 // Fade the boot splash out once the mounted app has actually painted —
 // double rAF so we're past React's first commit, not just synchronously after render().

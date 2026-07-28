@@ -9,4 +9,10 @@ export const supabase = createClient(url, key, {
     persistSession: true,
     autoRefreshToken: true,
   },
+  global: {
+    // Resolve `fetch` per call instead of capturing it at construction, so the
+    // dev-only sandbox (core/supabase/sandbox) can intercept writes even though
+    // this client is built during module init, before main.tsx runs.
+    fetch: (input, init) => fetch(input, init),
+  },
 })

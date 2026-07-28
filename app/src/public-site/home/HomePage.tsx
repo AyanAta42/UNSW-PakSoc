@@ -138,9 +138,21 @@ export default function HomePage({ active = true }: { active?: boolean }) {
   // No upcoming event means the hero (which normally carries the page's visual
   // weight) doesn't render, so this label steps up in size to read as the page
   // heading — same weight/colour/tracking as usual, just bigger.
-  const eventsLabelClass = !loading && !banner
+  const noHero = !loading && !banner
+  const eventsLabelClass = noHero
     ? 'text-sm md:text-base font-bold tracking-widest uppercase'
     : 'text-[10px] font-bold tracking-widest uppercase'
+  // Without the hero the lg+ column's section paddings (py-5 + gap-5 + py-5)
+  // stop reading as breathing room between blocks and start reading as dead
+  // space — the events row floats well below the navbar and the reels row sits
+  // ~74px under the event cards. Collapse the *inner* edges on lg+ only; the
+  // phone stack already uses gap-0/py-4 and is left untouched.
+  const eventsBlockClass = noHero
+    ? 'lg:pt-0 lg:pb-1'
+    : 'lg:py-5'
+  const socialBlockClass = noHero
+    ? 'lg:pt-0 lg:pb-5'
+    : 'lg:py-5'
 
   return (
     <div
@@ -180,8 +192,8 @@ export default function HomePage({ active = true }: { active?: boolean }) {
         <div className="flex flex-col gap-0 lg:gap-5 flex-[7] min-w-0 w-full">
           <HeroBanner banner={banner} loading={loading && !banner} />
 
-          <div className="bg-transparent rounded-none px-4 py-4 lg:px-6 lg:py-5">
-            <div className="flex items-center mb-5">
+          <div className={`bg-transparent rounded-none px-4 py-4 lg:px-6 ${eventsBlockClass}`}>
+            <div className={`flex items-center mb-5 ${noHero ? 'lg:mb-4' : ''}`}>
               <span className={eventsLabelClass} style={{ color: PALETTE.muted }}>Events</span>
             </div>
 
@@ -217,7 +229,7 @@ export default function HomePage({ active = true }: { active?: boolean }) {
           </div>
 
           {/* Social wall — served from Supabase; execs can refetch from Instagram */}
-          <div className="bg-transparent rounded-none px-4 py-4 lg:px-6 lg:py-5">
+          <div className={`bg-transparent rounded-none px-4 py-4 lg:px-6 ${socialBlockClass}`}>
             <div className="flex items-center justify-between mb-5">
               <span className="text-[10px] font-bold tracking-widest uppercase" style={{ color: PALETTE.muted }}>Social Wall</span>
               <a href="https://www.instagram.com/unswpaksoc/?hl=en" target="_blank" rel="noopener noreferrer" style={{ color: ACCENT }} className="text-xs font-semibold no-underline hover:opacity-80">View on Instagram →</a>

@@ -24,6 +24,14 @@ cd server && npm install && npm run dev
 docker-compose up --build
 ```
 
+### Sandbox mode (on by default in dev)
+Reads come from the real database, but every write — rows and image uploads — is kept
+in your browser instead of being saved, so real users never see your test changes.
+`npm run dev` is safe; a yellow badge in the corner confirms it and resets your local
+changes. To write for real from localhost you must opt out with `npm run dev:live`,
+which shows a red warning banner the whole time.
+See [app/src/core/supabase/sandbox/README.md](app/src/core/supabase/sandbox/README.md).
+
 - Client → http://localhost:5173
 - Server → http://localhost:4000
 - Health check → http://localhost:4000/api/health
