@@ -28,10 +28,27 @@ export function HeroBanner({ banner, loading }: Props) {
   const contentRef = useRef<HTMLDivElement>(null)
   const layersRef = useRef<ParallaxLayer[]>([])
   const titleRef = useRef<HTMLHeadingElement>(null)
+  const timerRef = useRef<HTMLDivElement>(null)
+  const actionsRef = useRef<HTMLDivElement>(null)
+  const btnRowRef = useRef<HTMLDivElement>(null)
   const [trailReady, setTrailReady] = useState(false)
+  // Desktop only: true once the CTAs can no longer sit beside the countdown.
+  const [stackActions, setStackActions] = useState(false)
   // Only slide the hero in on the first visit this session — on a back/forward
   // remount it should already be there, not re-animate from black.
   const animateEnter = useEnterOnce('hero')
+
+  const btns = banner ? getEventButtons(banner.buttons) : []
+
+  // Free-text note under the CTAs, e.g. "Final Release At $75". The first
+  // currency amount in it is split out so it keeps the slightly larger size the
+  // price had back when this was a separate numeric field; the surrounding text
+  // is left exactly as typed, punctuation and spacing included.
+  const note = banner?.banner_note?.trim() ?? ''
+  const amountMatch = note.match(/\$\s?\d[\d,]*(?:\.\d{1,2})?/)
+  const noteHead   = amountMatch ? note.slice(0, amountMatch.index) : note
+  const noteAmount = amountMatch?.[0] ?? ''
+  const noteTail   = amountMatch ? note.slice(amountMatch.index! + noteAmount.length) : ''
 
   // Shrink the headline font just enough that the full name fits on one line
   useLayoutEffect(() => {
@@ -50,6 +67,47 @@ export function HeroBanner({ banner, loading }: Props) {
     window.addEventListener('resize', fit)
     return () => window.removeEventListener('resize', fit)
   }, [banner?.name, loading])
+
+  // Long CTA labels used to shove the whole button group onto its own line at
+  // its natural width, leaving it stranded under the countdown. Detect that and
+  // fall back to the phone presentation instead: full width, stacked.
+  useLayoutEffect(() => {
+    const decide = () => {
+      const timer = timerRef.current
+      const col = actionsRef.current
+      if (!timer || !col) return
+      // Below md the CTAs are full-width and stacked already — nothing to pick.
+      if (!window.matchMedia('(min-width: 768px)').matches) { setStackActions(false); return }
+
+      // Measure the side-by-side geometry even while stacked: a full-width
+      // column always reports as wrapped, so measuring it as-is could latch
+      // into stacked mode and never recover when the window widens again.
+      const row = btnRowRef.current
+      const prevWidth = col.style.width
+      const prevMargin = col.style.marginLeft
+      const prevDir = row?.style.flexDirection ?? ''
+      col.style.width = 'auto'
+      col.style.marginLeft = 'auto'
+      if (row) row.style.flexDirection = 'row'
+
+      // Overlap, not offsetTop: the row is items-end/center aligned, so a
+      // shorter column sits lower than the countdown while still sharing the
+      // line. Only a genuine wrap puts its top at or past the timer's bottom.
+      const wrapped = col.getBoundingClientRect().top >= timer.getBoundingClientRect().bottom - 1
+
+      col.style.width = prevWidth
+      col.style.marginLeft = prevMargin
+      if (row) row.style.flexDirection = prevDir
+
+      setStackActions(wrapped)
+    }
+
+    decide()
+    // Label widths shift once the webfont swaps in.
+    document.fonts?.ready.then(decide)
+    window.addEventListener('resize', decide)
+    return () => window.removeEventListener('resize', decide)
+  }, [banner?.id, loading, note, btns.length])
 
   layersRef.current = [
     { depth: BG_DEPTH, el: bgRef.current },
@@ -78,24 +136,17 @@ export function HeroBanner({ banner, loading }: Props) {
   }, [])
 
   if (!banner && !loading) return null
-  const btns = banner ? getEventButtons(banner.buttons) : []
-
-  // Free-text note under the CTAs, e.g. "Final Release At $75". The first
-  // currency amount in it is split out so it keeps the weight and hotter shade
-  // the price had back when this was a separate numeric field; the surrounding
-  // text is left exactly as typed, punctuation and spacing included.
-  const note = banner?.banner_note?.trim() ?? ''
-  const amountMatch = note.match(/\$\s?\d[\d,]*(?:\.\d{1,2})?/)
-  const noteHead   = amountMatch ? note.slice(0, amountMatch.index) : note
-  const noteAmount = amountMatch?.[0] ?? ''
-  const noteTail   = amountMatch ? note.slice(amountMatch.index! + noteAmount.length) : ''
 
   return (
     <div className="motion-glow motion-glow-hero px-3 pt-4 md:px-4 lg:p-0">
       <div className={animateEnter ? 'motion-hero-enter' : undefined}>
+      {/* Desktop content is bottom-anchored inside a fixed 250px floor, so the
+          note would otherwise pull the title/timer/CTAs up to make room. Raise
+          the floor by the note's own height (25px line + 12px gap) instead, so
+          the banner grows downward and everything above it stays put. */}
       <div
         ref={heroRef}
-        className="hero-clip overflow-hidden relative flex flex-col min-h-[220px] md:flex-row md:min-h-[250px] rounded-[18px] border"
+        className={`hero-clip overflow-hidden relative flex flex-col min-h-[220px] md:flex-row ${note ? 'md:min-h-[278px]' : 'md:min-h-[250px]'} rounded-[18px] border`}
         style={{ borderColor: PALETTE.border, boxShadow: PALETTE.shadowLg }}
       >
 
@@ -151,8 +202,8 @@ export function HeroBanner({ banner, loading }: Props) {
               {/* Timer + CTAs share one wrapping row: the buttons sit beside the
                   countdown while they fit on a single line, and drop to their own
                   full row underneath the moment the two labels can't. */}
-              <div className="flex flex-wrap items-end gap-x-4 gap-y-3 mt-3.5 md:mt-4">
-                <div className="flex gap-2.5 shrink-0">
+              <div className={`flex flex-wrap items-end ${note ? 'md:items-center' : ''} gap-x-4 gap-y-3 mt-3.5 md:mt-4`}>
+                <div ref={timerRef} className="flex gap-2.5 shrink-0">
                   {(['days','hrs','mins','secs'] as const).map((k, i) => {
                     const val = [cd.days, cd.hrs, cd.mins, cd.secs][i]
                     const digits = String(Math.max(0, val)).padStart(2, '0').slice(-2)
@@ -172,9 +223,15 @@ export function HeroBanner({ banner, loading }: Props) {
                 </div>
 
                 {(btns.length > 0 || !!note) && (
-                  <div className="flex flex-col gap-2 w-full md:w-auto md:ml-auto motion-hero-actions">
+                  <div ref={actionsRef}
+                    // col-reverse when the CTAs sit in a row: the note reads
+                    // above them there, but stays underneath in the stacked
+                    // phone presentation. DOM order is buttons-then-note either
+                    // way, so focus order still hits the CTAs first.
+                    className={`flex flex-col gap-2 w-full motion-hero-actions ${stackActions ? '' : 'md:flex-col-reverse md:w-auto md:ml-auto'}`}>
                     {btns.length > 0 && (
-                      <div className="flex flex-col md:flex-row gap-2 md:gap-2.5 items-stretch">
+                      <div ref={btnRowRef}
+                        className={`flex items-stretch gap-2 ${stackActions ? 'flex-col' : 'flex-col md:flex-row md:gap-2.5'}`}>
                         {btns.map((b, i) => {
                           const variant = getCtaVariant(i, btns.length)
                           return (
@@ -189,7 +246,7 @@ export function HeroBanner({ banner, loading }: Props) {
                         boxes already share a baseline with the larger amount. */}
                     {note && (
                       <p style={{ color: NOTE_COLOR }}
-                        className="m-0 mt-0.5 text-[15px] md:text-base font-semibold text-center md:text-right">
+                        className="m-0 text-[15px] md:text-base font-semibold text-center md:text-right">
                         {noteHead}
                         {noteAmount && (
                           <span className="tabular-nums text-[17px] md:text-[18px]">
