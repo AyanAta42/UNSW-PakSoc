@@ -12,6 +12,10 @@ const HeroCelestialTrail = lazy(() =>
 
 interface Props { banner: DbEvent | null; loading: boolean }
 
+/** Banner note red — one colour and one weight for the whole line; the amount
+ *  inside it leads on size alone. Clears 5:1 on the hero's near-black backdrop. */
+const NOTE_COLOR = '#F87171'
+
 const BG_DEPTH = 8
 const GLOW_DEPTH = 16
 const CONTENT_DEPTH = 3
@@ -76,6 +80,16 @@ export function HeroBanner({ banner, loading }: Props) {
   if (!banner && !loading) return null
   const btns = banner ? getEventButtons(banner.buttons) : []
 
+  // Free-text note under the CTAs, e.g. "Final Release At $75". The first
+  // currency amount in it is split out so it keeps the weight and hotter shade
+  // the price had back when this was a separate numeric field; the surrounding
+  // text is left exactly as typed, punctuation and spacing included.
+  const note = banner?.banner_note?.trim() ?? ''
+  const amountMatch = note.match(/\$\s?\d[\d,]*(?:\.\d{1,2})?/)
+  const noteHead   = amountMatch ? note.slice(0, amountMatch.index) : note
+  const noteAmount = amountMatch?.[0] ?? ''
+  const noteTail   = amountMatch ? note.slice(amountMatch.index! + noteAmount.length) : ''
+
   return (
     <div className="motion-glow motion-glow-hero px-3 pt-4 md:px-4 lg:p-0">
       <div className={animateEnter ? 'motion-hero-enter' : undefined}>
@@ -107,7 +121,10 @@ export function HeroBanner({ banner, loading }: Props) {
         <div aria-hidden className="motion-hero-grain" />
 
         {/* Layer 4: Content */}
-        <div ref={contentRef} className="relative z-10 flex flex-col p-5 md:p-8 flex-1 min-w-0 min-h-[220px] md:min-h-0 motion-parallax-layer">
+        {/* Content is bottom-anchored, so trailing padding is the only thing
+            below the last line. The teaser's descender-light text made the
+            default gap read as dead space — trim it when the teaser is on. */}
+        <div ref={contentRef} className={`relative z-10 flex flex-col p-5 md:p-8 ${note ? 'pb-3.5 md:pb-6' : ''} flex-1 min-w-0 min-h-[220px] md:min-h-0 motion-parallax-layer`}>
           <div className="flex items-center gap-2.5 shrink-0 motion-hero-title">
             <span aria-hidden className="h-px w-7"
               style={{ background: `linear-gradient(90deg, ${ACCENT}, transparent)` }} />
@@ -154,15 +171,34 @@ export function HeroBanner({ banner, loading }: Props) {
                   })}
                 </div>
 
-                {btns.length > 0 && (
-                  <div className="flex gap-2 md:gap-2.5 items-stretch w-full md:w-auto md:ml-auto motion-hero-actions">
-                    {btns.map((b, i) => {
-                      const variant = getCtaVariant(i, btns.length)
-                      return (
-                        <EventCtaButton key={i} label={b.label} url={b.url} variant={variant}
-                          className={`flex-1 md:flex-none ${variant === 'primary' ? 'px-3 md:px-5' : 'px-3 md:px-4'} py-2 text-sm whitespace-nowrap text-center`} />
-                      )
-                    })}
+                {(btns.length > 0 || !!note) && (
+                  <div className="flex flex-col gap-2 w-full md:w-auto md:ml-auto motion-hero-actions">
+                    {btns.length > 0 && (
+                      <div className="flex flex-col md:flex-row gap-2 md:gap-2.5 items-stretch">
+                        {btns.map((b, i) => {
+                          const variant = getCtaVariant(i, btns.length)
+                          return (
+                            <EventCtaButton key={i} label={b.label} url={b.url} variant={variant}
+                              className={`w-full md:w-auto md:flex-none ${variant === 'primary' ? 'px-3 md:px-5' : 'px-3 md:px-4'} py-2 text-sm whitespace-nowrap text-center`} />
+                          )
+                        })}
+                      </div>
+                    )}
+                    {/* Plain inline text, not flex — a flex gap would inject space
+                        around the amount and break notes like "$75....". Inline
+                        boxes already share a baseline with the larger amount. */}
+                    {note && (
+                      <p style={{ color: NOTE_COLOR }}
+                        className="m-0 mt-0.5 text-[15px] md:text-base font-semibold text-center md:text-right">
+                        {noteHead}
+                        {noteAmount && (
+                          <span className="tabular-nums text-[17px] md:text-[18px]">
+                            {noteAmount}
+                          </span>
+                        )}
+                        {noteTail}
+                      </p>
+                    )}
                   </div>
                 )}
               </div>

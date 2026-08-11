@@ -3,7 +3,11 @@ import react from '@vitejs/plugin-react'
 import { VitePWA } from 'vite-plugin-pwa'
 import path from 'path'
 
-const COLS = 'id,name,time,end_time,location,price,public,image_url,buttons,timeline'
+// Must stay in sync with fetchPublicEvents — rows this preflight caches are
+// what the app paints from. If a column here is missing from the database the
+// whole boot fetch 400s and the app quietly falls back to fetchPublicEvents,
+// which retries without the optional columns.
+const COLS = 'id,name,time,end_time,location,price,public,image_url,buttons,timeline,banner_note'
 
 function eventsBootScript(url: string, anonKey: string): string {
   // Inline, blocking-free: fires the events GET before any React/module JS.

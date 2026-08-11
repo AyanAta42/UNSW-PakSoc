@@ -44,6 +44,7 @@ const ICON = {
   date:     <><rect x="3" y="4" width="18" height="18" rx="2" /><path d="M16 2v4M8 2v4M3 10h18" /></>,
   price:    <><line x1="12" y1="2" x2="12" y2="22" /><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" /></>,
   link:     <><path d="M10 13a5 5 0 0 0 7.07 0l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" /><path d="M14 11a5 5 0 0 0-7.07 0l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" /></>,
+  note:     <><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" /></>,
   timeline: <><line x1="8" y1="6" x2="21" y2="6" /><line x1="8" y1="12" x2="21" y2="12" /><line x1="8" y1="18" x2="21" y2="18" /><line x1="3" y1="6" x2="3.01" y2="6" /><line x1="3" y1="12" x2="3.01" y2="12" /><line x1="3" y1="18" x2="3.01" y2="18" /></>,
   image:    <><rect x="3" y="3" width="18" height="18" rx="2" /><circle cx="8.5" cy="8.5" r="1.5" /><path d="M21 15l-5-5L5 21" /></>,
   clock:    <><circle cx="12" cy="12" r="9" /><path d="M12 7v5l3 2" /></>,
@@ -67,6 +68,7 @@ export function AddEditEventModal({ onClose, onCreated, onCreateSettled, onUpdat
   const [name,     setName]     = useState(event?.name ?? '')
   const [location, setLocation] = useState(event?.location ?? '')
   const [price,    setPrice]    = useState(event?.price?.toString() ?? '0')
+  const [bannerNote, setBannerNote] = useState(event?.banner_note ?? '')
   const [timeline, setTimeline] = useState<TimelineItem[]>(event?.timeline ?? [])
   const [buttons,  setButtons]  = useState<EventButton[]>(
     event?.buttons?.length ? event.buttons : [...DEFAULT_BUTTONS]
@@ -107,6 +109,9 @@ export function AddEditEventModal({ onClose, onCreated, onCreateSettled, onUpdat
       name: name.trim(), location,
       time: startIso, end_time: endIso || undefined,
       image_url: optimisticImageUrl, price: parseFloat(price) || 0,
+      // Empty → null (not undefined) so clearing the note actually wipes the
+      // stored value instead of the key being dropped from the update body.
+      banner_note: bannerNote.trim() || null,
       timeline: timeline.map(i => ({ time: i.time.trim(), title: i.title.trim() })).filter(i => i.time && i.title).sort((a, b) => a.time.localeCompare(b.time)),
       buttons:  buttons.filter(b => b.label.trim()),
     }
@@ -210,6 +215,14 @@ export function AddEditEventModal({ onClose, onCreated, onCreateSettled, onUpdat
               <input type="number" min="0" step="0.01" value={price} onChange={e => setPrice(e.target.value)} placeholder="0.00"
                 style={{ ...inp, paddingLeft: '1.75rem' }} className="w-full px-3.5 py-2.5 text-sm outline-none focus:ring-2 focus:ring-green-500/30" /></div>
             <p style={{ color: PALETTE.disabled }} className="text-[10px] mt-1">Set to 0 for a free event</p></div>
+
+          {/* Banner note — free-text line printed under the home banner CTAs */}
+          <div><Label icon={ICON.note}>Additional Note (optional)</Label>
+            <input value={bannerNote} onChange={e => setBannerNote(e.target.value)} placeholder="e.g. Final Release At $75...."
+              style={inp} className="w-full px-3.5 py-2.5 text-sm outline-none focus:ring-2 focus:ring-green-500/30" />
+            <p style={{ color: PALETTE.disabled }} className="text-[10px] mt-1">
+              Shown at the bottom of the home banner, under the action buttons. Any $ amount is highlighted. Leave blank to hide.
+            </p></div>
 
           {/* CTA Buttons */}
           <div><Label icon={ICON.link}>Action Buttons</Label>

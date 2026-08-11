@@ -3,10 +3,19 @@ import { parseTimeline } from '@/events/utils/parseTimeline'
 import { getPublicSupabaseEnv } from '@/core/supabase/publicEnv'
 
 /** Columns the public home / cards / detail UI actually need. */
-const PUBLIC_EVENT_COLUMNS = [
+const BASE_COLUMNS = [
   'id', 'name', 'time', 'end_time', 'location', 'price', 'public',
   'image_url', 'buttons', 'timeline',
-].join(',')
+]
+
+/**
+ * Added by migration 20260811000001_banner_note. Kept separate so
+ * a deploy that lands before the SQL has run degrades to "no release teaser"
+ * instead of an empty homepage — PostgREST rejects the *whole* request when a
+ * single selected column is unknown. Fold these into BASE_COLUMNS once the
+ * migration has run everywhere.
+ */
+const OPTIONAL_COLUMNS = ['banner_note']
 
 function mapEvent(row: Record<string, unknown>): DbEvent {
   return { ...(row as unknown as DbEvent), timeline: parseTimeline(row.timeline) }
@@ -19,19 +28,29 @@ function mapEvent(row: Record<string, unknown>): DbEvent {
 export async function fetchPublicEvents(): Promise<DbEvent[]> {
   const { url: base, anonKey } = getPublicSupabaseEnv()
 
-  const url =
+  const request = (columns: string[]) => fetch(
     `${base}/rest/v1/events`
-    + `?select=${encodeURIComponent(PUBLIC_EVENT_COLUMNS)}`
+    + `?select=${encodeURIComponent(columns.join(','))}`
     + `&public=eq.true`
-    + `&order=time.asc`
-
-  const res = await fetch(url, {
-    headers: {
-      apikey: anonKey,
-      Authorization: `Bearer ${anonKey}`,
-      Accept: 'application/json',
+    + `&order=time.asc`,
+    {
+      headers: {
+        apikey: anonKey,
+        Authorization: `Bearer ${anonKey}`,
+        Accept: 'application/json',
+      },
     },
-  })
+  )
+
+  let res = await request([...BASE_COLUMNS, ...OPTIONAL_COLUMNS])
+
+  // 42703 = undefined_column: this database predates the migration above.
+  if (res.status === 400) {
+    const body = await res.text().catch(() => '')
+    if (!body.includes('42703')) throw new Error(`fetchPublicEvents failed: 400 ${body}`)
+    res = await request(BASE_COLUMNS)
+  }
+
   if (!res.ok) {
     const body = await res.text().catch(() => '')
     throw new Error(`fetchPublicEvents failed: ${res.status} ${body}`)
